@@ -1,4 +1,4 @@
-![image](https://github.com/bym-refitted/backyard-monsters-refitted-launcher/assets/157532981/bc24a388-75d5-4767-a723-f07b425150d0)
+![launcher](https://github.com/bym-refitted/bymr-desktop-launcher/assets/157532981/a089982e-d2da-4ccb-9950-d16bba9485a4)
 
 <br />
 <br />
