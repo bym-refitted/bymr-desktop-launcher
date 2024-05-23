@@ -33,7 +33,7 @@ fn main() {
 
 #[command] 
 async fn initialize_app(app: AppHandle) -> Result<(), String> {
-    println!("Application initialized");
+    println!("Tauri initialized");
 
     // Get OS info
     let message = format!("Platform: {} {}", env::consts::OS, env::consts::ARCH);

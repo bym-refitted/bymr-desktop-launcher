@@ -19,10 +19,14 @@ pub struct LocalVersionManifest {
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct VersionManifest {
+    #[serde(rename = "currentGameVersion")]
     pub current_game_version: String,
+    #[serde(rename = "currentLauncherVersion")]
     pub current_launcher_version: String,
     pub builds: Builds,
+    #[serde(rename = "flashRuntimes")]
     pub flash_runtimes: FlashRuntimes,
+    #[serde(rename = "httpsWorked")]
     pub https_worked: bool,
 }
 
@@ -62,8 +66,13 @@ pub async fn get_version_info() -> Result<VersionManifest, String> {
             }
         }
     };
+
+    let body = resp.text().await.map_err(|err| err.to_string())?;
+    let mut data: VersionManifest = serde_json::from_str(&body).map_err(|err| {
+        eprintln!("Error parsing JSON: {}", err);
+        err.to_string()
+    })?;
     
-    let mut data: VersionManifest = resp.json().await.map_err(|err| err.to_string())?;
     data.https_worked = https_worked;
     Ok(data)
 }
