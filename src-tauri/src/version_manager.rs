@@ -1,7 +1,11 @@
-use crate::file_manager::{download_file, ensure_folder_exists, file_exists, get_local_versions};
+use crate::{
+    emit_event,
+    file_manager::{download_file, ensure_folder_exists, file_exists, get_local_versions},
+};
 use reqwest;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
+use tauri::AppHandle;
 
 pub const VERSION_INFO_PATH_BASE: &str = "api.bymrefitted.com/launcher.json";
 pub const DOWNLOAD_BASE_PATH: &str = "api.bymrefitted.com/launcher/downloads/";
@@ -44,23 +48,28 @@ pub struct FlashRuntimes {
     linux: String,
 }
 
-pub async fn get_version_info() -> Result<VersionManifest, String> {
+pub async fn get_version_info(app: &AppHandle) -> Result<VersionManifest, String> {
     let mut https_worked = false;
 
     // First we try https
     let resp = match reqwest::get(&format!("https://{}", VERSION_INFO_PATH_BASE)).await {
         Ok(resp) => {
-            println!("Launcher successfully connected over https");
+            let connected_msg = "Launcher successfully connected over https".to_string();
+            emit_event(app, connected_msg);
             https_worked = true;
             resp
         }
         Err(err) => {
             // try via http if that fails
-            eprintln!("Could not access over https, attempting http: {}", err);
+            let http_msg = format!("Could not access over https, attempting http: {}", err);
+            emit_event(app, http_msg);
+
             match reqwest::get(&format!("http://{}", VERSION_INFO_PATH_BASE)).await {
                 Ok(resp) => resp,
                 Err(err) => {
-                    eprintln!("Could not access over http, please check the server status on our discord: {}", err);
+                    let failed_http_msg = format!("Could not access over http, please check the server status on our discord: {}", err);
+                    emit_event(app, failed_http_msg);
+
                     return Err(err.to_string());
                 }
             }
@@ -72,7 +81,7 @@ pub async fn get_version_info() -> Result<VersionManifest, String> {
         eprintln!("Error parsing JSON: {}", err);
         err.to_string()
     })?;
-    
+
     data.https_worked = https_worked;
     Ok(data)
 }

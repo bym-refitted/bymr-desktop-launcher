@@ -31,7 +31,7 @@ fn main() {
         .expect("error while running tauri application");
 }
 
-#[command] 
+#[command]
 async fn initialize_app(app: AppHandle) -> Result<(), String> {
     println!("Tauri initialized");
 
@@ -39,7 +39,7 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
     let message = format!("Platform: {} {}", env::consts::OS, env::consts::ARCH);
     emit_event(&app, message);
 
-    let server_manifest = match get_version_info().await {
+    let server_manifest = match get_version_info(&app).await {
         Ok(manifest) => manifest,
         Err(err) => {
             let err_msg =
@@ -157,7 +157,7 @@ fn launch_game(build_name: &str, version: &str, runtime: &str) -> Result<(), Str
     println!("Opening: {:?}, {:?}", flash_runtime_path, swf_path);
 
     // Open the game in Flash
-    let mut cmd = Command::new(&flash_runtime_path)
+    Command::new(&flash_runtime_path)
         .arg(&swf_path)
         .spawn()
         .map_err(|err| {
@@ -166,14 +166,6 @@ fn launch_game(build_name: &str, version: &str, runtime: &str) -> Result<(), Str
                 build_name, err
             )
         })?;
-
-    // Wait for the command to complete
-    cmd.wait().map_err(|err| {
-        format!(
-            "[BYMR LAUNCHER] Failed to wait for BYMR build {}: {:?}",
-            build_name, err
-        )
-    })?;
 
     Ok(())
 }

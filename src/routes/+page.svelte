@@ -9,7 +9,7 @@
   import { exit } from "@tauri-apps/api/process";
   import { listen } from "@tauri-apps/api/event";
   import { invoke } from "@tauri-apps/api/tauri";
-  
+
   interface Build {
     value: string;
     label: string;
@@ -47,8 +47,6 @@
   let errorCode = "";
   let debugLogs: string[] = [];
 
-  console.log("App started.");
-
   listen<InfoLogEvent>("infoLog", (event) => {
     debugLogs = [...debugLogs, event.payload.message];
   });
@@ -58,9 +56,9 @@
     const platform = event.payload.platform;
 
     // Dynamically gets the builds from JSON and set the first one as the default
-    builds = Object.keys(manifest.builds).map((buildName) => ({
-      value: buildName,
-      label: buildName.charAt(0).toUpperCase() + buildName.slice(1),
+    builds = Object.keys(manifest.builds).map((build_name) => ({
+      value: build_name,
+      label: build_name.charAt(0).toUpperCase() + build_name.slice(1),
     }));
 
     build = builds[0];
@@ -99,8 +97,8 @@
     disabled = true;
     try {
       await invoke("launch_game", {
-        build: build.value,
-        currentGameVersion: current_game_version,
+        buildName: build.value,
+        version: current_game_version,
         runtime: runtime.value,
       });
       showError = false;

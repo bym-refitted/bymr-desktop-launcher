@@ -10,15 +10,13 @@
   <div class="flex items-center space-x-4">
     <a
       href="https://discord.gg/ajZAccxNMA"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="text-accent hover:underline mt-1"><Discord /></a
+      target="_tauri"
+      class="text-accent"><Discord /></a
     >
     <a
       href="https://github.com/bym-refitted"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="text-accent hover:underline"><Github /></a
+      target="_tauri"
+      class="text-accent"><Github /></a
     >
   </div>
 </div>

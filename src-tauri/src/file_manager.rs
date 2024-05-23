@@ -99,7 +99,7 @@ pub fn get_local_versions() -> (bool, LocalVersionManifest, String) {
 }
 
 pub async fn set_local_versions(local_manifest: LocalVersionManifest) -> Result<(), String> {
-    let version_file_path = Path::new("path/to/downloads/version.json");
+    let version_file_path = Path::new(DOWNLOADS_FOLDER).join("version.json");
     let file = match std::fs::File::create(&version_file_path) {
         Ok(file) => file,
         Err(err) => return Err(format!("Failed to create local version manifest: {}", err)),

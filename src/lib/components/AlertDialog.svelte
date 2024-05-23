@@ -1,8 +1,9 @@
-<script>
+<script lang="ts">
   export let open = false;
   export let error = "";
 
   import { Button } from "$lib/components/ui/button";
+  import { exit } from "@tauri-apps/api/process";
 
   import {
     Dialog,
@@ -12,6 +13,10 @@
     DialogHeader,
     DialogTitle,
   } from "$lib/components/ui/dialog";
+
+  import type { ButtonEventHandler } from "bits-ui/dist/bits/button/types";
+
+  const quit = async () => await exit(0);
 </script>
 
 <Dialog bind:open>
@@ -34,9 +39,9 @@
           type="button"
           on:click={() => (open = false)}>Continue</Button
         >
-        <!-- <Button class="p-4 rounded" type="button" on:click={Quit}>Quit</Button> -->
-        <Button class="p-4 rounded" type="button" on:click={() => console.log("Clicked Quit")}>Quit</Button>
-
+        <Button class="p-4 rounded" type="button" on:click={() => quit()}
+          >Quit</Button
+        >
       </div>
     </DialogFooter>
   </DialogContent>
