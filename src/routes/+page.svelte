@@ -115,69 +115,68 @@
 <main
   class="h-screen bg-background text-foreground flex flex-col gap-4 p-4 antialiased select-none font-sans"
 >
-  <Navbar />
-  <div class="grow rounded bg-secondary font-mono p-3">
-    {#each debugLogs as log}
-      <p><small>{log}</small></p>
-    {/each}
-  </div>
-  <!-- {#if !current_game_version}
-      <div class="w-full flex justify-center items-center" role="status">
-        <Loader />
-        <span class="sr-only">Loading...</span>
-      </div>
-    {:else} -->
-  <div class="mt-auto w-full flex justify-between">
-    <label for="swf-build" class="font-display">SWF Build</label>
-    <Select.Root bind:selected={build} portal={null}>
-      <Select.Trigger class="w-[180px] rounded">
-        <Select.Value class="text-left" />
-      </Select.Trigger>
-      <Select.Content>
-        <Select.Group>
-          {#each builds as build}
-            <Select.Item value={build.value} label={build.label}
-              >{build.label}</Select.Item
-            >
-          {/each}
-        </Select.Group>
-      </Select.Content>
-      <Select.Input name="build" />
-    </Select.Root>
-  </div>
-  <div class="mt-auto w-full flex justify-between">
-    <label for="flash-runtime" class="font-display">Flash Runtime</label>
-    <Select.Root bind:selected={runtime} portal={null}>
-      <Select.Trigger class="w-[180px] rounded">
-        <Select.Value class="text-left" />
-      </Select.Trigger>
-      <Select.Content>
-        <Select.Group>
-          {#each runtimes as runtime}
-            <Select.Item value={runtime.value} label={runtime.label}
-              >{runtime.label}</Select.Item
-            >
-          {/each}
-        </Select.Group>
-      </Select.Content>
-      <Select.Input name="runtime" />
-    </Select.Root>
-  </div>
+  {#if !current_game_version}
+    <div class="w-full h-full flex justify-center items-center" role="status">
+      <Loader />
+    </div>
+  {:else}
+    <Navbar />
+    <div class="grow rounded bg-secondary font-mono p-3">
+      {#each debugLogs as log}
+        <p><small>{log}</small></p>
+      {/each}
+    </div>
+    <div class="mt-auto w-full flex justify-between">
+      <label for="swf-build" class="font-display">SWF Build</label>
+      <Select.Root bind:selected={build} portal={null}>
+        <Select.Trigger class="w-[180px] rounded">
+          <Select.Value class="text-left" />
+        </Select.Trigger>
+        <Select.Content>
+          <Select.Group>
+            {#each builds as build}
+              <Select.Item value={build.value} label={build.label}
+                >{build.label}</Select.Item
+              >
+            {/each}
+          </Select.Group>
+        </Select.Content>
+        <Select.Input name="build" />
+      </Select.Root>
+    </div>
+    <div class="mt-auto w-full flex justify-between">
+      <label for="flash-runtime" class="font-display">Flash Runtime</label>
+      <Select.Root bind:selected={runtime} portal={null}>
+        <Select.Trigger class="w-[180px] rounded">
+          <Select.Value class="text-left" />
+        </Select.Trigger>
+        <Select.Content>
+          <Select.Group>
+            {#each runtimes as runtime}
+              <Select.Item value={runtime.value} label={runtime.label}
+                >{runtime.label}</Select.Item
+              >
+            {/each}
+          </Select.Group>
+        </Select.Content>
+        <Select.Input name="runtime" />
+      </Select.Root>
+    </div>
 
-  <div class="mt-auto w-full flex justify-between">
-    <Button
-      variant="default"
-      class="p-4 rounded w-32"
-      on:click={launch}
-      {disabled}
-    >
-      {#if disabled}
-        <Loader2 />
-      {:else}
-        Launch Game
-      {/if}
-    </Button>
-  </div>
-  <!-- {/if} -->
+    <div class="mt-auto w-full flex justify-between">
+      <Button
+        variant="default"
+        class="p-4 rounded w-32"
+        on:click={launch}
+        {disabled}
+      >
+        {#if disabled}
+          <Loader2 class="animate-spin" />
+        {:else}
+          Launch Game
+        {/if}
+      </Button>
+    </div>
+  {/if}
   <AlertDialog bind:open={showError} error={errorCode}></AlertDialog>
 </main>
