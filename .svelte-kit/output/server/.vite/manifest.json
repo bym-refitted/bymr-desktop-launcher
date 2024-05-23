@@ -23,11 +23,16 @@
     "file": "chunks/internal.js",
     "name": "internal",
     "imports": [
-      "_ssr.js"
+      "_ssr.js",
+      "_ssr2.js"
     ]
   },
   "_ssr.js": {
     "file": "chunks/ssr.js",
+    "name": "ssr"
+  },
+  "_ssr2.js": {
+    "file": "chunks/ssr2.js",
     "name": "ssr"
   },
   "node_modules/@sveltejs/kit/src/runtime/components/error.svelte": {
@@ -72,7 +77,7 @@
       "_ssr.js"
     ],
     "css": [
-      "_app/immutable/assets/_layout.1kK1WdFF.css"
+      "_app/immutable/assets/_layout.D5aYuXz_.css"
     ],
     "assets": [
       "_app/immutable/assets/GROBOLDpro.onb39TcN.ttf",
@@ -93,7 +98,8 @@
     "isEntry": true,
     "imports": [
       "_ssr.js",
-      "_index.js"
+      "_index.js",
+      "_ssr2.js"
     ]
   }
 }

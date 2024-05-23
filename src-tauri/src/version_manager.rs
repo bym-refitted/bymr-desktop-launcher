@@ -1,4 +1,4 @@
-use crate::file_manager::{ensure_folder_exists, file_exists, get_local_versions};
+use crate::file_manager::{download_file, ensure_folder_exists, file_exists, get_local_versions};
 use reqwest;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -35,7 +35,7 @@ pub struct Builds {
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct FlashRuntimes {
-    windnows: String,
+    windows: String,
     darwin: String,
     linux: String,
 }
@@ -62,26 +62,35 @@ pub async fn get_version_info() -> Result<VersionManifest, String> {
             }
         }
     };
+    
     let mut data: VersionManifest = resp.json().await.map_err(|err| err.to_string())?;
     data.https_worked = https_worked;
     Ok(data)
 }
 
 pub fn local_files_status() -> (bool, LocalVersionManifest, String) {
-    ensure_folder_exists(DOWNLOADS_FOLDER);
-    ensure_folder_exists(BUILD_FOLDER);
-    ensure_folder_exists(RUNTIME_FOLDER);
+    let _ = ensure_folder_exists(DOWNLOADS_FOLDER);
+    let _ = ensure_folder_exists(BUILD_FOLDER);
+    let _ = ensure_folder_exists(RUNTIME_FOLDER);
 
     return get_local_versions();
 }
 
-pub fn download_swfs(builds: &Builds, version: &str, useHttps: bool) -> Result<(), String> {
+pub async fn download_swfs(builds: &Builds, version: &str, use_https: bool) -> Result<(), String> {
     let builds_to_check = [
         (&builds.stable, "stable"),
         (&builds.http, "http"),
         (&builds.local, "local"),
     ];
-    Ok(()) // ToDo: Implement download
+
+    for (build_url, build_name) in &builds_to_check {
+        let build_path = format!("{}/bymr-{}-{}.swf", BUILD_FOLDER, build_name, version);
+        if let Err(err) = download_file(&build_path, build_url, use_https).await {
+            return Err(err);
+        }
+    }
+
+    Ok(())
 }
 
 pub fn do_all_swfs_exist(builds: &Builds, version: &str) -> bool {
@@ -95,7 +104,29 @@ pub fn do_all_swfs_exist(builds: &Builds, version: &str) -> bool {
         let binding = Path::new(BUILD_FOLDER).join(format!("bymr-{}-{}.swf", build_name, version));
         let file_path = binding.to_str().unwrap();
 
-        if !file_exists(file_path) { return false }
+        if !file_exists(file_path) {
+            return false;
+        }
     }
     true
+}
+
+pub async fn download_runtimes(
+    flash_runtime_file_name: &str,
+    use_https: bool,
+) -> Result<(), String> {
+    let flash_file_path = format!("{}/{}", RUNTIME_FOLDER, flash_runtime_file_name);
+    download_file(&flash_file_path, flash_runtime_file_name, use_https).await
+}
+
+pub fn get_platform_flash_runtime(
+    platform: &str,
+    server_manifest: &VersionManifest,
+) -> Result<String, String> {
+    match platform {
+        "windows" => Ok(server_manifest.flash_runtimes.windows.clone()),
+        "darwin" => Ok(server_manifest.flash_runtimes.darwin.clone()),
+        "linux" => Ok(server_manifest.flash_runtimes.linux.clone()),
+        _ => Err(format!("unsupported platform: {}", platform)),
+    }
 }

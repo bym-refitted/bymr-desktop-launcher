@@ -36,7 +36,6 @@ declare module '$env/static/private' {
 	export const RUSTUP_TOOLCHAIN: string;
 	export const SHLVL: string;
 	export const TAURI_PLATFORM_VERSION: string;
-	export const WT_PROFILE_ID: string;
 	export const npm_config_noproxy: string;
 	export const HOME: string;
 	export const OLDPWD: string;
@@ -70,7 +69,6 @@ declare module '$env/static/private' {
 	export const PATH: string;
 	export const NODE: string;
 	export const npm_package_name: string;
-	export const WT_SESSION: string;
 	export const XDG_RUNTIME_DIR: string;
 	export const DISPLAY: string;
 	export const SSL_CERT_DIR: string;
@@ -142,7 +140,6 @@ declare module '$env/dynamic/private' {
 		RUSTUP_TOOLCHAIN: string;
 		SHLVL: string;
 		TAURI_PLATFORM_VERSION: string;
-		WT_PROFILE_ID: string;
 		npm_config_noproxy: string;
 		HOME: string;
 		OLDPWD: string;
@@ -176,7 +173,6 @@ declare module '$env/dynamic/private' {
 		PATH: string;
 		NODE: string;
 		npm_package_name: string;
-		WT_SESSION: string;
 		XDG_RUNTIME_DIR: string;
 		DISPLAY: string;
 		SSL_CERT_DIR: string;

@@ -1,11 +1,16 @@
-import { b as set_current_component, r as run_all, d as current_component, o as onDestroy, f as get_store_value, h as createEventDispatcher, c as create_ssr_component, i as compute_rest_props, j as spread, k as escape_attribute_value, l as escape_object, n as add_attribute, s as setContext, g as getContext, a as subscribe, v as validate_component, p as each, q as identity, e as escape } from "../../chunks/ssr.js";
-import "dequal";
+import { b as set_current_component, r as run_all, d as current_component, o as onDestroy, f as get_store_value, h as createEventDispatcher, c as create_ssr_component, i as compute_rest_props, j as spread, k as escape_attribute_value, l as escape_object, n as add_attribute, s as setContext, g as getContext, a as subscribe, e as escape, v as validate_component, p as each, q as identity } from "../../chunks/ssr.js";
+import { dequal } from "dequal";
 import { d as derived, w as writable, r as readable, a as readonly } from "../../chunks/index.js";
+import { o as onMount } from "../../chunks/ssr2.js";
 import { clsx } from "clsx";
 import { tv } from "tailwind-variants";
 import { nanoid } from "nanoid/non-secure";
+import { flip, offset, shift, arrow, size, autoUpdate, computePosition } from "@floating-ui/dom";
 import { createFocusTrap as createFocusTrap$1 } from "focus-trap";
 import { twMerge } from "tailwind-merge";
+import "@tauri-apps/api/process";
+import { listen } from "@tauri-apps/api/event";
+import "@tauri-apps/api/tauri";
 const dirty_components = [];
 const binding_callbacks = [];
 let render_callbacks = [];
@@ -80,8 +85,52 @@ const void_element_names = /^(?:area|base|br|col|command|embed|hr|img|input|keyg
 function is_void(name2) {
   return void_element_names.test(name2) || name2.toLowerCase() === "!doctype";
 }
+function arraysAreEqual(arr1, arr2) {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+  return arr1.every((value, index) => value === arr2[index]);
+}
+function back(array, index, increment, loop = true) {
+  const previousIndex = index - increment;
+  if (previousIndex <= 0) {
+    return loop ? array[array.length - 1] : array[0];
+  }
+  return array[previousIndex];
+}
+function forward(array, index, increment, loop = true) {
+  const nextIndex = index + increment;
+  if (nextIndex > array.length - 1) {
+    return loop ? array[0] : array[array.length - 1];
+  }
+  return array[nextIndex];
+}
+function next(array, index, loop = true) {
+  if (index === array.length - 1) {
+    return loop ? array[0] : array[index];
+  }
+  return array[index + 1];
+}
+function prev(array, currentIndex, loop = true) {
+  if (currentIndex <= 0) {
+    return loop ? array[array.length - 1] : array[0];
+  }
+  return array[currentIndex - 1];
+}
 function last(array) {
   return array[array.length - 1];
+}
+function wrapArray(array, startIndex) {
+  return array.map((_, index) => array[(startIndex + index) % array.length]);
+}
+function toggle(item, array, compare = dequal) {
+  const itemIdx = array.findIndex((innerItem) => compare(innerItem, item));
+  if (itemIdx !== -1) {
+    array.splice(itemIdx, 1);
+  } else {
+    array.push(item);
+  }
+  return array;
 }
 function styleToString(style) {
   return Object.keys(style).reduce((str, key) => {
@@ -90,7 +139,10 @@ function styleToString(style) {
     return str + `${key}:${style[key]};`;
   }, "");
 }
-({
+function disabledAttr(disabled) {
+  return disabled ? true : void 0;
+}
+const hiddenInputAttrs = {
   type: "hidden",
   "aria-hidden": true,
   hidden: true,
@@ -102,7 +154,7 @@ function styleToString(style) {
     margin: 0,
     transform: "translateX(-100%)"
   })
-});
+};
 function lightable(value) {
   function subscribe2(run) {
     run(value);
@@ -110,6 +162,12 @@ function lightable(value) {
     };
   }
   return { subscribe: subscribe2 };
+}
+function getElementByMeltId(id) {
+  if (!isBrowser)
+    return null;
+  const el = document.querySelector(`[data-melt-id="${id}"]`);
+  return isHTMLElement(el) ? el : null;
 }
 const hiddenAction = (obj) => {
   return new Proxy(obj, {
@@ -187,8 +245,29 @@ function createElHelpers(prefix) {
 }
 const isBrowser = typeof document !== "undefined";
 const isFunction = (v) => typeof v === "function";
+function isElement(element) {
+  return element instanceof Element;
+}
 function isHTMLElement(element) {
   return element instanceof HTMLElement;
+}
+function isHTMLInputElement(element) {
+  return element instanceof HTMLInputElement;
+}
+function isHTMLLabelElement(element) {
+  return element instanceof HTMLLabelElement;
+}
+function isHTMLButtonElement(element) {
+  return element instanceof HTMLButtonElement;
+}
+function isElementDisabled(element) {
+  const ariaDisabled = element.getAttribute("aria-disabled");
+  const disabled = element.getAttribute("disabled");
+  const dataDisabled = element.hasAttribute("data-disabled");
+  if (ariaDisabled === "true" || disabled !== null || dataDisabled) {
+    return true;
+  }
+  return false;
 }
 function isObject(value) {
   return value !== null && typeof value === "object";
@@ -246,6 +325,15 @@ function withMelt(handler) {
     return handler(event);
   };
 }
+function addHighlight(element) {
+  element.setAttribute("data-highlighted", "");
+}
+function removeHighlight(element) {
+  element.removeAttribute("data-highlighted");
+}
+function getOptions(el) {
+  return Array.from(el.querySelectorAll('[role="option"]:not([data-disabled])')).filter((el2) => isHTMLElement(el2));
+}
 function omit(obj, ...keys) {
   const result = {};
   for (const key of Object.keys(obj)) {
@@ -255,13 +343,16 @@ function omit(obj, ...keys) {
   }
   return result;
 }
+function stripValues(inputObject, toStrip, recursive) {
+  return Object.fromEntries(Object.entries(inputObject).filter(([_, value]) => !dequal(value, toStrip)));
+}
 const overridable = (store, onChange) => {
   const update2 = (updater, sideEffect) => {
     store.update((curr) => {
-      const next = updater(curr);
-      let res = next;
+      const next2 = updater(curr);
+      let res = next2;
       if (onChange) {
-        res = onChange({ curr, next });
+        res = onChange({ curr, next: next2 });
       }
       sideEffect?.(res);
       return res;
@@ -279,12 +370,12 @@ const overridable = (store, onChange) => {
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-function generateId() {
+function generateId$1() {
   return nanoid(10);
 }
 function generateIds(args) {
   return args.reduce((acc, curr) => {
-    acc[curr] = generateId();
+    acc[curr] = generateId$1();
     return acc;
   }, {});
 }
@@ -325,6 +416,20 @@ const kbd = {
   A: "a",
   P: "p"
 };
+const FIRST_KEYS = [kbd.ARROW_DOWN, kbd.PAGE_UP, kbd.HOME];
+const LAST_KEYS = [kbd.ARROW_UP, kbd.PAGE_DOWN, kbd.END];
+const FIRST_LAST_KEYS = [...FIRST_KEYS, ...LAST_KEYS];
+function debounce(fn, wait = 500) {
+  let timeout = null;
+  return function(...args) {
+    const later = () => {
+      timeout = null;
+      fn(...args);
+    };
+    timeout && clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 const isDom = () => typeof window !== "undefined";
 function getPlatform() {
   const agent = navigator.userAgentData;
@@ -402,6 +507,17 @@ function removeScroll(_document) {
     body.removeAttribute(LOCK_CLASSNAME);
   };
 }
+function derivedVisible(obj) {
+  const { open, forceVisible, activeTrigger } = obj;
+  return derived([open, forceVisible, activeTrigger], ([$open, $forceVisible, $activeTrigger]) => ($open || $forceVisible) && $activeTrigger !== null);
+}
+const safeOnMount = (fn) => {
+  try {
+    onMount(fn);
+  } catch {
+    return fn();
+  }
+};
 const safeOnDestroy = (fn) => {
   try {
     onDestroy(fn);
@@ -459,6 +575,67 @@ function toWritableStores(properties) {
   });
   return result;
 }
+function handleRovingFocus(nextElement) {
+  if (!isBrowser)
+    return;
+  sleep(1).then(() => {
+    const currentFocusedElement = document.activeElement;
+    if (!isHTMLElement(currentFocusedElement) || currentFocusedElement === nextElement)
+      return;
+    currentFocusedElement.tabIndex = -1;
+    if (nextElement) {
+      nextElement.tabIndex = 0;
+      nextElement.focus();
+    }
+  });
+}
+const ignoredKeys = /* @__PURE__ */ new Set(["Shift", "Control", "Alt", "Meta", "CapsLock", "NumLock"]);
+const defaults$2 = {
+  onMatch: handleRovingFocus,
+  getCurrentItem: () => document.activeElement
+};
+function createTypeaheadSearch(args = {}) {
+  const withDefaults = { ...defaults$2, ...args };
+  const typed = writable([]);
+  const resetTyped = debounce(() => {
+    typed.update(() => []);
+  });
+  const handleTypeaheadSearch = (key, items) => {
+    if (ignoredKeys.has(key))
+      return;
+    const currentItem = withDefaults.getCurrentItem();
+    const $typed = get_store_value(typed);
+    if (!Array.isArray($typed)) {
+      return;
+    }
+    $typed.push(key.toLowerCase());
+    typed.set($typed);
+    const candidateItems = items.filter((item) => {
+      if (item.getAttribute("disabled") === "true" || item.getAttribute("aria-disabled") === "true" || item.hasAttribute("data-disabled")) {
+        return false;
+      }
+      return true;
+    });
+    const isRepeated = $typed.length > 1 && $typed.every((char) => char === $typed[0]);
+    const normalizeSearch = isRepeated ? $typed[0] : $typed.join("");
+    const currentItemIndex = isHTMLElement(currentItem) ? candidateItems.indexOf(currentItem) : -1;
+    let wrappedItems = wrapArray(candidateItems, Math.max(currentItemIndex, 0));
+    const excludeCurrentItem = normalizeSearch.length === 1;
+    if (excludeCurrentItem) {
+      wrappedItems = wrappedItems.filter((v) => v !== currentItem);
+    }
+    const nextItem = wrappedItems.find((item) => item?.innerText && item.innerText.toLowerCase().startsWith(normalizeSearch.toLowerCase()));
+    if (isHTMLElement(nextItem) && nextItem !== currentItem) {
+      withDefaults.onMatch(nextItem);
+    }
+    resetTyped();
+  };
+  return {
+    typed,
+    resetTyped,
+    handleTypeaheadSearch
+  };
+}
 function getPortalParent(node) {
   let parent = node.parentElement;
   while (isHTMLElement(parent) && !parent.hasAttribute("data-portal")) {
@@ -473,6 +650,22 @@ function getPortalDestination(node, portalProp) {
   if (portalParent === "body")
     return document.body;
   return null;
+}
+function createClickOutsideIgnore(meltId) {
+  return (e) => {
+    const target = e.target;
+    const triggerEl = getElementByMeltId(meltId);
+    if (!triggerEl || !isElement(target))
+      return false;
+    const id = triggerEl.id;
+    if (isHTMLLabelElement(target) && id === target.htmlFor) {
+      return true;
+    }
+    if (target.closest(`label[for="${id}"]`)) {
+      return true;
+    }
+    return false;
+  };
 }
 async function handleFocus(args) {
   const { prop, defaultEl } = args;
@@ -595,6 +788,106 @@ const useEscapeKeydown = (node, config = {}) => {
     }
   };
 };
+const defaultConfig$1 = {
+  strategy: "absolute",
+  placement: "top",
+  gutter: 5,
+  flip: true,
+  sameWidth: false,
+  overflowPadding: 8
+};
+const ARROW_TRANSFORM = {
+  bottom: "rotate(45deg)",
+  left: "rotate(135deg)",
+  top: "rotate(225deg)",
+  right: "rotate(315deg)"
+};
+function useFloating(reference, floating, opts = {}) {
+  if (!floating || !reference || opts === null)
+    return {
+      destroy: noop
+    };
+  const options = { ...defaultConfig$1, ...opts };
+  const arrowEl = floating.querySelector("[data-arrow=true]");
+  const middleware = [];
+  if (options.flip) {
+    middleware.push(flip({
+      boundary: options.boundary,
+      padding: options.overflowPadding
+    }));
+  }
+  const arrowOffset = isHTMLElement(arrowEl) ? arrowEl.offsetHeight / 2 : 0;
+  if (options.gutter || options.offset) {
+    const data = options.gutter ? { mainAxis: options.gutter } : options.offset;
+    if (data?.mainAxis != null) {
+      data.mainAxis += arrowOffset;
+    }
+    middleware.push(offset(data));
+  }
+  middleware.push(shift({
+    boundary: options.boundary,
+    crossAxis: options.overlap,
+    padding: options.overflowPadding
+  }));
+  if (arrowEl) {
+    middleware.push(arrow({ element: arrowEl, padding: 8 }));
+  }
+  middleware.push(size({
+    padding: options.overflowPadding,
+    apply({ rects, availableHeight, availableWidth }) {
+      if (options.sameWidth) {
+        Object.assign(floating.style, {
+          width: `${Math.round(rects.reference.width)}px`,
+          minWidth: "unset"
+        });
+      }
+      if (options.fitViewport) {
+        Object.assign(floating.style, {
+          maxWidth: `${availableWidth}px`,
+          maxHeight: `${availableHeight}px`
+        });
+      }
+    }
+  }));
+  function compute() {
+    if (!reference || !floating)
+      return;
+    const { placement, strategy } = options;
+    computePosition(reference, floating, {
+      placement,
+      middleware,
+      strategy
+    }).then((data) => {
+      const x = Math.round(data.x);
+      const y = Math.round(data.y);
+      Object.assign(floating.style, {
+        position: options.strategy,
+        top: `${y}px`,
+        left: `${x}px`
+      });
+      if (isHTMLElement(arrowEl) && data.middlewareData.arrow) {
+        const { x: x2, y: y2 } = data.middlewareData.arrow;
+        const dir = data.placement.split("-")[0];
+        Object.assign(arrowEl.style, {
+          position: "absolute",
+          left: x2 != null ? `${x2}px` : "",
+          top: y2 != null ? `${y2}px` : "",
+          [dir]: `calc(100% - ${arrowOffset}px)`,
+          transform: ARROW_TRANSFORM[dir],
+          backgroundColor: "inherit",
+          zIndex: "inherit"
+        });
+      }
+      return data;
+    });
+  }
+  Object.assign(floating.style, {
+    position: options.strategy
+  });
+  return {
+    destroy: autoUpdate(reference, floating, compute)
+  };
+}
 function createFocusTrap(config = {}) {
   let trap;
   const { immediate, ...focusTrapOptions } = config;
@@ -648,6 +941,72 @@ function createFocusTrap(config = {}) {
     unpause
   };
 }
+const defaultConfig = {
+  floating: {},
+  focusTrap: {},
+  clickOutside: {},
+  escapeKeydown: {},
+  portal: "body"
+};
+const usePopper = (popperElement, args) => {
+  popperElement.dataset.escapee = "";
+  const { anchorElement, open, options } = args;
+  if (!anchorElement || !open || !options) {
+    return { destroy: noop };
+  }
+  const opts = { ...defaultConfig, ...options };
+  const callbacks = [];
+  if (opts.portal !== null) {
+    const portal = usePortal(popperElement, opts.portal);
+    if (portal?.destroy) {
+      callbacks.push(portal.destroy);
+    }
+  }
+  callbacks.push(useFloating(anchorElement, popperElement, opts.floating).destroy);
+  if (opts.focusTrap !== null) {
+    const { useFocusTrap } = createFocusTrap({
+      immediate: true,
+      escapeDeactivates: false,
+      allowOutsideClick: true,
+      returnFocusOnDeactivate: false,
+      fallbackFocus: popperElement,
+      ...opts.focusTrap
+    });
+    const usedFocusTrap = useFocusTrap(popperElement);
+    if (usedFocusTrap?.destroy) {
+      callbacks.push(usedFocusTrap.destroy);
+    }
+  }
+  if (opts.clickOutside !== null) {
+    callbacks.push(useClickOutside(popperElement, {
+      enabled: open,
+      handler: (e) => {
+        if (e.defaultPrevented)
+          return;
+        if (isHTMLElement(anchorElement) && !anchorElement.contains(e.target)) {
+          open.set(false);
+          anchorElement.focus();
+        }
+      },
+      ...opts.clickOutside
+    }).destroy);
+  }
+  if (opts.escapeKeydown !== null) {
+    callbacks.push(useEscapeKeydown(popperElement, {
+      enabled: open,
+      handler: () => {
+        open.set(false);
+      },
+      ...opts.escapeKeydown
+    }).destroy);
+  }
+  const unsubscribe = executeCallbacks(...callbacks);
+  return {
+    destroy() {
+      unsubscribe();
+    }
+  };
+};
 const usePortal = (el, target = "body") => {
   let targetEl;
   if (!isHTMLElement(target) && typeof target !== "string") {
@@ -684,7 +1043,471 @@ const usePortal = (el, target = "body") => {
     destroy
   };
 };
-const { name } = createElHelpers("dialog");
+function createLabel() {
+  const root = builder("label", {
+    action: (node) => {
+      const mouseDown = addMeltEventListener(node, "mousedown", (e) => {
+        if (!e.defaultPrevented && e.detail > 1) {
+          e.preventDefault();
+        }
+      });
+      return {
+        destroy: mouseDown
+      };
+    }
+  });
+  return {
+    elements: {
+      root
+    }
+  };
+}
+const INTERACTION_KEYS = [kbd.ARROW_LEFT, kbd.ESCAPE, kbd.ARROW_RIGHT, kbd.SHIFT, kbd.CAPS_LOCK, kbd.CONTROL, kbd.ALT, kbd.META, kbd.ENTER, kbd.F1, kbd.F2, kbd.F3, kbd.F4, kbd.F5, kbd.F6, kbd.F7, kbd.F8, kbd.F9, kbd.F10, kbd.F11, kbd.F12];
+const defaults$1 = {
+  positioning: {
+    placement: "bottom",
+    sameWidth: true
+  },
+  scrollAlignment: "nearest",
+  loop: true,
+  defaultOpen: false,
+  closeOnOutsideClick: true,
+  preventScroll: true,
+  closeOnEscape: true,
+  forceVisible: false,
+  portal: void 0,
+  builder: "listbox",
+  disabled: false,
+  required: false,
+  name: void 0,
+  typeahead: true,
+  highlightOnHover: true,
+  onOutsideClick: void 0
+};
+const listboxIdParts = ["trigger", "menu", "label"];
+function createListbox(props) {
+  const withDefaults = { ...defaults$1, ...props };
+  const activeTrigger = writable(null);
+  const highlightedItem = writable(null);
+  const selectedWritable = withDefaults.selected ?? writable(withDefaults.defaultSelected);
+  const selected = overridable(selectedWritable, withDefaults?.onSelectedChange);
+  const highlighted = derived(highlightedItem, ($highlightedItem) => $highlightedItem ? getOptionProps($highlightedItem) : void 0);
+  const openWritable = withDefaults.open ?? writable(withDefaults.defaultOpen);
+  const open = overridable(openWritable, withDefaults?.onOpenChange);
+  const options = toWritableStores({
+    ...omit(withDefaults, "open", "defaultOpen", "builder", "ids"),
+    multiple: withDefaults.multiple ?? false
+  });
+  const { scrollAlignment, loop, closeOnOutsideClick, closeOnEscape, preventScroll, portal, forceVisible, positioning, multiple, arrowSize, disabled, required, typeahead, name: nameProp, highlightOnHover, onOutsideClick } = options;
+  const { name: name2, selector } = createElHelpers(withDefaults.builder);
+  const ids = toWritableStores({ ...generateIds(listboxIdParts), ...withDefaults.ids });
+  const { handleTypeaheadSearch } = createTypeaheadSearch({
+    onMatch: (element) => {
+      highlightedItem.set(element);
+      element.scrollIntoView({ block: get_store_value(scrollAlignment) });
+    },
+    getCurrentItem() {
+      return get_store_value(highlightedItem);
+    }
+  });
+  function getOptionProps(el) {
+    const value = el.getAttribute("data-value");
+    const label2 = el.getAttribute("data-label");
+    const disabled2 = el.hasAttribute("data-disabled");
+    return {
+      value: value ? JSON.parse(value) : value,
+      label: label2 ?? el.textContent ?? void 0,
+      disabled: disabled2 ? true : false
+    };
+  }
+  const setOption = (newOption) => {
+    selected.update(($option) => {
+      const $multiple = get_store_value(multiple);
+      if ($multiple) {
+        const optionArr = Array.isArray($option) ? $option : [];
+        return toggle(newOption, optionArr, (itemA, itemB) => dequal(itemA.value, itemB.value));
+      }
+      return newOption;
+    });
+  };
+  function selectItem(item) {
+    const props2 = getOptionProps(item);
+    setOption(props2);
+  }
+  async function openMenu() {
+    open.set(true);
+    const triggerEl = document.getElementById(get_store_value(ids.trigger));
+    if (!triggerEl)
+      return;
+    activeTrigger.set(triggerEl);
+    await tick();
+    const menuElement = document.getElementById(get_store_value(ids.menu));
+    if (!isHTMLElement(menuElement))
+      return;
+    const selectedItem = menuElement.querySelector("[aria-selected=true]");
+    if (!isHTMLElement(selectedItem))
+      return;
+    highlightedItem.set(selectedItem);
+  }
+  function closeMenu() {
+    open.set(false);
+    highlightedItem.set(null);
+  }
+  const isVisible = derivedVisible({ open, forceVisible, activeTrigger });
+  const isSelected = derived([selected], ([$selected]) => {
+    return (value) => {
+      if (Array.isArray($selected)) {
+        return $selected.some((o) => dequal(o.value, value));
+      }
+      if (isObject(value)) {
+        return dequal($selected?.value, stripValues(value, void 0));
+      }
+      return dequal($selected?.value, value);
+    };
+  });
+  const isHighlighted = derived([highlighted], ([$value]) => {
+    return (item) => {
+      return dequal($value?.value, item);
+    };
+  });
+  const trigger = builder(name2("trigger"), {
+    stores: [open, highlightedItem, disabled, ids.menu, ids.trigger, ids.label],
+    returned: ([$open, $highlightedItem, $disabled, $menuId, $triggerId, $labelId]) => {
+      return {
+        "aria-activedescendant": $highlightedItem?.id,
+        "aria-autocomplete": "list",
+        "aria-controls": $menuId,
+        "aria-expanded": $open,
+        "aria-labelledby": $labelId,
+        // autocomplete: 'off',
+        id: $triggerId,
+        role: "combobox",
+        disabled: disabledAttr($disabled)
+      };
+    },
+    action: (node) => {
+      const isInput = isHTMLInputElement(node);
+      const unsubscribe = executeCallbacks(
+        addMeltEventListener(node, "click", () => {
+          node.focus();
+          const $open = get_store_value(open);
+          if ($open) {
+            closeMenu();
+          } else {
+            openMenu();
+          }
+        }),
+        // Handle all input key events including typing, meta, and navigation.
+        addMeltEventListener(node, "keydown", (e) => {
+          const $open = get_store_value(open);
+          if (!$open) {
+            if (INTERACTION_KEYS.includes(e.key)) {
+              return;
+            }
+            if (e.key === kbd.TAB) {
+              return;
+            }
+            if (e.key === kbd.BACKSPACE && isInput && node.value === "") {
+              return;
+            }
+            if (e.key === kbd.SPACE && isHTMLButtonElement(node)) {
+              return;
+            }
+            openMenu();
+            tick().then(() => {
+              const $selectedItem = get_store_value(selected);
+              if ($selectedItem)
+                return;
+              const menuEl = document.getElementById(get_store_value(ids.menu));
+              if (!isHTMLElement(menuEl))
+                return;
+              const enabledItems = Array.from(menuEl.querySelectorAll(`${selector("item")}:not([data-disabled]):not([data-hidden])`)).filter((item) => isHTMLElement(item));
+              if (!enabledItems.length)
+                return;
+              if (e.key === kbd.ARROW_DOWN) {
+                highlightedItem.set(enabledItems[0]);
+                enabledItems[0].scrollIntoView({ block: get_store_value(scrollAlignment) });
+              } else if (e.key === kbd.ARROW_UP) {
+                highlightedItem.set(last(enabledItems));
+                last(enabledItems).scrollIntoView({ block: get_store_value(scrollAlignment) });
+              }
+            });
+          }
+          if (e.key === kbd.TAB) {
+            closeMenu();
+            return;
+          }
+          if (e.key === kbd.ENTER || e.key === kbd.SPACE && isHTMLButtonElement(node)) {
+            e.preventDefault();
+            const $highlightedItem = get_store_value(highlightedItem);
+            if ($highlightedItem) {
+              selectItem($highlightedItem);
+            }
+            if (!get_store_value(multiple)) {
+              closeMenu();
+            }
+          }
+          if (e.key === kbd.ARROW_UP && e.altKey) {
+            closeMenu();
+          }
+          if (FIRST_LAST_KEYS.includes(e.key)) {
+            e.preventDefault();
+            const menuElement = document.getElementById(get_store_value(ids.menu));
+            if (!isHTMLElement(menuElement))
+              return;
+            const itemElements = getOptions(menuElement);
+            if (!itemElements.length)
+              return;
+            const candidateNodes = itemElements.filter((opt) => !isElementDisabled(opt) && opt.dataset.hidden === void 0);
+            const $currentItem = get_store_value(highlightedItem);
+            const currentIndex = $currentItem ? candidateNodes.indexOf($currentItem) : -1;
+            const $loop = get_store_value(loop);
+            const $scrollAlignment = get_store_value(scrollAlignment);
+            let nextItem;
+            switch (e.key) {
+              case kbd.ARROW_DOWN:
+                nextItem = next(candidateNodes, currentIndex, $loop);
+                break;
+              case kbd.ARROW_UP:
+                nextItem = prev(candidateNodes, currentIndex, $loop);
+                break;
+              case kbd.PAGE_DOWN:
+                nextItem = forward(candidateNodes, currentIndex, 10, $loop);
+                break;
+              case kbd.PAGE_UP:
+                nextItem = back(candidateNodes, currentIndex, 10, $loop);
+                break;
+              case kbd.HOME:
+                nextItem = candidateNodes[0];
+                break;
+              case kbd.END:
+                nextItem = last(candidateNodes);
+                break;
+              default:
+                return;
+            }
+            highlightedItem.set(nextItem);
+            nextItem?.scrollIntoView({ block: $scrollAlignment });
+          } else if (get_store_value(typeahead)) {
+            const menuEl = document.getElementById(get_store_value(ids.menu));
+            if (!isHTMLElement(menuEl))
+              return;
+            handleTypeaheadSearch(e.key, getOptions(menuEl));
+          }
+        })
+      );
+      let unsubEscapeKeydown = noop;
+      const escape2 = useEscapeKeydown(node, {
+        handler: closeMenu,
+        enabled: derived([open, closeOnEscape], ([$open, $closeOnEscape]) => {
+          return $open && $closeOnEscape;
+        })
+      });
+      if (escape2 && escape2.destroy) {
+        unsubEscapeKeydown = escape2.destroy;
+      }
+      return {
+        destroy() {
+          unsubscribe();
+          unsubEscapeKeydown();
+        }
+      };
+    }
+  });
+  const menu = builder(name2("menu"), {
+    stores: [isVisible, ids.menu],
+    returned: ([$isVisible, $menuId]) => {
+      return {
+        hidden: $isVisible ? void 0 : true,
+        id: $menuId,
+        role: "listbox",
+        style: styleToString({ display: $isVisible ? void 0 : "none" })
+      };
+    },
+    action: (node) => {
+      let unsubPopper = noop;
+      const unsubscribe = executeCallbacks(
+        // Bind the popper portal to the input element.
+        effect([isVisible, portal, closeOnOutsideClick, positioning, activeTrigger], ([$isVisible, $portal, $closeOnOutsideClick, $positioning, $activeTrigger]) => {
+          unsubPopper();
+          if (!$isVisible || !$activeTrigger)
+            return;
+          const ignoreHandler = createClickOutsideIgnore(get_store_value(ids.trigger));
+          const popper = usePopper(node, {
+            anchorElement: $activeTrigger,
+            open,
+            options: {
+              floating: $positioning,
+              focusTrap: null,
+              clickOutside: $closeOnOutsideClick ? {
+                handler: (e) => {
+                  get_store_value(onOutsideClick)?.(e);
+                  if (e.defaultPrevented)
+                    return;
+                  const target = e.target;
+                  if (!isElement(target))
+                    return;
+                  if (target === $activeTrigger || $activeTrigger.contains(target)) {
+                    return;
+                  }
+                  closeMenu();
+                },
+                ignore: ignoreHandler
+              } : null,
+              escapeKeydown: null,
+              portal: getPortalDestination(node, $portal)
+            }
+          });
+          if (popper && popper.destroy) {
+            unsubPopper = popper.destroy;
+          }
+        })
+      );
+      return {
+        destroy: () => {
+          unsubscribe();
+          unsubPopper();
+        }
+      };
+    }
+  });
+  const { elements: { root: labelBuilder } } = createLabel();
+  const { action: labelAction } = get_store_value(labelBuilder);
+  const label = builder(name2("label"), {
+    stores: [ids.label, ids.trigger],
+    returned: ([$labelId, $triggerId]) => {
+      return {
+        id: $labelId,
+        for: $triggerId
+      };
+    },
+    action: labelAction
+  });
+  const option = builder(name2("option"), {
+    stores: [isSelected],
+    returned: ([$isSelected]) => (props2) => {
+      const selected2 = $isSelected(props2.value);
+      return {
+        "data-value": JSON.stringify(props2.value),
+        "data-label": props2.label,
+        "data-disabled": disabledAttr(props2.disabled),
+        "aria-disabled": props2.disabled ? true : void 0,
+        "aria-selected": selected2,
+        "data-selected": selected2 ? "" : void 0,
+        id: generateId$1(),
+        role: "option"
+      };
+    },
+    action: (node) => {
+      const unsubscribe = executeCallbacks(addMeltEventListener(node, "click", (e) => {
+        if (isElementDisabled(node)) {
+          e.preventDefault();
+          return;
+        }
+        selectItem(node);
+        if (!get_store_value(multiple)) {
+          closeMenu();
+        }
+      }), effect(highlightOnHover, ($highlightOnHover) => {
+        if (!$highlightOnHover)
+          return;
+        const unsub = executeCallbacks(addMeltEventListener(node, "mouseover", () => {
+          highlightedItem.set(node);
+        }), addMeltEventListener(node, "mouseleave", () => {
+          highlightedItem.set(null);
+        }));
+        return unsub;
+      }));
+      return { destroy: unsubscribe };
+    }
+  });
+  const hiddenInput = builder(name2("hidden-input"), {
+    stores: [selected, required, nameProp],
+    returned: ([$selected, $required, $name]) => {
+      const value = Array.isArray($selected) ? $selected.map((o) => o.value) : $selected?.value;
+      return {
+        ...hiddenInputAttrs,
+        required: $required ? true : void 0,
+        value,
+        name: $name
+      };
+    }
+  });
+  const arrow2 = builder(name2("arrow"), {
+    stores: arrowSize,
+    returned: ($arrowSize) => ({
+      "data-arrow": true,
+      style: styleToString({
+        position: "absolute",
+        width: `var(--arrow-size, ${$arrowSize}px)`,
+        height: `var(--arrow-size, ${$arrowSize}px)`
+      })
+    })
+  });
+  safeOnMount(() => {
+    if (!isBrowser)
+      return;
+    const menuEl = document.getElementById(get_store_value(ids.menu));
+    if (!menuEl)
+      return;
+    const triggerEl = document.getElementById(get_store_value(ids.trigger));
+    if (triggerEl) {
+      activeTrigger.set(triggerEl);
+    }
+    const selectedEl = menuEl.querySelector("[data-selected]");
+    if (!isHTMLElement(selectedEl))
+      return;
+  });
+  effect([highlightedItem], ([$highlightedItem]) => {
+    if (!isBrowser)
+      return;
+    const menuElement = document.getElementById(get_store_value(ids.menu));
+    if (!isHTMLElement(menuElement))
+      return;
+    getOptions(menuElement).forEach((node) => {
+      if (node === $highlightedItem) {
+        addHighlight(node);
+      } else {
+        removeHighlight(node);
+      }
+    });
+  });
+  effect([open], ([$open]) => {
+    if (!isBrowser)
+      return;
+    let unsubScroll = noop;
+    if (get_store_value(preventScroll) && $open) {
+      unsubScroll = removeScroll();
+    }
+    return () => {
+      unsubScroll();
+    };
+  });
+  return {
+    ids,
+    elements: {
+      trigger,
+      option,
+      menu,
+      label,
+      hiddenInput,
+      arrow: arrow2
+    },
+    states: {
+      open,
+      selected,
+      highlighted,
+      highlightedItem
+    },
+    helpers: {
+      isSelected,
+      isHighlighted,
+      closeMenu
+    },
+    options
+  };
+}
+const { name: name$1 } = createElHelpers("dialog");
 const defaults = {
   preventScroll: true,
   closeOnEscape: true,
@@ -732,16 +1555,16 @@ function createDialog(props) {
   effect([open], ([$open]) => {
     sleep(100).then(() => {
       if ($open) {
-        openDialogIds.update((prev) => {
-          prev.push(get_store_value(ids.content));
-          return prev;
+        openDialogIds.update((prev2) => {
+          prev2.push(get_store_value(ids.content));
+          return prev2;
         });
       } else {
-        openDialogIds.update((prev) => prev.filter((id) => id !== get_store_value(ids.content)));
+        openDialogIds.update((prev2) => prev2.filter((id) => id !== get_store_value(ids.content)));
       }
     });
   });
-  const trigger = builder(name("trigger"), {
+  const trigger = builder(name$1("trigger"), {
     stores: [open],
     returned: ([$open]) => {
       return {
@@ -764,7 +1587,7 @@ function createDialog(props) {
       };
     }
   });
-  const overlay = builder(name("overlay"), {
+  const overlay = builder(name$1("overlay"), {
     stores: [isVisible],
     returned: ([$isVisible]) => {
       return {
@@ -796,7 +1619,7 @@ function createDialog(props) {
       };
     }
   });
-  const content = builder(name("content"), {
+  const content = builder(name$1("content"), {
     stores: [isVisible, ids.content, ids.description, ids.title],
     returned: ([$isVisible, $contentId, $descriptionId, $titleId]) => {
       return {
@@ -877,7 +1700,7 @@ function createDialog(props) {
       };
     }
   });
-  const portalled = builder(name("portalled"), {
+  const portalled = builder(name$1("portalled"), {
     stores: portal,
     returned: ($portal) => ({
       "data-portal": $portal ? "" : void 0
@@ -903,19 +1726,19 @@ function createDialog(props) {
       };
     }
   });
-  const title = builder(name("title"), {
+  const title = builder(name$1("title"), {
     stores: [ids.title],
     returned: ([$titleId]) => ({
       id: $titleId
     })
   });
-  const description = builder(name("description"), {
+  const description = builder(name$1("description"), {
     stores: [ids.description],
     returned: ([$descriptionId]) => ({
       id: $descriptionId
     })
   });
-  const close = builder(name("close"), {
+  const close = builder(name$1("close"), {
     returned: () => ({
       type: "button"
     }),
@@ -965,6 +1788,43 @@ function createDialog(props) {
     options
   };
 }
+const { name } = createElHelpers("select");
+function createSelect(props) {
+  const listbox = createListbox({ ...props, builder: "select" });
+  const group = builder(name("group"), {
+    returned: () => {
+      return (groupId) => ({
+        role: "group",
+        "aria-labelledby": groupId
+      });
+    }
+  });
+  const groupLabel = builder(name("group-label"), {
+    returned: () => {
+      return (groupId) => ({
+        id: groupId
+      });
+    }
+  });
+  const selectedLabel = derived(listbox.states.selected, ($selected) => {
+    if (Array.isArray($selected)) {
+      return $selected.map((o) => o.label).join(", ");
+    }
+    return $selected?.label ?? "";
+  });
+  return {
+    ...listbox,
+    elements: {
+      ...listbox.elements,
+      group,
+      groupLabel
+    },
+    states: {
+      ...listbox.states,
+      selectedLabel
+    }
+  };
+}
 function createBitAttrs(bit, parts) {
   const attrs = {};
   parts.forEach((part) => {
@@ -985,6 +1845,9 @@ function createDispatcher() {
       e.preventDefault();
     }
   };
+}
+function generateId() {
+  return nanoid(10);
 }
 function removeUndefined(obj) {
   const result = {};
@@ -1061,6 +1924,50 @@ const Button$1 = create_ssr_component(($$result, $$props, $$bindings, slots) => 
     )}>${is_void(tag) ? "" : `${slots.default ? slots.default({}) : ``}`}${is_void(tag) ? "" : `</${tag}>`}` : "";
   })(href ? "a" : "button")}`}`;
 });
+function getPositioningUpdater(store) {
+  return (props = {}) => {
+    return updatePositioning$1(store, props);
+  };
+}
+function updatePositioning$1(store, props) {
+  const defaultPositioningProps = {
+    side: "bottom",
+    align: "center",
+    sideOffset: 0,
+    alignOffset: 0,
+    sameWidth: false,
+    avoidCollisions: true,
+    collisionPadding: 8,
+    fitViewport: false,
+    strategy: "absolute",
+    overlap: false
+  };
+  const withDefaults = { ...defaultPositioningProps, ...props };
+  store.update((prev2) => {
+    return {
+      ...prev2,
+      placement: joinPlacement(withDefaults.side, withDefaults.align),
+      offset: {
+        ...prev2.offset,
+        mainAxis: withDefaults.sideOffset,
+        crossAxis: withDefaults.alignOffset
+      },
+      gutter: 0,
+      sameWidth: withDefaults.sameWidth,
+      flip: withDefaults.avoidCollisions,
+      overflowPadding: withDefaults.collisionPadding,
+      boundary: withDefaults.collisionBoundary,
+      fitViewport: withDefaults.fitViewport,
+      strategy: withDefaults.strategy,
+      overlap: withDefaults.overlap
+    };
+  });
+}
+function joinPlacement(side, align) {
+  if (align === "center")
+    return side;
+  return `${side}-${align}`;
+}
 function getDialogData() {
   const NAME = "dialog";
   const PARTS = [
@@ -1077,7 +1984,7 @@ function getDialogData() {
     PARTS
   };
 }
-function setCtx(props) {
+function setCtx$1(props) {
   const { NAME, PARTS } = getDialogData();
   const getAttrs2 = createBitAttrs(NAME, PARTS);
   const dialog = {
@@ -1090,7 +1997,7 @@ function setCtx(props) {
     updateOption: getOptionUpdater(dialog.options)
   };
 }
-function getCtx() {
+function getCtx$1() {
   const { NAME } = getDialogData();
   return getContext(NAME);
 }
@@ -1105,7 +2012,7 @@ const Dialog = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let { openFocus = void 0 } = $$props;
   let { closeFocus = void 0 } = $$props;
   let { onOutsideClick = void 0 } = $$props;
-  const { states: { open: localOpen }, updateOption, ids } = setCtx({
+  const { states: { open: localOpen }, updateOption, ids } = setCtx$1({
     closeOnEscape,
     preventScroll,
     closeOnOutsideClick,
@@ -1115,12 +2022,12 @@ const Dialog = create_ssr_component(($$result, $$props, $$bindings, slots) => {
     openFocus,
     closeFocus,
     onOutsideClick,
-    onOpenChange: ({ next }) => {
-      if (open !== next) {
-        onOpenChange?.(next);
-        open = next;
+    onOpenChange: ({ next: next2 }) => {
+      if (open !== next2) {
+        onOpenChange?.(next2);
+        open = next2;
       }
-      return next;
+      return next2;
     }
   });
   const idValues = derived([ids.content, ids.description, ids.title], ([$contentId, $descriptionId, $titleId]) => ({
@@ -1180,7 +2087,7 @@ const Dialog_title$1 = create_ssr_component(($$result, $$props, $$bindings, slot
   let { asChild = false } = $$props;
   let { id = void 0 } = $$props;
   let { el = void 0 } = $$props;
-  const { elements: { title }, ids, getAttrs: getAttrs2 } = getCtx();
+  const { elements: { title }, ids, getAttrs: getAttrs2 } = getCtx$1();
   $$unsubscribe_title = subscribe(title, (value) => $title = value);
   const attrs = getAttrs2("title");
   if ($$props.level === void 0 && $$bindings.level && level !== void 0)
@@ -1211,7 +2118,7 @@ const Dialog_close = create_ssr_component(($$result, $$props, $$bindings, slots)
   let $close, $$unsubscribe_close;
   let { asChild = false } = $$props;
   let { el = void 0 } = $$props;
-  const { elements: { close }, getAttrs: getAttrs2 } = getCtx();
+  const { elements: { close }, getAttrs: getAttrs2 } = getCtx$1();
   $$unsubscribe_close = subscribe(close, (value) => $close = value);
   createDispatcher();
   const attrs = getAttrs2("close");
@@ -1232,7 +2139,7 @@ const Dialog_portal$1 = create_ssr_component(($$result, $$props, $$bindings, slo
   let $portalled, $$unsubscribe_portalled;
   let { asChild = false } = $$props;
   let { el = void 0 } = $$props;
-  const { elements: { portalled }, getAttrs: getAttrs2 } = getCtx();
+  const { elements: { portalled }, getAttrs: getAttrs2 } = getCtx$1();
   $$unsubscribe_portalled = subscribe(portalled, (value) => $portalled = value);
   const attrs = getAttrs2("portal");
   if ($$props.asChild === void 0 && $$bindings.asChild && asChild !== void 0)
@@ -1270,7 +2177,7 @@ const Dialog_content$1 = create_ssr_component(($$result, $$props, $$bindings, sl
   let { asChild = false } = $$props;
   let { id = void 0 } = $$props;
   let { el = void 0 } = $$props;
-  const { elements: { content }, states: { open }, ids, getAttrs: getAttrs2 } = getCtx();
+  const { elements: { content }, states: { open }, ids, getAttrs: getAttrs2 } = getCtx$1();
   $$unsubscribe_content = subscribe(content, (value) => $content = value);
   $$unsubscribe_open = subscribe(open, (value) => $open = value);
   const attrs = getAttrs2("content");
@@ -1327,7 +2234,7 @@ const Dialog_overlay$1 = create_ssr_component(($$result, $$props, $$bindings, sl
   let { outTransitionConfig = void 0 } = $$props;
   let { asChild = false } = $$props;
   let { el = void 0 } = $$props;
-  const { elements: { overlay }, states: { open }, getAttrs: getAttrs2 } = getCtx();
+  const { elements: { overlay }, states: { open }, getAttrs: getAttrs2 } = getCtx$1();
   $$unsubscribe_overlay = subscribe(overlay, (value) => $overlay = value);
   $$unsubscribe_open = subscribe(open, (value) => $open = value);
   const attrs = getAttrs2("overlay");
@@ -1362,7 +2269,7 @@ const Dialog_description$1 = create_ssr_component(($$result, $$props, $$bindings
   let { asChild = false } = $$props;
   let { id = void 0 } = $$props;
   let { el = void 0 } = $$props;
-  const { elements: { description }, ids, getAttrs: getAttrs2 } = getCtx();
+  const { elements: { description }, ids, getAttrs: getAttrs2 } = getCtx$1();
   $$unsubscribe_description = subscribe(description, (value) => $description = value);
   const attrs = getAttrs2("description");
   if ($$props.asChild === void 0 && $$bindings.asChild && asChild !== void 0)
@@ -1382,6 +2289,487 @@ const Dialog_description$1 = create_ssr_component(($$result, $$props, $$bindings
   }
   $$unsubscribe_description();
   return `${asChild ? `${slots.default ? slots.default({ builder: builder2 }) : ``}` : `<div${spread([escape_object(builder2), escape_object($$restProps)], {})}${add_attribute("this", el, 0)}>${slots.default ? slots.default({ builder: builder2 }) : ``}</div>`}`;
+});
+function getSelectData() {
+  const NAME = "select";
+  const GROUP_NAME = "select-group";
+  const ITEM_NAME = "select-item";
+  const PARTS = [
+    "arrow",
+    "content",
+    "group",
+    "item",
+    "indicator",
+    "input",
+    "label",
+    "trigger",
+    "value"
+  ];
+  return {
+    NAME,
+    GROUP_NAME,
+    ITEM_NAME,
+    PARTS
+  };
+}
+function getCtx() {
+  const { NAME } = getSelectData();
+  return getContext(NAME);
+}
+function setCtx(props) {
+  const { NAME, PARTS } = getSelectData();
+  const getAttrs2 = createBitAttrs(NAME, PARTS);
+  const select = {
+    ...createSelect({ ...removeUndefined(props), forceVisible: true }),
+    getAttrs: getAttrs2
+  };
+  setContext(NAME, select);
+  return {
+    ...select,
+    updateOption: getOptionUpdater(select.options)
+  };
+}
+function setGroupCtx() {
+  const { GROUP_NAME } = getSelectData();
+  const id = generateId();
+  setContext(GROUP_NAME, id);
+  const { elements: { group }, getAttrs: getAttrs2 } = getCtx();
+  return { group, id, getAttrs: getAttrs2 };
+}
+function setItemCtx(value) {
+  const { ITEM_NAME } = getSelectData();
+  const select = getCtx();
+  setContext(ITEM_NAME, value);
+  return select;
+}
+function getItemIndicator() {
+  const { ITEM_NAME } = getSelectData();
+  const { helpers: { isSelected }, getAttrs: getAttrs2 } = getCtx();
+  const value = getContext(ITEM_NAME);
+  return {
+    value,
+    isSelected,
+    getAttrs: getAttrs2
+  };
+}
+function updatePositioning(props) {
+  const defaultPlacement = {
+    side: "bottom",
+    align: "center",
+    sameWidth: true
+  };
+  const withDefaults = { ...defaultPlacement, ...props };
+  const { options: { positioning } } = getCtx();
+  const updater = getPositioningUpdater(positioning);
+  updater(withDefaults);
+}
+const Select = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let $idValues, $$unsubscribe_idValues;
+  let { required = void 0 } = $$props;
+  let { disabled = void 0 } = $$props;
+  let { preventScroll = void 0 } = $$props;
+  let { loop = void 0 } = $$props;
+  let { closeOnEscape = void 0 } = $$props;
+  let { closeOnOutsideClick = void 0 } = $$props;
+  let { portal = void 0 } = $$props;
+  let { name: name2 = void 0 } = $$props;
+  let { multiple = false } = $$props;
+  let { selected = void 0 } = $$props;
+  let { onSelectedChange = void 0 } = $$props;
+  let { open = void 0 } = $$props;
+  let { onOpenChange = void 0 } = $$props;
+  let { items = [] } = $$props;
+  let { onOutsideClick = void 0 } = $$props;
+  const { states: { open: localOpen, selected: localSelected }, updateOption, ids } = setCtx({
+    required,
+    disabled,
+    preventScroll,
+    loop,
+    closeOnEscape,
+    closeOnOutsideClick,
+    portal,
+    name: name2,
+    onOutsideClick,
+    multiple,
+    forceVisible: true,
+    defaultSelected: Array.isArray(selected) ? [...selected] : (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      selected
+    ),
+    defaultOpen: open,
+    onSelectedChange: ({ next: next2 }) => {
+      if (Array.isArray(next2)) {
+        if (!Array.isArray(selected) || !arraysAreEqual(selected, next2)) {
+          onSelectedChange?.(next2);
+          selected = next2;
+          return next2;
+        }
+        return next2;
+      }
+      if (selected !== next2) {
+        onSelectedChange?.(next2);
+        selected = next2;
+      }
+      return next2;
+    },
+    onOpenChange: ({ next: next2 }) => {
+      if (open !== next2) {
+        onOpenChange?.(next2);
+        open = next2;
+      }
+      return next2;
+    },
+    items
+  });
+  const idValues = derived([ids.menu, ids.trigger, ids.label], ([$menuId, $triggerId, $labelId]) => ({
+    menu: $menuId,
+    trigger: $triggerId,
+    label: $labelId
+  }));
+  $$unsubscribe_idValues = subscribe(idValues, (value) => $idValues = value);
+  if ($$props.required === void 0 && $$bindings.required && required !== void 0)
+    $$bindings.required(required);
+  if ($$props.disabled === void 0 && $$bindings.disabled && disabled !== void 0)
+    $$bindings.disabled(disabled);
+  if ($$props.preventScroll === void 0 && $$bindings.preventScroll && preventScroll !== void 0)
+    $$bindings.preventScroll(preventScroll);
+  if ($$props.loop === void 0 && $$bindings.loop && loop !== void 0)
+    $$bindings.loop(loop);
+  if ($$props.closeOnEscape === void 0 && $$bindings.closeOnEscape && closeOnEscape !== void 0)
+    $$bindings.closeOnEscape(closeOnEscape);
+  if ($$props.closeOnOutsideClick === void 0 && $$bindings.closeOnOutsideClick && closeOnOutsideClick !== void 0)
+    $$bindings.closeOnOutsideClick(closeOnOutsideClick);
+  if ($$props.portal === void 0 && $$bindings.portal && portal !== void 0)
+    $$bindings.portal(portal);
+  if ($$props.name === void 0 && $$bindings.name && name2 !== void 0)
+    $$bindings.name(name2);
+  if ($$props.multiple === void 0 && $$bindings.multiple && multiple !== void 0)
+    $$bindings.multiple(multiple);
+  if ($$props.selected === void 0 && $$bindings.selected && selected !== void 0)
+    $$bindings.selected(selected);
+  if ($$props.onSelectedChange === void 0 && $$bindings.onSelectedChange && onSelectedChange !== void 0)
+    $$bindings.onSelectedChange(onSelectedChange);
+  if ($$props.open === void 0 && $$bindings.open && open !== void 0)
+    $$bindings.open(open);
+  if ($$props.onOpenChange === void 0 && $$bindings.onOpenChange && onOpenChange !== void 0)
+    $$bindings.onOpenChange(onOpenChange);
+  if ($$props.items === void 0 && $$bindings.items && items !== void 0)
+    $$bindings.items(items);
+  if ($$props.onOutsideClick === void 0 && $$bindings.onOutsideClick && onOutsideClick !== void 0)
+    $$bindings.onOutsideClick(onOutsideClick);
+  open !== void 0 && localOpen.set(open);
+  selected !== void 0 && localSelected.set(Array.isArray(selected) ? [...selected] : (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    selected
+  ));
+  {
+    updateOption("required", required);
+  }
+  {
+    updateOption("disabled", disabled);
+  }
+  {
+    updateOption("preventScroll", preventScroll);
+  }
+  {
+    updateOption("loop", loop);
+  }
+  {
+    updateOption("closeOnEscape", closeOnEscape);
+  }
+  {
+    updateOption("closeOnOutsideClick", closeOnOutsideClick);
+  }
+  {
+    updateOption("portal", portal);
+  }
+  {
+    updateOption("name", name2);
+  }
+  {
+    updateOption("multiple", multiple);
+  }
+  {
+    updateOption("onOutsideClick", onOutsideClick);
+  }
+  $$unsubscribe_idValues();
+  return `${slots.default ? slots.default({ ids: $idValues }) : ``}`;
+});
+const Select_content$1 = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let builder2;
+  let $$restProps = compute_rest_props($$props, [
+    "transition",
+    "transitionConfig",
+    "inTransition",
+    "inTransitionConfig",
+    "outTransition",
+    "outTransitionConfig",
+    "asChild",
+    "id",
+    "side",
+    "align",
+    "sideOffset",
+    "alignOffset",
+    "collisionPadding",
+    "avoidCollisions",
+    "collisionBoundary",
+    "sameWidth",
+    "fitViewport",
+    "strategy",
+    "overlap",
+    "el"
+  ]);
+  let $open, $$unsubscribe_open;
+  let $menu, $$unsubscribe_menu;
+  let { transition = void 0 } = $$props;
+  let { transitionConfig = void 0 } = $$props;
+  let { inTransition = void 0 } = $$props;
+  let { inTransitionConfig = void 0 } = $$props;
+  let { outTransition = void 0 } = $$props;
+  let { outTransitionConfig = void 0 } = $$props;
+  let { asChild = false } = $$props;
+  let { id = void 0 } = $$props;
+  let { side = "bottom" } = $$props;
+  let { align = "center" } = $$props;
+  let { sideOffset = 0 } = $$props;
+  let { alignOffset = 0 } = $$props;
+  let { collisionPadding = 8 } = $$props;
+  let { avoidCollisions = true } = $$props;
+  let { collisionBoundary = void 0 } = $$props;
+  let { sameWidth = true } = $$props;
+  let { fitViewport = false } = $$props;
+  let { strategy = "absolute" } = $$props;
+  let { overlap = false } = $$props;
+  let { el = void 0 } = $$props;
+  const { elements: { menu }, states: { open }, ids, getAttrs: getAttrs2 } = getCtx();
+  $$unsubscribe_menu = subscribe(menu, (value) => $menu = value);
+  $$unsubscribe_open = subscribe(open, (value) => $open = value);
+  createDispatcher();
+  const attrs = getAttrs2("content");
+  if ($$props.transition === void 0 && $$bindings.transition && transition !== void 0)
+    $$bindings.transition(transition);
+  if ($$props.transitionConfig === void 0 && $$bindings.transitionConfig && transitionConfig !== void 0)
+    $$bindings.transitionConfig(transitionConfig);
+  if ($$props.inTransition === void 0 && $$bindings.inTransition && inTransition !== void 0)
+    $$bindings.inTransition(inTransition);
+  if ($$props.inTransitionConfig === void 0 && $$bindings.inTransitionConfig && inTransitionConfig !== void 0)
+    $$bindings.inTransitionConfig(inTransitionConfig);
+  if ($$props.outTransition === void 0 && $$bindings.outTransition && outTransition !== void 0)
+    $$bindings.outTransition(outTransition);
+  if ($$props.outTransitionConfig === void 0 && $$bindings.outTransitionConfig && outTransitionConfig !== void 0)
+    $$bindings.outTransitionConfig(outTransitionConfig);
+  if ($$props.asChild === void 0 && $$bindings.asChild && asChild !== void 0)
+    $$bindings.asChild(asChild);
+  if ($$props.id === void 0 && $$bindings.id && id !== void 0)
+    $$bindings.id(id);
+  if ($$props.side === void 0 && $$bindings.side && side !== void 0)
+    $$bindings.side(side);
+  if ($$props.align === void 0 && $$bindings.align && align !== void 0)
+    $$bindings.align(align);
+  if ($$props.sideOffset === void 0 && $$bindings.sideOffset && sideOffset !== void 0)
+    $$bindings.sideOffset(sideOffset);
+  if ($$props.alignOffset === void 0 && $$bindings.alignOffset && alignOffset !== void 0)
+    $$bindings.alignOffset(alignOffset);
+  if ($$props.collisionPadding === void 0 && $$bindings.collisionPadding && collisionPadding !== void 0)
+    $$bindings.collisionPadding(collisionPadding);
+  if ($$props.avoidCollisions === void 0 && $$bindings.avoidCollisions && avoidCollisions !== void 0)
+    $$bindings.avoidCollisions(avoidCollisions);
+  if ($$props.collisionBoundary === void 0 && $$bindings.collisionBoundary && collisionBoundary !== void 0)
+    $$bindings.collisionBoundary(collisionBoundary);
+  if ($$props.sameWidth === void 0 && $$bindings.sameWidth && sameWidth !== void 0)
+    $$bindings.sameWidth(sameWidth);
+  if ($$props.fitViewport === void 0 && $$bindings.fitViewport && fitViewport !== void 0)
+    $$bindings.fitViewport(fitViewport);
+  if ($$props.strategy === void 0 && $$bindings.strategy && strategy !== void 0)
+    $$bindings.strategy(strategy);
+  if ($$props.overlap === void 0 && $$bindings.overlap && overlap !== void 0)
+    $$bindings.overlap(overlap);
+  if ($$props.el === void 0 && $$bindings.el && el !== void 0)
+    $$bindings.el(el);
+  {
+    if (id) {
+      ids.menu.set(id);
+    }
+  }
+  builder2 = $menu;
+  {
+    Object.assign(builder2, attrs);
+  }
+  {
+    if ($open) {
+      updatePositioning({
+        side,
+        align,
+        sideOffset,
+        alignOffset,
+        collisionPadding,
+        avoidCollisions,
+        collisionBoundary,
+        sameWidth,
+        fitViewport,
+        strategy,
+        overlap
+      });
+    }
+  }
+  $$unsubscribe_open();
+  $$unsubscribe_menu();
+  return ` ${asChild && $open ? `${slots.default ? slots.default({ builder: builder2 }) : ``}` : `${transition && $open ? `<div${spread([escape_object(builder2), escape_object($$restProps)], {})}${add_attribute("this", el, 0)}>${slots.default ? slots.default({ builder: builder2 }) : ``}</div>` : `${inTransition && outTransition && $open ? `<div${spread([escape_object(builder2), escape_object($$restProps)], {})}${add_attribute("this", el, 0)}>${slots.default ? slots.default({ builder: builder2 }) : ``}</div>` : `${inTransition && $open ? `<div${spread([escape_object(builder2), escape_object($$restProps)], {})}${add_attribute("this", el, 0)}>${slots.default ? slots.default({ builder: builder2 }) : ``}</div>` : `${outTransition && $open ? `<div${spread([escape_object(builder2), escape_object($$restProps)], {})}${add_attribute("this", el, 0)}>${slots.default ? slots.default({ builder: builder2 }) : ``}</div>` : `${$open ? `<div${spread([escape_object(builder2), escape_object($$restProps)], {})}${add_attribute("this", el, 0)}>${slots.default ? slots.default({ builder: builder2 }) : ``}</div>` : ``}`}`}`}`}`}`;
+});
+const Select_group = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let builder2;
+  let $$restProps = compute_rest_props($$props, ["asChild", "el"]);
+  let $group, $$unsubscribe_group;
+  let { asChild = false } = $$props;
+  let { el = void 0 } = $$props;
+  const { group, id, getAttrs: getAttrs2 } = setGroupCtx();
+  $$unsubscribe_group = subscribe(group, (value) => $group = value);
+  const attrs = getAttrs2("group");
+  if ($$props.asChild === void 0 && $$bindings.asChild && asChild !== void 0)
+    $$bindings.asChild(asChild);
+  if ($$props.el === void 0 && $$bindings.el && el !== void 0)
+    $$bindings.el(el);
+  builder2 = $group(id);
+  {
+    Object.assign(builder2, attrs);
+  }
+  $$unsubscribe_group();
+  return `${asChild ? `${slots.default ? slots.default({ builder: builder2 }) : ``}` : `<div${spread([escape_object(builder2), escape_object($$restProps)], {})}${add_attribute("this", el, 0)}>${slots.default ? slots.default({ builder: builder2 }) : ``}</div>`}`;
+});
+const Select_input = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let attrs;
+  let builder2;
+  let $$restProps = compute_rest_props($$props, ["asChild", "el"]);
+  let $hiddenInput, $$unsubscribe_hiddenInput;
+  let $disabled, $$unsubscribe_disabled;
+  let { asChild = false } = $$props;
+  let { el = void 0 } = $$props;
+  const { elements: { hiddenInput }, options: { disabled }, getAttrs: getAttrs2 } = getCtx();
+  $$unsubscribe_hiddenInput = subscribe(hiddenInput, (value) => $hiddenInput = value);
+  $$unsubscribe_disabled = subscribe(disabled, (value) => $disabled = value);
+  if ($$props.asChild === void 0 && $$bindings.asChild && asChild !== void 0)
+    $$bindings.asChild(asChild);
+  if ($$props.el === void 0 && $$bindings.el && el !== void 0)
+    $$bindings.el(el);
+  attrs = {
+    ...getAttrs2("input"),
+    disabled: $disabled ? true : void 0
+  };
+  builder2 = $hiddenInput;
+  {
+    Object.assign(builder2, attrs);
+  }
+  $$unsubscribe_hiddenInput();
+  $$unsubscribe_disabled();
+  return `${asChild ? `${slots.default ? slots.default({ builder: builder2 }) : ``}` : `<input${spread([escape_object(builder2), escape_object($$restProps)], {})}${add_attribute("this", el, 0)}>`}`;
+});
+const Select_item$1 = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let builder2;
+  let isSelected;
+  let $$restProps = compute_rest_props($$props, ["value", "disabled", "label", "asChild", "el"]);
+  let $isSelectedStore, $$unsubscribe_isSelectedStore;
+  let $item, $$unsubscribe_item;
+  let { value } = $$props;
+  let { disabled = void 0 } = $$props;
+  let { label = void 0 } = $$props;
+  let { asChild = false } = $$props;
+  let { el = void 0 } = $$props;
+  const { elements: { option: item }, helpers: { isSelected: isSelectedStore }, getAttrs: getAttrs2 } = setItemCtx(value);
+  $$unsubscribe_item = subscribe(item, (value2) => $item = value2);
+  $$unsubscribe_isSelectedStore = subscribe(isSelectedStore, (value2) => $isSelectedStore = value2);
+  createDispatcher();
+  const attrs = getAttrs2("item");
+  if ($$props.value === void 0 && $$bindings.value && value !== void 0)
+    $$bindings.value(value);
+  if ($$props.disabled === void 0 && $$bindings.disabled && disabled !== void 0)
+    $$bindings.disabled(disabled);
+  if ($$props.label === void 0 && $$bindings.label && label !== void 0)
+    $$bindings.label(label);
+  if ($$props.asChild === void 0 && $$bindings.asChild && asChild !== void 0)
+    $$bindings.asChild(asChild);
+  if ($$props.el === void 0 && $$bindings.el && el !== void 0)
+    $$bindings.el(el);
+  builder2 = $item({ value, disabled, label });
+  {
+    Object.assign(builder2, attrs);
+  }
+  isSelected = $isSelectedStore(value);
+  $$unsubscribe_isSelectedStore();
+  $$unsubscribe_item();
+  return ` ${asChild ? `${slots.default ? slots.default({ builder: builder2, isSelected }) : ``}` : `<div${spread([escape_object(builder2), escape_object($$restProps)], {})}${add_attribute("this", el, 0)}>${slots.default ? slots.default({ builder: builder2, isSelected }) : ` ${escape(label ? label : value)} `}</div>`}`;
+});
+const Select_item_indicator = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let $$restProps = compute_rest_props($$props, ["asChild", "el"]);
+  let $isSelected, $$unsubscribe_isSelected;
+  let { asChild = false } = $$props;
+  let { el = void 0 } = $$props;
+  const { isSelected, value, getAttrs: getAttrs2 } = getItemIndicator();
+  $$unsubscribe_isSelected = subscribe(isSelected, (value2) => $isSelected = value2);
+  const attrs = getAttrs2("indicator");
+  if ($$props.asChild === void 0 && $$bindings.asChild && asChild !== void 0)
+    $$bindings.asChild(asChild);
+  if ($$props.el === void 0 && $$bindings.el && el !== void 0)
+    $$bindings.el(el);
+  $$unsubscribe_isSelected();
+  return `${asChild ? `${slots.default ? slots.default({ attrs, isSelected: $isSelected(value) }) : ``}` : `<div${spread([escape_object($$restProps), escape_object(attrs)], {})}${add_attribute("this", el, 0)}>${$isSelected(value) ? `${slots.default ? slots.default({ attrs, isSelected: $isSelected(value) }) : ``}` : ``}</div>`}`;
+});
+const Select_trigger$1 = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let builder2;
+  let $$restProps = compute_rest_props($$props, ["asChild", "id", "el"]);
+  let $trigger, $$unsubscribe_trigger;
+  let { asChild = false } = $$props;
+  let { id = void 0 } = $$props;
+  let { el = void 0 } = $$props;
+  const { elements: { trigger }, ids, getAttrs: getAttrs2 } = getCtx();
+  $$unsubscribe_trigger = subscribe(trigger, (value) => $trigger = value);
+  createDispatcher();
+  const attrs = getAttrs2("trigger");
+  if ($$props.asChild === void 0 && $$bindings.asChild && asChild !== void 0)
+    $$bindings.asChild(asChild);
+  if ($$props.id === void 0 && $$bindings.id && id !== void 0)
+    $$bindings.id(id);
+  if ($$props.el === void 0 && $$bindings.el && el !== void 0)
+    $$bindings.el(el);
+  {
+    if (id) {
+      ids.trigger.set(id);
+    }
+  }
+  builder2 = $trigger;
+  {
+    Object.assign(builder2, attrs);
+  }
+  $$unsubscribe_trigger();
+  return `${asChild ? `${slots.default ? slots.default({ builder: builder2 }) : ``}` : `<button${spread([escape_object(builder2), { type: "button" }, escape_object($$restProps)], {})}${add_attribute("this", el, 0)}>${slots.default ? slots.default({ builder: builder2 }) : ``}</button>`}`;
+});
+const Select_value = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let label;
+  let $$restProps = compute_rest_props($$props, ["placeholder", "asChild", "el"]);
+  let $selectedLabel, $$unsubscribe_selectedLabel;
+  let { placeholder = "" } = $$props;
+  let { asChild = false } = $$props;
+  let { el = void 0 } = $$props;
+  const { states: { selectedLabel }, getAttrs: getAttrs2 } = getCtx();
+  $$unsubscribe_selectedLabel = subscribe(selectedLabel, (value) => $selectedLabel = value);
+  const attrs = getAttrs2("value");
+  if ($$props.placeholder === void 0 && $$bindings.placeholder && placeholder !== void 0)
+    $$bindings.placeholder(placeholder);
+  if ($$props.asChild === void 0 && $$bindings.asChild && asChild !== void 0)
+    $$bindings.asChild(asChild);
+  if ($$props.el === void 0 && $$bindings.el && el !== void 0)
+    $$bindings.el(el);
+  label = $selectedLabel;
+  $$unsubscribe_selectedLabel();
+  return `${asChild ? `${slots.default ? slots.default({ label, attrs }) : ``}` : `<span${spread(
+    [
+      escape_object($$restProps),
+      escape_object(attrs),
+      {
+        "data-placeholder": escape_attribute_value(!label ? "" : void 0)
+      }
+    ],
+    {}
+  )}${add_attribute("this", el, 0)}>${escape(label ? label : placeholder)}</span>`}`;
 });
 function cubicOut(t) {
   const f = t - 1;
@@ -1413,9 +2801,9 @@ const flyAndScale = (node, params = { y: -8, x: 0, start: 0.95, duration: 150 })
     css: (t) => {
       const y = scaleConversion(t, [0, 1], [params.y ?? 5, 0]);
       const x = scaleConversion(t, [0, 1], [params.x ?? 0, 0]);
-      const scale = scaleConversion(t, [0, 1], [params.start ?? 0.95, 1]);
+      const scale2 = scaleConversion(t, [0, 1], [params.start ?? 0.95, 1]);
       return styleToString2({
-        transform: `${transform} translate3d(${x}px, ${y}px, 0) scale(${scale})`,
+        transform: `${transform} translate3d(${x}px, ${y}px, 0) scale(${scale2})`,
         opacity: t
       });
     },
@@ -1426,14 +2814,14 @@ const Button = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let $$restProps = compute_rest_props($$props, ["class", "variant", "size", "builders"]);
   let { class: className = void 0 } = $$props;
   let { variant = "default" } = $$props;
-  let { size = "default" } = $$props;
+  let { size: size2 = "default" } = $$props;
   let { builders = [] } = $$props;
   if ($$props.class === void 0 && $$bindings.class && className !== void 0)
     $$bindings.class(className);
   if ($$props.variant === void 0 && $$bindings.variant && variant !== void 0)
     $$bindings.variant(variant);
-  if ($$props.size === void 0 && $$bindings.size && size !== void 0)
-    $$bindings.size(size);
+  if ($$props.size === void 0 && $$bindings.size && size2 !== void 0)
+    $$bindings.size(size2);
   if ($$props.builders === void 0 && $$bindings.builders && builders !== void 0)
     $$bindings.builders(builders);
   return `${validate_component(Button$1, "ButtonPrimitive.Root").$$render(
@@ -1442,7 +2830,7 @@ const Button = create_ssr_component(($$result, $$props, $$bindings, slots) => {
       {},
       { builders },
       {
-        class: cn(buttonVariants({ variant, size, className }))
+        class: cn(buttonVariants({ variant, size: size2, className }))
       },
       { type: "button" },
       $$restProps
@@ -1499,7 +2887,7 @@ const Icon = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let $$restProps = compute_rest_props($$props, ["name", "color", "size", "strokeWidth", "absoluteStrokeWidth", "iconNode"]);
   let { name: name2 } = $$props;
   let { color = "currentColor" } = $$props;
-  let { size = 24 } = $$props;
+  let { size: size2 = 24 } = $$props;
   let { strokeWidth = 2 } = $$props;
   let { absoluteStrokeWidth = false } = $$props;
   let { iconNode } = $$props;
@@ -1507,8 +2895,8 @@ const Icon = create_ssr_component(($$result, $$props, $$bindings, slots) => {
     $$bindings.name(name2);
   if ($$props.color === void 0 && $$bindings.color && color !== void 0)
     $$bindings.color(color);
-  if ($$props.size === void 0 && $$bindings.size && size !== void 0)
-    $$bindings.size(size);
+  if ($$props.size === void 0 && $$bindings.size && size2 !== void 0)
+    $$bindings.size(size2);
   if ($$props.strokeWidth === void 0 && $$bindings.strokeWidth && strokeWidth !== void 0)
     $$bindings.strokeWidth(strokeWidth);
   if ($$props.absoluteStrokeWidth === void 0 && $$bindings.absoluteStrokeWidth && absoluteStrokeWidth !== void 0)
@@ -1519,11 +2907,11 @@ const Icon = create_ssr_component(($$result, $$props, $$bindings, slots) => {
     [
       escape_object(defaultAttributes),
       escape_object($$restProps),
-      { width: escape_attribute_value(size) },
-      { height: escape_attribute_value(size) },
+      { width: escape_attribute_value(size2) },
+      { height: escape_attribute_value(size2) },
       { stroke: escape_attribute_value(color) },
       {
-        "stroke-width": escape_attribute_value(absoluteStrokeWidth ? Number(strokeWidth) * 24 / Number(size) : strokeWidth)
+        "stroke-width": escape_attribute_value(absoluteStrokeWidth ? Number(strokeWidth) * 24 / Number(size2) : strokeWidth)
       },
       {
         class: escape_attribute_value(`lucide-icon lucide lucide-${name2} ${$$props.class ?? ""}`)
@@ -1536,6 +2924,30 @@ const Icon = create_ssr_component(($$result, $$props, $$bindings, slots) => {
     })(tag)}`;
   })}${slots.default ? slots.default({}) : ``}</svg>`;
 });
+const Check = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  const iconNode = [["path", { "d": "M20 6 9 17l-5-5" }]];
+  return `${validate_component(Icon, "Icon").$$render($$result, Object.assign({}, { name: "check" }, $$props, { iconNode }), {}, {
+    default: () => {
+      return `${slots.default ? slots.default({}) : ``}`;
+    }
+  })}`;
+});
+const Chevron_down = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  const iconNode = [["path", { "d": "m6 9 6 6 6-6" }]];
+  return `${validate_component(Icon, "Icon").$$render($$result, Object.assign({}, { name: "chevron-down" }, $$props, { iconNode }), {}, {
+    default: () => {
+      return `${slots.default ? slots.default({}) : ``}`;
+    }
+  })}`;
+});
+const Loader_2 = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  const iconNode = [["path", { "d": "M21 12a9 9 0 1 1-6.219-8.56" }]];
+  return `${validate_component(Icon, "Icon").$$render($$result, Object.assign({}, { name: "loader-2" }, $$props, { iconNode }), {}, {
+    default: () => {
+      return `${slots.default ? slots.default({}) : ``}`;
+    }
+  })}`;
+});
 const X = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   const iconNode = [["path", { "d": "M18 6 6 18" }], ["path", { "d": "m6 6 12 12" }]];
   return `${validate_component(Icon, "Icon").$$render($$result, Object.assign({}, { name: "x" }, $$props, { iconNode }), {}, {
@@ -1543,6 +2955,44 @@ const X = create_ssr_component(($$result, $$props, $$bindings, slots) => {
       return `${slots.default ? slots.default({}) : ``}`;
     }
   })}`;
+});
+const Select_item = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let $$restProps = compute_rest_props($$props, ["class", "value", "label", "disabled"]);
+  let { class: className = void 0 } = $$props;
+  let { value } = $$props;
+  let { label = void 0 } = $$props;
+  let { disabled = void 0 } = $$props;
+  if ($$props.class === void 0 && $$bindings.class && className !== void 0)
+    $$bindings.class(className);
+  if ($$props.value === void 0 && $$bindings.value && value !== void 0)
+    $$bindings.value(value);
+  if ($$props.label === void 0 && $$bindings.label && label !== void 0)
+    $$bindings.label(label);
+  if ($$props.disabled === void 0 && $$bindings.disabled && disabled !== void 0)
+    $$bindings.disabled(disabled);
+  return `${validate_component(Select_item$1, "SelectPrimitive.Item").$$render(
+    $$result,
+    Object.assign(
+      {},
+      { value },
+      { disabled },
+      { label },
+      {
+        class: cn("relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className)
+      },
+      $$restProps
+    ),
+    {},
+    {
+      default: () => {
+        return `<span class="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">${validate_component(Select_item_indicator, "SelectPrimitive.ItemIndicator").$$render($$result, {}, {}, {
+          default: () => {
+            return `${validate_component(Check, "Check").$$render($$result, { class: "h-4 w-4" }, {}, {})}`;
+          }
+        })}</span> ${slots.default ? slots.default({}) : ``}`;
+      }
+    }
+  )}`;
 });
 function fade(node, { delay = 0, duration = 400, easing = identity } = {}) {
   const o = +getComputedStyle(node).opacity;
@@ -1553,6 +3003,97 @@ function fade(node, { delay = 0, duration = 400, easing = identity } = {}) {
     css: (t) => `opacity: ${t * o}`
   };
 }
+function scale(node, { delay = 0, duration = 400, easing = cubicOut, start = 0, opacity = 0 } = {}) {
+  const style = getComputedStyle(node);
+  const target_opacity = +style.opacity;
+  const transform = style.transform === "none" ? "" : style.transform;
+  const sd = 1 - start;
+  const od = target_opacity * (1 - opacity);
+  return {
+    delay,
+    duration,
+    easing,
+    css: (_t, u) => `
+			transform: ${transform} scale(${1 - sd * u});
+			opacity: ${target_opacity - od * u}
+		`
+  };
+}
+const Select_content = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let $$restProps = compute_rest_props($$props, [
+    "sideOffset",
+    "inTransition",
+    "inTransitionConfig",
+    "outTransition",
+    "outTransitionConfig",
+    "class"
+  ]);
+  let { sideOffset = 4 } = $$props;
+  let { inTransition = flyAndScale } = $$props;
+  let { inTransitionConfig = void 0 } = $$props;
+  let { outTransition = scale } = $$props;
+  let { outTransitionConfig = { start: 0.95, opacity: 0, duration: 50 } } = $$props;
+  let { class: className = void 0 } = $$props;
+  if ($$props.sideOffset === void 0 && $$bindings.sideOffset && sideOffset !== void 0)
+    $$bindings.sideOffset(sideOffset);
+  if ($$props.inTransition === void 0 && $$bindings.inTransition && inTransition !== void 0)
+    $$bindings.inTransition(inTransition);
+  if ($$props.inTransitionConfig === void 0 && $$bindings.inTransitionConfig && inTransitionConfig !== void 0)
+    $$bindings.inTransitionConfig(inTransitionConfig);
+  if ($$props.outTransition === void 0 && $$bindings.outTransition && outTransition !== void 0)
+    $$bindings.outTransition(outTransition);
+  if ($$props.outTransitionConfig === void 0 && $$bindings.outTransitionConfig && outTransitionConfig !== void 0)
+    $$bindings.outTransitionConfig(outTransitionConfig);
+  if ($$props.class === void 0 && $$bindings.class && className !== void 0)
+    $$bindings.class(className);
+  return `${validate_component(Select_content$1, "SelectPrimitive.Content").$$render(
+    $$result,
+    Object.assign(
+      {},
+      { inTransition },
+      { inTransitionConfig },
+      { outTransition },
+      { outTransitionConfig },
+      { sideOffset },
+      {
+        class: cn("relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md outline-none", className)
+      },
+      $$restProps
+    ),
+    {},
+    {
+      default: () => {
+        return `<div class="w-full p-1">${slots.default ? slots.default({}) : ``}</div>`;
+      }
+    }
+  )}`;
+});
+const Select_trigger = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let $$restProps = compute_rest_props($$props, ["class"]);
+  let { class: className = void 0 } = $$props;
+  if ($$props.class === void 0 && $$bindings.class && className !== void 0)
+    $$bindings.class(className);
+  return `${validate_component(Select_trigger$1, "SelectPrimitive.Trigger").$$render(
+    $$result,
+    Object.assign(
+      {},
+      {
+        class: cn("flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1", className)
+      },
+      $$restProps
+    ),
+    {},
+    {
+      default: ({ builder: builder2 }) => {
+        return `${slots.default ? slots.default({ builder: builder2 }) : ``} <div>${validate_component(Chevron_down, "ChevronDown").$$render($$result, { class: "h-4 w-4 opacity-50" }, {}, {})}</div>`;
+      }
+    }
+  )}`;
+});
+const Root$1 = Select;
+const Group = Select_group;
+const Input = Select_input;
+const Value = Select_value;
 const Dialog_title = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let $$restProps = compute_rest_props($$props, ["class"]);
   let { class: className = void 0 } = $$props;
@@ -1798,13 +3339,41 @@ const Github = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 const Navbar = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   return `<div class="flex justify-between items-center my-2"><h1 class="text-foreground font-bold font-title text-3xl" data-svelte-h="svelte-tu3l2a">Backyard Monsters <span class="text-header">Refitted</span></h1> <div class="flex items-center space-x-4"><a href="https://discord.gg/ajZAccxNMA" target="_blank" rel="noopener noreferrer" class="text-accent hover:underline mt-1">${validate_component(Discord, "Discord").$$render($$result, {}, {}, {})}</a> <a href="https://github.com/bym-refitted" target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">${validate_component(Github, "Github").$$render($$result, {}, {}, {})}</a></div></div>`;
 });
-const Loader = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-  return `<svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#fff"></path><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="#00CDB8"></path></svg>`;
-});
-let errorCode = "";
 const Page = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let builds = [];
+  let build;
+  let runtime;
+  let runtimes = [];
+  let current_game_version = "";
+  let disabled = true;
   let showError = false;
+  let errorCode = "";
   let debugLogs = [];
+  listen("infoLog", (event) => {
+    debugLogs = [...debugLogs, event.payload.message];
+  });
+  listen("initialLoad", (event) => {
+    const manifest = event.payload.manifest;
+    const platform = event.payload.platform;
+    builds = Object.keys(manifest.builds).map((buildName) => ({
+      value: buildName,
+      label: buildName.charAt(0).toUpperCase() + buildName.slice(1)
+    }));
+    build = builds[0];
+    runtimes = [
+      {
+        value: manifest.flashRuntimes[platform],
+        label: `Flash Player (${platform.charAt(0).toUpperCase() + platform.slice(1)})`
+      }
+    ];
+    runtime = runtimes[0];
+    current_game_version = manifest.currentGameVersion;
+    debugLogs = [
+      ...debugLogs,
+      `Latest SWF version: ${current_game_version}`,
+      `Latest Launcher version: ${manifest.currentLauncherVersion}`
+    ];
+  });
   let $$settled;
   let $$rendered;
   let previous_head = $$result.head;
@@ -1813,7 +3382,92 @@ const Page = create_ssr_component(($$result, $$props, $$bindings, slots) => {
     $$result.head = previous_head;
     $$rendered = `<main class="h-screen bg-background text-foreground flex flex-col gap-4 p-4 antialiased select-none font-sans">${validate_component(Navbar, "Navbar").$$render($$result, {}, {}, {})} <div class="grow rounded bg-secondary font-mono p-3">${each(debugLogs, (log) => {
       return `<p><small>${escape(log)}</small></p>`;
-    })}</div> ${`<div class="w-full flex justify-center items-center" role="status">${validate_component(Loader, "Loader").$$render($$result, {}, {}, {})} <span class="sr-only" data-svelte-h="svelte-1wtojot">Loading...</span></div>`} ${validate_component(AlertDialog, "AlertDialog").$$render(
+    })}</div>  <div class="mt-auto w-full flex justify-between"><label class="font-display" data-svelte-h="svelte-1liwykz">SWF Build</label> ${validate_component(Root$1, "Select.Root").$$render(
+      $$result,
+      { portal: null, selected: build },
+      {
+        selected: ($$value) => {
+          build = $$value;
+          $$settled = false;
+        }
+      },
+      {
+        default: () => {
+          return `${validate_component(Select_trigger, "Select.Trigger").$$render($$result, { class: "w-[180px] rounded" }, {}, {
+            default: () => {
+              return `${validate_component(Value, "Select.Value").$$render($$result, { class: "text-left" }, {}, {})}`;
+            }
+          })} ${validate_component(Select_content, "Select.Content").$$render($$result, {}, {}, {
+            default: () => {
+              return `${validate_component(Group, "Select.Group").$$render($$result, {}, {}, {
+                default: () => {
+                  return `${each(builds, (build2) => {
+                    return `${validate_component(Select_item, "Select.Item").$$render($$result, { value: build2.value, label: build2.label }, {}, {
+                      default: () => {
+                        return `${escape(build2.label)}`;
+                      }
+                    })}`;
+                  })}`;
+                }
+              })}`;
+            }
+          })} ${validate_component(Input, "Select.Input").$$render($$result, { name: "build" }, {}, {})}`;
+        }
+      }
+    )}</div> <div class="mt-auto w-full flex justify-between"><label class="font-display" data-svelte-h="svelte-v3lqu5">Flash Runtime</label> ${validate_component(Root$1, "Select.Root").$$render(
+      $$result,
+      { portal: null, selected: runtime },
+      {
+        selected: ($$value) => {
+          runtime = $$value;
+          $$settled = false;
+        }
+      },
+      {
+        default: () => {
+          return `${validate_component(Select_trigger, "Select.Trigger").$$render($$result, { class: "w-[180px] rounded" }, {}, {
+            default: () => {
+              return `${validate_component(Value, "Select.Value").$$render($$result, { class: "text-left" }, {}, {})}`;
+            }
+          })} ${validate_component(Select_content, "Select.Content").$$render($$result, {}, {}, {
+            default: () => {
+              return `${validate_component(Group, "Select.Group").$$render($$result, {}, {}, {
+                default: () => {
+                  return `${each(runtimes, (runtime2) => {
+                    return `${validate_component(Select_item, "Select.Item").$$render(
+                      $$result,
+                      {
+                        value: runtime2.value,
+                        label: runtime2.label
+                      },
+                      {},
+                      {
+                        default: () => {
+                          return `${escape(runtime2.label)}`;
+                        }
+                      }
+                    )}`;
+                  })}`;
+                }
+              })}`;
+            }
+          })} ${validate_component(Input, "Select.Input").$$render($$result, { name: "runtime" }, {}, {})}`;
+        }
+      }
+    )}</div> <div class="mt-auto w-full flex justify-between">${validate_component(Button, "Button").$$render(
+      $$result,
+      {
+        variant: "default",
+        class: "p-4 rounded w-32",
+        disabled
+      },
+      {},
+      {
+        default: () => {
+          return `${`${validate_component(Loader_2, "Loader2").$$render($$result, {}, {}, {})}`}`;
+        }
+      }
+    )}</div>  ${validate_component(AlertDialog, "AlertDialog").$$render(
       $$result,
       { error: errorCode, open: showError },
       {
