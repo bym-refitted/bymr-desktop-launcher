@@ -134,17 +134,21 @@ fn launch_game(build_name: &str, version: &str, runtime: &str) -> Result<(), Str
     let binding = Path::new(".")
         .join(BUILD_FOLDER)
         .join(format!("bymr-{}-{}.swf", build_name, version));
-    let swf_path = binding.to_str().unwrap();
+
+    let mut swf_path = String::from(binding.to_str().unwrap());
 
     if !file_exists(&swf_path) {
-        eprint!("Cannot find file: {:?}", swf_path);
+        eprintln!("Cannot find file: {:?}", swf_path);
         return Err("cannot find swf build".to_string());
     }
 
     // Linux
-    // Sets the full path in Linux, due to Linux filesystem permission
+    // Set the absolute path to SWF
+    // If error, set permissions to be executable for Flash runtime
     if env::consts::OS == "linux" {
-        if let Ok(_) = std::fs::canonicalize(&swf_path) {
+        if let Ok(absolute_path) = std::fs::canonicalize(&swf_path) {
+            swf_path = absolute_path.to_str().unwrap().to_owned();
+
             if let Err(perm_err) = Command::new("chmod")
                 .arg("+x")
                 .arg(&flash_runtime_path)
@@ -156,7 +160,7 @@ fn launch_game(build_name: &str, version: &str, runtime: &str) -> Result<(), Str
     }
     println!("Opening: {:?}, {:?}", flash_runtime_path, swf_path);
 
-    // Open the game in Flash
+    // Open the game in Flash Player
     Command::new(&flash_runtime_path)
         .arg(&swf_path)
         .spawn()
