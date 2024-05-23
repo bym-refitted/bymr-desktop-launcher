@@ -9,8 +9,7 @@
   import { exit } from "@tauri-apps/api/process";
   import { listen } from "@tauri-apps/api/event";
   import { invoke } from "@tauri-apps/api/tauri";
-  import { onMount } from "svelte";
-
+  
   interface Build {
     value: string;
     label: string;
@@ -48,6 +47,8 @@
   let errorCode = "";
   let debugLogs: string[] = [];
 
+  console.log("App started.");
+
   listen<InfoLogEvent>("infoLog", (event) => {
     debugLogs = [...debugLogs, event.payload.message];
   });
@@ -82,23 +83,17 @@
       `Latest SWF version: ${current_game_version}`,
       `Latest Launcher version: ${manifest.currentLauncherVersion}`,
     ];
-
-    const initializeApp = async () => {
-      try {
-        console.log("Initializing");
-        await invoke("initialize_app");
-        debugLogs = [...debugLogs, "Launcher initialized"];
-        disabled = false;
-      } catch (error) {
-        console.log("Did not initialize");
-        debugLogs = [...debugLogs, `Error initializing launcher: ${error}`];
-      }
-    };
-
-    initializeApp();
-
-    onMount(() => console.log("Frontend application started"));
   });
+
+  (async () => {
+    try {
+      await invoke("initialize_app");
+      debugLogs = [...debugLogs, "Launcher initialized"];
+      disabled = false;
+    } catch (error) {
+      debugLogs = [...debugLogs, `Error initializing launcher: ${error}`];
+    }
+  })();
 
   const launch = async () => {
     disabled = true;
@@ -135,7 +130,7 @@
       </div>
     {:else} -->
   <div class="mt-auto w-full flex justify-between">
-    <label class="font-display">SWF Build</label>
+    <label for="swf-build" class="font-display">SWF Build</label>
     <Select.Root bind:selected={build} portal={null}>
       <Select.Trigger class="w-[180px] rounded">
         <Select.Value class="text-left" />
@@ -153,7 +148,7 @@
     </Select.Root>
   </div>
   <div class="mt-auto w-full flex justify-between">
-    <label class="font-display">Flash Runtime</label>
+    <label for="flash-runtime" class="font-display">Flash Runtime</label>
     <Select.Root bind:selected={runtime} portal={null}>
       <Select.Trigger class="w-[180px] rounded">
         <Select.Value class="text-left" />
