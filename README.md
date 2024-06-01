@@ -12,41 +12,31 @@
 
 A desktop launcher for Windows, Mac & Linux which utilises the efficiency of Rust and Tauri for managing Flash runtimes and game versions, for the Backyard Monsters Refitted client. This launcher packages the required SWF binaries and loads them into Flash Player.
 
-# create-svelte
+<br />
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+## Prerequisites
+You will need the following components corrrectly installed and configured:
+> [Rust](https://www.rust-lang.org/tools/install)
 
-## Creating a project
+> [Cargo](https://crates.io/)
 
-If you're seeing this, you've probably already done this step. Congrats!
+> [MSVC Toolchain](https://visualstudio.microsoft.com/vs/features/cplusplus/)
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+> [Node.js & NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+We need to ensure that we are compiling our application with the MSVC toolchain, as the GNU toolchain alternative does not seem to embed the WebView2 runtime into the binary and instead uses a DLL script called `WebView2Loader.dll` which would need to be packaged with your executable. You can find out more about this [here](https://crates.io/crates/tauri-webview2#runtime). It is is recommended to locate your `.cargo` directory and modify the `config.toml` file to point to the correct linker and target. Example:
+```toml
+[target.x86_64-pc-windows-msvc]
+linker = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\link.exe"
+ar = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\lib.exe"
+``` 
 
-## Developing
+<br />
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Live Development
+To run this application in development mode, use `npm run tauri dev` or if you prefer the cargo command, use `cargo tauri dev`. This will run a Vite development server that will provide very fast hot reload of your frontend changes.  There is also a dev server that runs on http://localhost:5173 if you want to develop in a browser.
 
-```bash
-npm run dev
+<br />
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+## Production Build
+To build a redistributable, production mode package, use `npm run tauri build --release` or `cargo tauri build --release`.
