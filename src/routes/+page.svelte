@@ -5,6 +5,7 @@
   import AlertDialog from "$lib/components/AlertDialog.svelte";
   import Navbar from "$lib/components/Navbar.svelte";
   import Loader from "../../src/assets/svgs/Loader.svelte";
+  import RustLogo from "../../src/assets/images/rust.png";
 
   import { exit } from "@tauri-apps/api/process";
   import { listen } from "@tauri-apps/api/event";
@@ -180,3 +181,13 @@
   {/if}
   <AlertDialog bind:open={showError} error={errorCode}></AlertDialog>
 </main>
+
+<!-- Temporary to know what launcher users have -->
+<div class="relative">
+  <img
+    src={RustLogo}
+    alt="rust-logo"
+    width="25px"
+    class="absolute bottom-4 right-4 filter invert"
+  />
+</div>
