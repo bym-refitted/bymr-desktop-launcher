@@ -24,7 +24,9 @@ You will need the following components corrrectly installed and configured:
 
 > [Node.js & NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 
-We need to ensure that we are compiling our application with the MSVC toolchain, as the GNU toolchain alternative does not seem to embed the WebView2 runtime into the binary and instead uses a DLL script called `WebView2Loader.dll` which would need to be packaged with your executable. You can find out more about this [here](https://crates.io/crates/tauri-webview2#runtime). It is is recommended to locate your `.cargo` directory and modify the `config.toml` file to point to the correct linker and target. Example:
+We need to ensure that we are compiling our application with the MSVC toolchain, as the GNU toolchain alternative does not seem to embed the WebView2 runtime into the binary and instead uses a DLL script called `WebView2Loader.dll` which would need to be packaged with your executable. You can find out more about this [here](https://crates.io/crates/tauri-webview2#runtime).
+
+It is is recommended to locate your `.cargo` directory and modify the `config.toml` file to point to the correct linker and target. Example:
 ```toml
 [target.x86_64-pc-windows-msvc]
 linker = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\link.exe"
