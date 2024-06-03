@@ -11,3 +11,4 @@ flashplayer.*
 # Others
 .idea
 .svelte-kit
+.tauri
