@@ -42,11 +42,10 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
     let server_manifest = match get_version_info(&app).await {
         Ok(manifest) => manifest,
         Err(err) => {
-            let err_msg =
-                "Server manifest could not be retrieved. Please check your internet connection.";
-            emit_event(&app, err_msg.to_string());
+            let err_msg = format!("Server manifest could not be retrieved. Please check your internet connection. {:?}", err);
+            emit_event(&app, err_msg.clone());
 
-            return Err(err.to_string());
+            return Err(err_msg);
         }
     };
 

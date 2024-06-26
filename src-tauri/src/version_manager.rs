@@ -4,7 +4,7 @@ use crate::{
 };
 use reqwest;
 use serde::{Deserialize, Serialize};
-use std::path::Path;
+use std::{error::Error, path::Path};
 use tauri::AppHandle;
 
 pub const VERSION_INFO_PATH_BASE: &str = "api.bymrefitted.com/launcher.json";
@@ -51,6 +51,7 @@ pub struct FlashRuntimes {
 pub async fn get_version_info(app: &AppHandle) -> Result<VersionManifest, String> {
     let mut https_worked = false;
 
+    
     // First we try https
     let resp = match reqwest::get(&format!("https://{}", VERSION_INFO_PATH_BASE)).await {
         Ok(resp) => {
@@ -70,13 +71,18 @@ pub async fn get_version_info(app: &AppHandle) -> Result<VersionManifest, String
                     let failed_http_msg = format!("Could not access over http, please check the server status on our discord: {}", err);
                     emit_event(app, failed_http_msg);
 
-                    return Err(err.to_string());
+                    return Err(format!("Error code: {:?}, cause: {:?}", err.status(), err.source()));
                 }
             }
         }
     };
+    
+    if !resp.status().is_success() {
+        return Err(format!("Error code: {:?}", resp.status()));
+    }
 
     let body = resp.text().await.map_err(|err| err.to_string())?;
+    // if body.
     let mut data: VersionManifest = serde_json::from_str(&body).map_err(|err| {
         eprintln!("Error parsing JSON: {}", err);
         err.to_string()

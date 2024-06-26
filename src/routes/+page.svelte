@@ -11,6 +11,10 @@
   import { listen } from "@tauri-apps/api/event";
   import { invoke } from "@tauri-apps/api/tauri";
 
+  import {
+    onUpdaterEvent,
+  } from "@tauri-apps/api/updater";
+
   interface Build {
     value: string;
     label: string;
@@ -47,6 +51,14 @@
   let showError = false;
   let errorCode = "";
   let debugLogs: string[] = [];
+
+  onUpdaterEvent(({ error, status }) => {
+    // This will log all updater events, including status updates and errors.
+    debugLogs = [
+      ...debugLogs,
+      `Launcher updater event: ${status ? status : ""} ${error ? error : ""}`,
+    ];
+  });
 
   listen<InfoLogEvent>("infoLog", (event) => {
     debugLogs = [...debugLogs, event.payload.message];
@@ -87,7 +99,7 @@
   (async () => {
     try {
       await invoke("initialize_app");
-      debugLogs = [...debugLogs, "Launcher initialized"];
+      debugLogs = [...debugLogs, "Launcher initialized (▀̿Ĺ̯▀̿ ̿) 🚀"];
       disabled = false;
     } catch (error) {
       debugLogs = [...debugLogs, `Error initializing launcher: ${error}`];
@@ -116,17 +128,17 @@
 <main
   class="h-screen bg-background text-foreground flex flex-col gap-4 p-4 antialiased select-none font-sans"
 >
+  <Navbar />
+  <div class="grow rounded bg-secondary font-mono p-3">
+    {#each debugLogs as log}
+      <p><small>{log}</small></p>
+    {/each}
+  </div>
   {#if !current_game_version}
     <div class="w-full h-full flex justify-center items-center" role="status">
       <Loader />
     </div>
   {:else}
-    <Navbar />
-    <div class="grow rounded bg-secondary font-mono p-3">
-      {#each debugLogs as log}
-        <p><small>{log}</small></p>
-      {/each}
-    </div>
     <div class="mt-auto w-full flex justify-between">
       <label for="swf-build" class="font-display">SWF Build</label>
       <Select.Root bind:selected={build} portal={null}>
