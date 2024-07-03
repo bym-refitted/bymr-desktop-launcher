@@ -1,14 +1,12 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod file_manager;
+mod networking;
 mod version_manager;
 
-use crate::file_manager::{file_exists, set_local_versions};
 use crate::version_manager::*;
 use serde::{Deserialize, Serialize};
 use std::env;
-use std::path::{Path, PathBuf};
 use std::process::Command;
 use tauri::{command, AppHandle, Manager};
 
@@ -33,135 +31,59 @@ fn main() {
 
 #[command]
 async fn initialize_app(app: AppHandle) -> Result<(), String> {
-    println!("Tauri initialized");
-
-    // Get OS info
-    let message = format!("Platform: {} {}", env::consts::OS, env::consts::ARCH);
+    let message = format!("Platform: {} {}", env::consts::OS, env::consts::ARCH); // Get OS info
     emit_event(&app, message);
 
-    let server_manifest = match get_version_info(&app).await {
-        Ok(manifest) => manifest,
+    let manifest_result: Result<VersionManifest, _> = get_server_manifest().await;
+    let use_https = match manifest_result {
+        Ok(manifest) => {
+            emit_event(
+                &app,
+                format!(
+                    "Connected successfully to the server. \n Current SWF version: {}\n Launcher connected via http{}",
+                    manifest.current_game_version, if manifest.https_worked {"s"} else {""}
+                ),
+            );
+            manifest.https_worked
+        }
         Err(err) => {
-            let err_msg = format!("Server manifest could not be retrieved. Please check your internet connection. {:?}", err);
-            emit_event(&app, err_msg.clone());
-
-            return Err(err_msg);
+            emit_error(&app, err.to_string());
+            false
         }
     };
 
-    let _ = app.emit_all(
-        "initialLoad",
-        InitialInfo {
-            platform: env::consts::OS.to_string(),
-            architecture: env::consts::ARCH.to_string(),
-            manifest: server_manifest.clone(),
-        },
-    );
-
-    let (local_manifest_exists, local_manifest, err) = local_files_status();
-
-    let no_local_manifest = !local_manifest_exists || !err.is_empty();
-
-    let should_refresh_builds = no_local_manifest
-        || server_manifest.current_game_version != local_manifest.current_game_version
-        || !do_all_swfs_exist(
-            &server_manifest.builds,
-            &server_manifest.current_game_version,
-        );
-
-    // Download SWFs
-    if should_refresh_builds {
-        emit_event(&app, "Downloading latest SWFs".to_string());
-
-        if let Err(err) = download_swfs(
-            &server_manifest.builds,
-            &server_manifest.current_game_version,
-            server_manifest.https_worked,
-        )
-        .await
-        {
-            emit_event(&app, format!("Could not download latest swfs {}", err));
-        }
-    }
-
-    let flash_runtime_file_name =
-        match get_platform_flash_runtime(env::consts::OS, &server_manifest) {
-            Ok(file_name) => file_name,
-            Err(err) => {
-                let err_msg = format!("Could not download latest flash runtime {}", err);
-                emit_event(&app, err_msg);
-
-                return Err(err);
-            }
-        };
-
-    let binding = PathBuf::from(RUNTIME_FOLDER).join(&flash_runtime_file_name);
-    let flash_runtime_path = binding.to_str().unwrap();
-
-    if no_local_manifest || !file_exists(&flash_runtime_path) {
+    let file_info = get_platform_flash_runtime(&env::consts::OS)?;
+    if !file_info.0.exists() {
         let log = "Downloading flash player for your platform...";
         emit_event(&app, log.to_string());
-        download_runtimes(&flash_runtime_file_name, server_manifest.https_worked).await?;
-    }
-
-    // Create an instance of LocalVersionManifest from serverManifest
-    let local_manifest = LocalVersionManifest {
-        current_game_version: server_manifest.current_game_version,
-        current_launcher_version: server_manifest.current_launcher_version,
-        builds: server_manifest.builds,
-        flash_runtimes: server_manifest.flash_runtimes,
-    };
-
-    match set_local_versions(local_manifest).await {
-        Ok(()) => println!("Local version manifest successfully written to file."),
-        Err(err) => println!("Version manifest error: {}", err),
+        download_runtime(file_info, use_https).await?;
     }
 
     Ok(())
 }
 
 #[command]
-fn launch_game(build_name: &str, version: &str, runtime: &str) -> Result<(), String> {
-    let binding = PathBuf::from(".").join(RUNTIME_FOLDER).join(runtime);
-    let flash_runtime_path = binding.to_str().unwrap();
+fn launch_game(build_name: &str) -> Result<(), String> {
+    let (flash_runtime_path, _) = get_platform_flash_runtime(&env::consts::OS)?;
 
-    if !file_exists(&flash_runtime_path) {
-        eprintln!("cannot find file: {}", flash_runtime_path);
-        return Err(format!("cannot find flashplayer: {}", flash_runtime_path));
+    if !flash_runtime_path.exists() {
+        eprintln!("cannot find file: {}", flash_runtime_path.display());
+        return Err(format!(
+            "cannot find flashplayer: {}",
+            flash_runtime_path.display()
+        ));
     }
-
-    let binding = Path::new(".")
-        .join(BUILD_FOLDER)
-        .join(format!("bymr-{}-{}.swf", build_name, version));
-
-    let mut swf_path = String::from(binding.to_str().unwrap());
-
-    if !file_exists(&swf_path) {
-        eprintln!("Cannot find file: {:?}", swf_path);
-        return Err("cannot find swf build".to_string());
-    }
-
-    // Linux
-    // Set the absolute path to SWF
-    // If error, set permissions to be executable for Flash runtime
-    if env::consts::OS == "linux" {
-        if let Ok(absolute_path) = std::fs::canonicalize(&swf_path) {
-            swf_path = absolute_path.to_str().unwrap().to_owned();
-
-            if let Err(perm_err) = Command::new("chmod")
-                .arg("+x")
-                .arg(&flash_runtime_path)
-                .output()
-            {
-                println!("Linux fix: could not run command: {:?}", perm_err);
-            }
-        }
-    }
-    println!("Opening: {:?}, {:?}", flash_runtime_path, swf_path);
+    let swf_url = format!(
+        "http{}://{}bymr-{}.swf",
+        if build_name == "stable" { "s" } else { "" },
+        DOWNLOAD_BASE_PATH,
+        build_name
+    );
+    println!("Opening: {:?}, {:?}", flash_runtime_path, swf_url);
 
     // Open the game in Flash Player
     Command::new(&flash_runtime_path)
-        .arg(&swf_path)
+        .arg(&swf_url)
         .spawn()
         .map_err(|err| {
             format!(
@@ -176,6 +98,16 @@ fn launch_game(build_name: &str, version: &str, runtime: &str) -> Result<(), Str
 pub fn emit_event(app: &AppHandle, message: String) {
     app.emit_all(
         "infoLog",
+        Payload {
+            message: message.to_string(),
+        },
+    )
+    .unwrap();
+}
+
+pub fn emit_error(app: &AppHandle, message: String) {
+    app.emit_all(
+        "errorLog",
         Payload {
             message: message.to_string(),
         },
