@@ -1,31 +1,31 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
-  import * as Select from '$lib/components/ui/select';
-  import { Loader2 } from 'lucide-svelte';
-  import AlertDialog from '$lib/components/AlertDialog.svelte';
-  import Loader from '../../src/assets/svgs/Loader.svelte';
+  import { Button } from "$lib/components/ui/button";
+  import * as Select from "$lib/components/ui/select";
+  import { Loader2 } from "lucide-svelte";
+  import AlertDialog from "$lib/components/AlertDialog.svelte";
+  import Loader from "../../src/assets/svgs/Loader.svelte";
 
-  import { exit } from '@tauri-apps/api/process';
-  import { listen } from '@tauri-apps/api/event';
-  import { invoke } from '@tauri-apps/api/tauri';
-  import { getVersion } from '@tauri-apps/api/app';
-  import { onUpdaterEvent } from '@tauri-apps/api/updater';
-  import DebugLogs from '$lib/components/DebugLogs.svelte';
+  import { exit } from "@tauri-apps/api/process";
+  import { listen } from "@tauri-apps/api/event";
+  import { invoke } from "@tauri-apps/api/tauri";
+  import { getVersion } from "@tauri-apps/api/app";
+  import { onUpdaterEvent } from "@tauri-apps/api/updater";
+  import DebugLogs from "$lib/components/DebugLogs.svelte";
 
   interface Build {
     value: string;
     label: string;
   }
 
-  interface InfoLogEvent {
+  interface LogEvent {
     message: string;
   }
 
   // Dynamically set during initialLoad event
   const builds: Build[] = [
-    { label: 'Stable', value: 'stable' },
-    { label: 'HTTP', value: 'http' },
-    { label: 'Local', value: 'local' },
+    { label: "Stable", value: "stable" },
+    { label: "HTTP", value: "http" },
+    { label: "Local", value: "local" },
   ];
   let build: Build = builds[0];
 
@@ -33,7 +33,7 @@
   let disabled = true;
   let loading = true;
   let showError = false;
-  let errorCode = '';
+  let errorCode = "";
   type LogEntry = string | { class: string; msg: string };
   let debugLogs: LogEntry[] = [];
 
@@ -42,32 +42,35 @@
       // This will log all updater events, including status updates and errors.
       debugLogs = [
         ...debugLogs,
-        `Launcher updater event: ${status ? status : ''} ${error ? error : ''}`,
+        `Launcher updater event: ${status ? status : ""} ${error ? error : ""}`,
       ];
     }
   });
 
-  listen<InfoLogEvent>('infoLog', (event) => {
+  listen<LogEvent>("infoLog", (event) => {
     debugLogs = [...debugLogs, event.payload.message];
   });
 
-  listen<InfoLogEvent>('errorLog', (event) => {
-    debugLogs = [...debugLogs, { msg: event.payload.message, class: 'text-red-500' }];
+  listen<LogEvent>("errorLog", (event) => {
+    debugLogs = [
+      ...debugLogs,
+      { msg: event.payload.message, class: "text-red-500" },
+    ];
   });
 
   (async () => {
     try {
-      await invoke('initialize_app');
+      await invoke("initialize_app");
       debugLogs = [
         ...debugLogs,
-        { msg: 'Launcher initialized! (▀̿Ĺ̯▀̿ ̿) 🚀', class: 'text-green-500' },
+        { msg: "Launcher initialized! (▀̿Ĺ̯▀̿ ̿) 🚀", class: "text-green-500" },
       ];
       loading = false;
       disabled = false;
     } catch (error) {
       debugLogs = [
         ...debugLogs,
-        { msg: `Error initializing launcher`, class: 'text-red-500' },
+        { msg: `Error initializing launcher`, class: "text-red-500" },
         `${error}`,
       ];
     }
@@ -76,7 +79,7 @@
   const launch = async () => {
     disabled = true;
     try {
-      await invoke('launch_game', {
+      await invoke("launch_game", {
         buildName: build.value,
       });
       showError = false;
@@ -105,7 +108,9 @@
       <Select.Content>
         <Select.Group>
           {#each builds as build}
-            <Select.Item value={build.value} label={build.label}>{build.label}</Select.Item>
+            <Select.Item value={build.value} label={build.label}
+              >{build.label}</Select.Item
+            >
           {/each}
         </Select.Group>
       </Select.Content>
@@ -113,7 +118,12 @@
     </Select.Root>
   </div>
   <div class="mt-auto w-full flex justify-between">
-    <Button variant="default" class="p-4 rounded w-32" on:click={launch} {disabled}>
+    <Button
+      variant="default"
+      class="p-4 rounded w-32"
+      on:click={launch}
+      {disabled}
+    >
       {#if disabled}
         <Loader2 class="animate-spin" />
       {:else}

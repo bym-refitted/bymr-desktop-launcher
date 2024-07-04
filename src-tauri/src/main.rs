@@ -76,7 +76,7 @@ fn launch_game(build_name: &str) -> Result<(), String> {
     let swf_url = format!(
         "http{}://{}bymr-{}.swf",
         if build_name == "stable" { "s" } else { "" },
-        DOWNLOAD_BASE_PATH,
+        LAUNCHER_DOWNLOADS_URL,
         build_name
     );
     println!("Opening: {:?}, {:?}", flash_runtime_path, swf_url);

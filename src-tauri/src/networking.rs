@@ -18,7 +18,7 @@
 use std::{fmt, path::PathBuf};
 use tokio::{fs::File, io::AsyncWriteExt};
 
-use crate::DOWNLOAD_BASE_PATH;
+use crate::LAUNCHER_DOWNLOADS_URL;
 
 #[derive(Debug)]
 pub(crate) enum FetchError {
@@ -139,7 +139,7 @@ pub async fn download_file(
     let full_url = format!(
         "{}://{}{}",
         get_protocol(use_https),
-        DOWNLOAD_BASE_PATH,
+        LAUNCHER_DOWNLOADS_URL,
         url
     );
     let mut response = reqwest::Client::new().get(&full_url).send().await?;
