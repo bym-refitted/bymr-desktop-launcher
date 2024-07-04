@@ -8,7 +8,6 @@
   import { exit } from "@tauri-apps/api/process";
   import { listen } from "@tauri-apps/api/event";
   import { invoke } from "@tauri-apps/api/tauri";
-  import { getVersion } from "@tauri-apps/api/app";
   import { onUpdaterEvent } from "@tauri-apps/api/updater";
   import DebugLogs from "$lib/components/DebugLogs.svelte";
 
@@ -17,14 +16,14 @@
     label: string;
   }
 
-  interface LogEvent {
+  interface EventLog {
     message: string;
   }
 
   // Dynamically set during initialLoad event
   const builds: Build[] = [
     { label: "Stable", value: "stable" },
-    { label: "HTTP", value: "http" },
+    { label: "Http", value: "http" },
     { label: "Local", value: "local" },
   ];
   let build: Build = builds[0];
@@ -47,11 +46,11 @@
     }
   });
 
-  listen<LogEvent>("infoLog", (event) => {
+  listen<EventLog>("infoLog", (event) => {
     debugLogs = [...debugLogs, event.payload.message];
   });
 
-  listen<LogEvent>("errorLog", (event) => {
+  listen<EventLog>("errorLog", (event) => {
     debugLogs = [
       ...debugLogs,
       { msg: event.payload.message, class: "text-red-500" },
@@ -100,7 +99,7 @@
   </div>
 {:else}
   <div class="mt-auto w-full flex justify-between">
-    <label for="swf-build" class="font-display">Game Server</label>
+    <label for="swf-build" class="font-display">Game Server:</label>
     <Select.Root bind:selected={build} portal={null}>
       <Select.Trigger class="w-[180px] rounded">
         <Select.Value class="text-left" />
