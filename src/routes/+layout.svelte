@@ -1,20 +1,20 @@
 <script lang="ts">
-  import Navbar from '$lib/components/Navbar.svelte';
-  import { getVersion } from '@tauri-apps/api/app';
-  import '../app.pcss';
-  import Footer from '$lib/components/Footer.svelte';
-  import { onUpdaterEvent } from '@tauri-apps/api/updater';
+  import Navbar from "$lib/components/Navbar.svelte";
+  import { getVersion } from "@tauri-apps/api/app";
+  import "../app.pcss";
+  import Footer from "$lib/components/Footer.svelte";
+  import { onUpdaterEvent } from "@tauri-apps/api/updater";
   import {
     addErrorLog,
     addInfoLog,
     addSuccessLog,
     setupLogListeners,
-  } from '$lib/stores/debugLogStore';
-  import { invoke } from '@tauri-apps/api';
-  import { onMount } from 'svelte';
-  import Loader from '../../src/assets/svgs/Loader.svelte';
+  } from "$lib/stores/debugLogStore";
+  import { invoke } from "@tauri-apps/api";
+  import { onMount } from "svelte";
+  import Loader from "../../src/assets/svgs/Loader.svelte";
 
-  let launcherVersion = '0.0.0';
+  let launcherVersion = "0.0.0";
   let loading = true;
 
   onMount(() => {
@@ -29,7 +29,7 @@
   async function initializeLauncher() {
     try {
       launcherVersion = await getVersion();
-      await invoke('initialize_app');
+      await invoke("initialize_app");
       addSuccessLog(`Launcher initialized! (▀̿Ĺ̯▀̿ ̿) 🚀`);
     } catch (error) {
       addErrorLog(`Error during launcher initialization: ${error}`);
@@ -39,7 +39,9 @@
   }
 
   function handleUpdaterEvent({ error, status }) {
-    addInfoLog(`Launcher updater event: ${status ? status : ''} ${error ? error : ''}`);
+    addInfoLog(
+      `Launcher updater event: ${status ? status : ""} ${error ? error : ""}`
+    );
   }
 </script>
 
