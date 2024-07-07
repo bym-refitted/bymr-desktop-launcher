@@ -6,6 +6,7 @@
 
   import { exit } from '@tauri-apps/api/process';
   import { invoke } from '@tauri-apps/api/tauri';
+  import TabSwitcher from '$lib/components/ui/tabs/TabSwitcher.svelte';
   interface Build {
     value: string;
     label: string;
@@ -41,7 +42,14 @@
   };
 </script>
 
-<div class="mt-auto w-full flex justify-between">
+<TabSwitcher
+  tabs={[
+    { content: 'teasdasdst', label: 'content' },
+    { content: 'teasdasdst2', label: 'content2' },
+  ]}
+/>
+
+<!-- <div class="mt-auto w-full flex justify-between">
   <label for="swf-build" class="font-display">Game Server</label>
   <Select.Root bind:selected={build} portal={null}>
     <Select.Trigger class="w-[180px] rounded">
@@ -65,6 +73,6 @@
       Launch Game
     {/if}
   </Button>
-</div>
+</div> -->
 
 <AlertDialog bind:open={showError} error={errorCode}></AlertDialog>
