@@ -4,7 +4,7 @@ use crate::networking::{self, download_file, fetch_json_with_http_retry};
 use serde::{Deserialize, Serialize};
 
 pub const VERSION_INFO_PATH_BASE: &str = "api.bymrefitted.com/launcher.json";
-pub const DOWNLOAD_BASE_PATH: &str = "api.bymrefitted.com/launcher/downloads/";
+pub const DOWNLOAD_BASE_PATH: &str = "cdn.bymrefitted.com/launcher/downloads/";
 
 pub const RUNTIME_FOLDER: &str = "bymr-downloads/runtimes";
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]

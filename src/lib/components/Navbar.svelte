@@ -10,5 +10,6 @@
   <div class="flex items-center space-x-4">
     <a href="https://discord.gg/ajZAccxNMA" target="_tauri" class="text-accent"><Discord /></a>
     <a href="https://github.com/bym-refitted" target="_tauri" class="text-accent"><Github /></a>
+    <a href="/login">Login</a>
   </div>
 </div>
