@@ -4,6 +4,7 @@
   import { exit } from "@tauri-apps/api/process";
   import { invoke } from "@tauri-apps/api/tauri";
   import TabView from "$lib/components/ui/tabs/TabView.svelte";
+  import Toast from "$lib/components/Toast.svelte";
 
   interface Build {
     value: string;
@@ -41,4 +42,5 @@
 </script>
 
 <TabView />
+
 <AlertDialog bind:open={showError} error={errorCode}></AlertDialog>

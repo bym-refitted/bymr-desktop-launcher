@@ -1,11 +1,19 @@
 <script lang="ts">
-  import { debugLogs } from '$lib/stores/debugLogStore';
+  import { debugLogs } from "$lib/stores/debugLogStore";
+  export let launcherVersion = "";
 </script>
 
-<div class="grow rounded bg-secondary font-mono p-3">
-  {#each $debugLogs as log}
-    {#each log.msg.split('\n') as line}
-      <p class={`font-mono ${log.class}`}><small>{line}</small></p>
+<div
+  class="absolute bottom-0 w-full py-12 px-8 rounded bg-secondary font-mono p-3"
+>
+  <h1 class="text-2xl font-display">Launcher version: <span class="text-header">v{launcherVersion}</span></h1>
+  <div class="mt-8">
+    {#each $debugLogs as log}
+      {#each log.msg.split("\n") as line}
+        <p class={`text-[20px] font-medium ${log.class}`}>
+          <small>{line}</small>
+        </p>
+      {/each}
     {/each}
-  {/each}
+  </div>
 </div>

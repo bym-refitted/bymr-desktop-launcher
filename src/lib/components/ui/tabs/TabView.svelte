@@ -1,5 +1,6 @@
 <script lang="ts">
   import Navbar from "$lib/components/Navbar.svelte";
+  import Toast from "$lib/components/Toast.svelte";
   import { Tabs } from "bits-ui";
   import Controller from "phosphor-svelte/lib/GameController";
   import Plugs from "phosphor-svelte/lib/Plugs";

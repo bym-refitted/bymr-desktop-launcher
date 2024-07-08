@@ -12,6 +12,7 @@
   import { invoke } from "@tauri-apps/api";
   import { onMount } from "svelte";
   import Loader from "$lib/components/svgs/Loader.svelte";
+  import Toast from "$lib/components/Toast.svelte";
 
   let launcherVersion = "0.0.0";
   let loading = true;
@@ -44,7 +45,7 @@
   };
 </script>
 
-<div class="flex flex-col h-screen">
+<div class="flex flex-col h-screen bg-white">
   <main
     class="flex-1 overflow-auto bg-background text-foreground flex flex-col antialiased select-none font-sans"
   >
@@ -56,5 +57,6 @@
       <slot />
     {/if}
   </main>
+  <Toast {launcherVersion}/>
   <!-- <Footer {launcherVersion}></Footer> -->
 </div>
