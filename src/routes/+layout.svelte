@@ -56,5 +56,5 @@
       <slot />
     {/if}
   </main>
-  <Footer {launcherVersion}></Footer>
+  <!-- <Footer {launcherVersion}></Footer> -->
 </div>

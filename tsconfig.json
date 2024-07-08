@@ -37,7 +37,7 @@
 	   */
 	  "include": [
 		"src/**/*.d.ts",
-		"src/**/*.js",
+		"src/**/*.ts",
 		"src/**/*.svelte"
-	  ]
+, "src/lib/components/ui/dialog/index.ts", "src/lib/components/ui/button/index.ts"	  ]
 }

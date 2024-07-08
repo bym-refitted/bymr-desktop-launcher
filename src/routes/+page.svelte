@@ -1,12 +1,10 @@
 <script lang="ts">
-  import { Button } from "$lib/components/ui/button";
-  import * as Select from "$lib/components/ui/select";
-  import { Loader2 } from "lucide-svelte";
   import AlertDialog from "$lib/components/AlertDialog.svelte";
 
   import { exit } from "@tauri-apps/api/process";
   import { invoke } from "@tauri-apps/api/tauri";
   import TabView from "$lib/components/ui/tabs/TabView.svelte";
+
   interface Build {
     value: string;
     label: string;
@@ -43,30 +41,4 @@
 </script>
 
 <TabView />
-<!-- <div class="mt-auto w-full flex justify-between">
-  <label for="swf-build" class="font-display">Game Server</label>
-  <Select.Root bind:selected={build} portal={null}>
-    <Select.Trigger class="w-[180px] rounded">
-      <Select.Value class="text-left" />
-    </Select.Trigger>
-    <Select.Content>
-      <Select.Group>
-        {#each builds as build}
-          <Select.Item value={build.value} label={build.label}>{build.label}</Select.Item>
-        {/each}
-      </Select.Group>
-    </Select.Content>
-    <Select.Input name="build" />
-  </Select.Root>
-</div>
-<div class="mt-auto w-full flex justify-between">
-  <Button variant="default" class="p-4 rounded w-32" on:click={launch} {disabled}>
-    {#if disabled}
-      <Loader2 class="animate-spin" />
-    {:else}
-      Launch Game
-    {/if}
-  </Button>
-</div> -->
-
 <AlertDialog bind:open={showError} error={errorCode}></AlertDialog>
