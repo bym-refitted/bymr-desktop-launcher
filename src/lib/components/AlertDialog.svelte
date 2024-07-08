@@ -14,8 +14,6 @@
     DialogTitle,
   } from "$lib/components/ui/dialog";
 
-  import type { ButtonEventHandler } from "bits-ui/dist/bits/button/types";
-
   const quit = async () => await exit(0);
 </script>
 

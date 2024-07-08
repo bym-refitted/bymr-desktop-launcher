@@ -11,7 +11,7 @@
 {#if viewLogs}
   <DebugLogs />
 {/if}
-<footer class="bg-black px-4 py-1 flex-none flex bg-opacity-25 mt-2 justify-between relative">
+<footer class="bg-black px-4 py-1 flex-none flex bg-opacity-25 justify-between relative">
   <div class="flex space-x-2">
     {#if typeof $latestLog === 'string'}
       <p class="inline-block"><small class="font-mono">{latestLog}</small></p>

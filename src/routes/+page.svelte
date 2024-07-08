@@ -6,7 +6,7 @@
 
   import { exit } from "@tauri-apps/api/process";
   import { invoke } from "@tauri-apps/api/tauri";
-  import TabSwitcher from "$lib/components/ui/tabs/TabSwitcher.svelte";
+  import TabView from "$lib/components/ui/tabs/TabView.svelte";
   interface Build {
     value: string;
     label: string;
@@ -42,13 +42,7 @@
   };
 </script>
 
-<TabSwitcher
-  tabs={[
-    { content: "teasdasdst", label: "content" },
-    { content: "teasdasdst2", label: "content2" },
-  ]}
-/>
-
+<TabView />
 <!-- <div class="mt-auto w-full flex justify-between">
   <label for="swf-build" class="font-display">Game Server</label>
   <Select.Root bind:selected={build} portal={null}>

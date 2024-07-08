@@ -1,15 +1,12 @@
 <script>
-  import Discord from '../../assets/svgs/Discord.svelte';
-  import Github from '../../assets/svgs/Github.svelte';
+  import Discord from "phosphor-svelte/lib/DiscordLogo";
+  import GitHub from "phosphor-svelte/lib/GithubLogo";
+
 </script>
 
-<div class="flex justify-between items-center my-2">
-  <h1 class="text-foreground font-bold font-title text-3xl">
-    Backyard Monsters <span class="text-header">Refitted</span>
-  </h1>
+<div class="h-20 flex justify-end items-center pr-12">
   <div class="flex items-center space-x-4">
-    <a href="https://discord.gg/ajZAccxNMA" target="_tauri" class="text-accent"><Discord /></a>
-    <a href="https://github.com/bym-refitted" target="_tauri" class="text-accent"><Github /></a>
-    <a href="/login">Login</a>
+    <a href="https://discord.gg/ajZAccxNMA" target="_tauri" class="text-accent"><Discord weight="bold" color="#00CDB8" size="30"/></a>
+    <a href="https://github.com/bym-refitted" target="_tauri" class="text-accent"><GitHub weight="bold" color="#00CDB8" size="30"/></a>
   </div>
 </div>
