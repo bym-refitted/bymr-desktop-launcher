@@ -25,7 +25,7 @@
     initializeLauncher();
   });
 
-  async function initializeLauncher() {
+  const initializeLauncher = async () => {
     try {
       launcherVersion = await getVersion();
       await invoke("initialize_app");
@@ -35,13 +35,13 @@
     } finally {
       loading = false;
     }
-  }
+  };
 
-  function handleUpdaterEvent({ error, status }) {
+  const handleUpdaterEvent = ({ error, status }) => {
     addInfoLog(
       `Launcher updater event: ${status ? status : ""} ${error ? error : ""}`
     );
-  }
+  };
 </script>
 
 <div class="flex flex-col h-screen">
