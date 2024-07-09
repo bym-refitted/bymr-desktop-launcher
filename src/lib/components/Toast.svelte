@@ -1,8 +1,10 @@
 <script lang="ts">
   import { hasErrors, latestLog, platform } from '$lib/stores/debugLogStore';
+  import { hasLoaded } from '$lib/stores/loadState';
   import DebugLogs from './DebugLogs.svelte';
   import SealCheck from 'phosphor-svelte/lib/SealCheck';
   import XCircle from 'phosphor-svelte/lib/XCircle';
+  import Plug from 'phosphor-svelte/lib/Plug';
 
   export let launcherVersion = '';
   let viewLogs = false;
@@ -23,7 +25,9 @@
 >
   <div class="flex items-center">
     <div class="mr-3 flex size-12 items-center justify-center rounded-full bg-muted">
-      {#if $hasErrors}
+      {#if !$hasLoaded}
+        <Plug weight="bold" size={26} color="orange" />
+      {:else if $hasErrors}
         <XCircle weight="bold" size={26} color="red" />
       {:else}
         <SealCheck weight="bold" size={26} color="green" />
@@ -31,14 +35,18 @@
     </div>
     <div class="flex flex-col">
       <h4 class="text-[17px] font-display leading-5 tracking-[-0.01em]">
-        {#if $hasErrors}
+        {#if !$hasLoaded}
+          Connecting
+        {:else if $hasErrors}
           Launcher Failed
         {:else}
-          Launcher Initialized
+          Connected
         {/if}
       </h4>
       <p class="text-sm font-medium text-muted-foreground">
-        {#if $hasErrors}
+        {#if !$hasLoaded}
+          Herding Zafreetis back into their pens...
+        {:else if $hasErrors}
           Click to view logs
         {:else}
           You're all set!
@@ -49,16 +57,16 @@
 </div>
 
 <!-- {#if viewLogs}
-    <DebugLogs />
-  {/if}
-  <footer class="bg-black px-4 py-1 flex-none flex bg-opacity-25 justify-between relative">
-    <div class="flex space-x-2">
-      {#if typeof $latestLog === 'string'}
-        <p class="inline-block"><small class="font-mono">{latestLog}</small></p>
-      {:else if $latestLog !== null}
-        <p class={`font-mono ${$latestLog.class}`}><small>{$latestLog.msg}</small></p>
-      {/if}
-      <small><button on:click={toggleLogs}>{viewLogs ? 'Hide' : 'View'} logs</button></small>
+<DebugLogs />
+{/if}
+<footer class="bg-black px-4 py-1 flex-none flex bg-opacity-25 justify-between relative">
+  <div class="flex space-x-2">
+    {#if typeof $latestLog === 'string'}
+    <p class="inline-block"><small class="font-mono">{latestLog}</small></p>
+    {:else if $latestLog !== null}
+    <p class={`font-mono ${$latestLog.class}`}><small>{$latestLog.msg}</small></p>
+    {/if}
+    <small><button on:click={toggleLogs}>{viewLogs ? 'Hide' : 'View'} logs</button></small>
     </div>
     <p><small>{$platform?.msg} | v{launcherVersion}</small></p>
-  </footer> -->
+    </footer> -->
