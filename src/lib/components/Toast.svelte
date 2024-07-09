@@ -6,8 +6,6 @@
 
   export let launcherVersion = '';
   let viewLogs = false;
-  let isError = true; // TODO: Set this based on LAUNCHER_INITIALIZED event
-
   const toggleLogs = () => {
     viewLogs = !viewLogs;
   };
