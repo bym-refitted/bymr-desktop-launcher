@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { latestLog, platform } from "$lib/stores/debugLogStore";
-  import DebugLogs from "./DebugLogs.svelte";
-  import SealCheck from "phosphor-svelte/lib/SealCheck";
-  import XCircle from "phosphor-svelte/lib/XCircle";
+  import { hasErrors, latestLog, platform } from '$lib/stores/debugLogStore';
+  import DebugLogs from './DebugLogs.svelte';
+  import SealCheck from 'phosphor-svelte/lib/SealCheck';
+  import XCircle from 'phosphor-svelte/lib/XCircle';
 
-  export let launcherVersion = "";
+  export let launcherVersion = '';
   let viewLogs = false;
   let isError = true; // TODO: Set this based on LAUNCHER_INITIALIZED event
 
@@ -14,7 +14,7 @@
 </script>
 
 {#if viewLogs}
-  <DebugLogs {launcherVersion}/>
+  <DebugLogs {launcherVersion} />
 {/if}
 <div
   role="button"
@@ -24,10 +24,8 @@
   tabindex="0"
 >
   <div class="flex items-center">
-    <div
-      class="mr-3 flex size-12 items-center justify-center rounded-full bg-muted"
-    >
-      {#if isError}
+    <div class="mr-3 flex size-12 items-center justify-center rounded-full bg-muted">
+      {#if $hasErrors}
         <XCircle weight="bold" size={26} color="red" />
       {:else}
         <SealCheck weight="bold" size={26} color="green" />
@@ -35,14 +33,14 @@
     </div>
     <div class="flex flex-col">
       <h4 class="text-[17px] font-display leading-5 tracking-[-0.01em]">
-        {#if isError}
+        {#if $hasErrors}
           Launcher Failed
         {:else}
           Launcher Initialized
         {/if}
       </h4>
       <p class="text-sm font-medium text-muted-foreground">
-        {#if isError}
+        {#if $hasErrors}
           Click to view logs
         {:else}
           You're all set!
