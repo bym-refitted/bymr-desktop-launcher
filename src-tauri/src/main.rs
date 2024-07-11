@@ -1,9 +1,5 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-#![cfg_attr(
-    all(not(debug_assertions), target_os = "windows"),
-    windows_subsystem = "windows"
-)]
 
 mod networking;
 mod version_manager;
@@ -24,11 +20,6 @@ fn main() {
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-}
-
-fn set_window_decor(app: &App) {
-    let window = app.get_window("main").unwrap();
-    set_shadow(&window, true).expect("Unsupported platform!");
 }
 
 #[command]
@@ -105,4 +96,18 @@ struct EventLog {
 
 fn emit_event(app: &AppHandle, event_type: &str, message: String) {
     app.emit_all(event_type, EventLog { message }).unwrap();
+}
+
+/** This is a temporary filthy hack to create a window shadow when using custom titlebars/no window decorations
+ * because of tauri's shitty implementation which doesn't provide fine-tune control over native window elements.
+ * Tauri 2.0 beta supports this, however, we are using stable.
+ * Beta Docs: https://v2.tauri.app/reference/javascript/api/namespacewindow/#setshadow
+ * Explanation: https://github.com/tauri-apps/tauri/discussions/3093#discussioncomment-1854703
+ */
+fn set_window_decor(app: &App) {
+    if env::consts::OS == "linux" {
+        return;
+    }
+    let window = app.get_window("main").unwrap();
+    set_shadow(&window, true).expect("Unsupported platform!");
 }
