@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @font-face {
   font-family: "GROBOLDpro";
   src: url("./assets/fonts/GROBOLDpro.ttf");
@@ -13,53 +13,68 @@
 }
 
 @font-face {
-  font-family: 'Inter';
-  src: url('./assets/fonts/Inter-Medium.ttf');
+  font-family: "Inter";
+  src: url("./assets/fonts/Inter-Medium.ttf");
 }
 
 @layer base {
   :root {
     --background: 212 18.3% 13.9%;
     --foreground: 210 40% 98%;
- 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
- 
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
- 
     --header-title: 174 100% 40.2%;
-    --button:220 100% 45%;
-
+    --button: 220 100% 45%;
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
- 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
- 
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
- 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
- 
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
- 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
- 
-    --ring: hsl(212.7,26.8%,83.9);
-
+    --ring: hsl(212.7, 26.8%, 83.9%);
     --unselected: 5, 0%, 60%;
+    --scrollbar-bg: transparent;
+    --scrollbar-thumb: hsla(0, 0%, 100%, 0.2);
   }
-}
- 
-@layer base {
+
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Custom Scrollbar Styles */
+  /* Webkit Browsers (Chrome, Safari) */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 6px;
+  }
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-bg);
+
+  /* Apply scrollbar styles for both Webkit and Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-bg);
   }
 }

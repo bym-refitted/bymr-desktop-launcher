@@ -1,4 +1,4 @@
-<script>
+<!-- <script>
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   //   import { Dialog as DialogPrimitive } from 'bits-ui';
@@ -35,4 +35,4 @@
   </div>
 
   <Button type="submit" variant="default" class="p-4 rounded w-32 my-2">Login</Button>
-</div>
+</div> -->

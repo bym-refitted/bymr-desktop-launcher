@@ -1,4 +1,4 @@
-const defaultTheme = require('tailwindcss/defaultTheme');
+const defaultTheme = require("tailwindcss/defaultTheme");
 
 /** @type {import('tailwindcss').Config} */
 const config = {
@@ -20,12 +20,22 @@ const config = {
     },
     extend: {
       colors: {
+        // Basic Colors
+        transparent: "transparent",
+        red: "red",
+        green: "green",
+        blue: "blue",
+        yellow: "yellow",
+        black: "black",
+        white: "white",
+
+        // Element Colors
         border: "hsl(var(--border) / <alpha-value>)",
         input: "hsl(var(--input) / <alpha-value>)",
         ring: "hsl(var(--ring) / <alpha-value>)",
         background: "hsl(var(--background) / <alpha-value>)",
         foreground: "hsl(var(--foreground) / <alpha-value>)",
-        unselected:"hsl(var(--unselected))",
+        unselected: "hsl(var(--unselected))",
         primary: {
           DEFAULT: "hsl(var(--primary) / <alpha-value>)",
           foreground: "hsl(var(--primary-foreground) / <alpha-value>)",
@@ -35,10 +45,10 @@ const config = {
           foreground: "hsl(var(--secondary-foreground) / <alpha-value>)",
         },
         button: {
-          DEFAULT: "hsl(var(--button) / <alpha-value>)"
+          DEFAULT: "hsl(var(--button) / <alpha-value>)",
         },
         header: {
-          DEFAULT: "hsl(var(--header-title) / <alpha-value>)"
+          DEFAULT: "hsl(var(--header-title) / <alpha-value>)",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
