@@ -1,5 +1,9 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![cfg_attr(
+    all(not(debug_assertions), target_os = "windows"),
+    windows_subsystem = "windows"
+)]
 
 mod networking;
 mod version_manager;
@@ -8,13 +12,23 @@ use crate::version_manager::*;
 use serde::Serialize;
 use std::env;
 use std::process::Command;
-use tauri::{command, AppHandle, Manager};
+use tauri::{command, App, AppHandle, Manager};
+use window_shadows::set_shadow;
 
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![initialize_app, launch_game])
+        .setup(|app| {
+            set_window_decor(app);
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+fn set_window_decor(app: &App) {
+    let window = app.get_window("main").unwrap();
+    set_shadow(&window, true).expect("Unsupported platform!");
 }
 
 #[command]
@@ -89,6 +103,6 @@ struct EventLog {
     message: String,
 }
 
-pub fn emit_event(app: &AppHandle, event_type: &str, message: String) {
+fn emit_event(app: &AppHandle, event_type: &str, message: String) {
     app.emit_all(event_type, EventLog { message }).unwrap();
 }

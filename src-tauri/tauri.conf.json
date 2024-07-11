@@ -13,6 +13,17 @@
     "allowlist": {
       "process": {
         "exit": true
+      },
+      "window": {
+        "all": false,
+        "close": true,
+        "hide": true,
+        "show": true,
+        "maximize": true,
+        "minimize": true,
+        "unmaximize": true,
+        "unminimize": true,
+        "startDragging": true
       }
     },
     "bundle": {
@@ -68,8 +79,9 @@
         "fullscreen": false,
         "resizable": true,
         "maximized": true,
-        "height": 600,
-        "width": 620
+        "minWidth": 1000,
+        "minHeight": 600,
+        "decorations": false
       }
     ]
   }
