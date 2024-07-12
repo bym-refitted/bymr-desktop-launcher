@@ -2,7 +2,7 @@
   export let open = false;
   export let error = "";
 
-  import { Button } from "$lib/components/ui/button";
+  import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
   import { exit } from "@tauri-apps/api/process";
 
   import {
@@ -31,15 +31,8 @@
     </DialogHeader>
     <DialogFooter>
       <div class="flex justify-end gap-2">
-        <Button
-          class="p-4 rounded"
-          variant="default"
-          type="button"
-          on:click={() => (open = false)}>Continue</Button
-        >
-        <Button class="p-4 rounded" type="button" on:click={() => quit()}
-          >Quit</Button
-        >
+        <PrimaryButton on:click={() => (open = false)}>Continue</PrimaryButton>
+        <PrimaryButton on:click={() => quit()}>Quit</PrimaryButton>
       </div>
     </DialogFooter>
   </DialogContent>

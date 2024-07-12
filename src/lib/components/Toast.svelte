@@ -16,7 +16,7 @@
 {/if}
 <div
   role="button"
-  class="absolute bottom-10 right-10 z-30 w-full max-w-[328px] rounded-[12px] border border-dark-10 bg-background p-4 shadow-popover"
+  class="absolute bottom-10 right-10 z-30 w-full max-w-[328px] rounded-[12px] border border-dark-10 bg-background p-4"
   on:click={toggleLogs}
   on:keydown={toggleLogs}
   tabindex="0"
