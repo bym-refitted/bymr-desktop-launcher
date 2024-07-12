@@ -87,6 +87,6 @@
     for="register"
     class="text-md text-center pt-2 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
   >
-    Already have an account? <span class="text-secondary">Sign in</span>
+    Don't have an account? <span class="text-secondary">Register here</span>
   </Label.Root>
 </form>
