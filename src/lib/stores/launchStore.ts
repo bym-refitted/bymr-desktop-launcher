@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api';
 import { exit } from '@tauri-apps/api/process';
 import { writable } from 'svelte/store';
+import { addErrorLog } from './debugLogStore';
 
 export let isLaunching = writable(false);
 export let launchError = writable({ code: '', show: false });
@@ -20,11 +21,14 @@ export const launchSwf = async (buildName: String) => {
   }
 };
 
+export const isQuickLaunchEnabled = () => {
+  return !!localStorage.getItem('lastLaunch');
+};
 export const quickLaunchSwf = async () => {
   const lastLaunch = localStorage.getItem('lastLaunch');
   if (lastLaunch) {
     const launchOptions = JSON.parse(lastLaunch);
     return launchSwf(launchOptions.buildName);
   }
-  return new Error('Could not find last launch options in local storage');
+  addErrorLog('Could not quick launch, no previous launch in storage');
 };
