@@ -41,6 +41,15 @@
     class={`${isRegister ? "focus:outline-primary" : "focus:outline-secondary"} bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
     placeholder="Password"
   />
+  {#if isRegister}
+    <input
+      type="password"
+      id="confirm-password"
+      name="confirm-password"
+      class={`${isRegister ? "focus:outline-primary" : "focus:outline-secondary"} bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
+      placeholder="Confirm Password"
+    />
+  {/if} 
 
   <Select.Root items={builds}>
     <Select.Trigger
