@@ -11,10 +11,6 @@ const config = {
       display: ['"GROBOLDpro"', ...defaultTheme.fontFamily.serif],
     },
     extend: {
-      screens: {
-        // Custom breakpoints for minimum window size
-        minWindowSize: "1024px",
-      },
       colors: {
         // Basic colors
         transparent: "transparent",
