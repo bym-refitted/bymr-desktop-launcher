@@ -10,15 +10,27 @@
     { value: "bymr-http", label: "HTTP" },
   ];
 
+  let isRegister = false;
   let isChecked = false;
+
+  const showRegisterForm = () => (isRegister = !isRegister);
 </script>
 
 <form class="flex flex-col gap-4 p-4 w-[450px]">
+  {#if isRegister}
+    <input
+      type="text"
+      id="username"
+      name="username"
+      class={`${isRegister ? "focus:outline-primary" : "focus:outline-secondary"} bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
+      placeholder="Username"
+    />
+  {/if}
   <input
     type="email"
     id="email"
     name="email"
-    class="bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:outline-secondary focus:bg-transparent focus:placeholder-white"
+    class={`${isRegister ? "focus:outline-primary" : "focus:outline-secondary"} bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
     placeholder="Email"
   />
 
@@ -26,13 +38,13 @@
     type="password"
     id="password"
     name="password"
-    class="bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:outline-secondary focus:bg-transparent focus:placeholder-white"
+    class={`${isRegister ? "focus:outline-primary" : "focus:outline-secondary"} bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
     placeholder="Password"
   />
 
   <Select.Root items={builds}>
     <Select.Trigger
-      class="flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:outline-secondary focus:bg-transparent focus:text-white"
+      class={`${isRegister ? "focus:outline-primary" : "focus:outline-secondary"} flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white`}
       aria-label="Connection Type"
     >
       <Select.Value
@@ -48,7 +60,7 @@
     >
       {#each builds as build}
         <Select.Item
-          class="flex h-10 w-full select-none items-center rounded-button py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-75 data-[highlighted]:bg-secondary"
+          class={`${isRegister ? "data-[highlighted]:bg-primary" : "data-[highlighted]:bg-secondary"} flex h-10 w-full select-none items-center rounded-button py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-75`}
           value={build.value}
           label={build.label}
         >
@@ -62,9 +74,9 @@
 
   <div class="flex items-center space-x-3">
     <Checkbox.Root
-      id="terms"
-      aria-labelledby="terms-label"
-      class="peer inline-flex size-[25px] items-center justify-center rounded-sm border border-white/10 bg-secondary transition-all duration-150 ease-in-out active:scale-98 data-[state=unchecked]:border-border-input data-[state=unchecked]:bg-background"
+      id="remember-me-checkbox"
+      aria-labelledby="remember-checkbox"
+      class={`${isRegister ? "bg-primary" : "bg-secondary"} peer inline-flex size-[25px] items-center justify-center rounded-sm border border-white/10 transition-all duration-150 ease-in-out active:scale-98 data-[state=unchecked]:border-border-input data-[state=unchecked]:bg-background`}
       bind:checked={isChecked}
     >
       <Checkbox.Indicator let:isChecked>
@@ -81,12 +93,26 @@
       Remember Me
     </Label.Root>
   </div>
-  <PrimaryButton buttonText={`Login`.toUpperCase()} />
+  <PrimaryButton
+    buttonText={(isRegister ? "Register" : "Login").toUpperCase()}
+    color={isRegister ? "bg-primary" : "bg-secondary"}
+  />
   <Label.Root
     id="register-label"
     for="register"
     class="text-md text-center pt-2 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
   >
-    Don't have an account? <span class="text-secondary">Register here</span>
+    <div
+      on:click={showRegisterForm}
+      on:keydown={showRegisterForm}
+      role="button"
+      tabindex="0"
+    >
+      {#if isRegister}
+        Already have an account? <span class="text-primary">Login here</span>
+      {:else}
+        Don't have an account? <span class="text-secondary">Register here</span>
+      {/if}
+    </div>
   </Label.Root>
 </form>

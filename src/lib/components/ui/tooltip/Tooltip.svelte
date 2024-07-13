@@ -11,7 +11,12 @@
 <Tooltip.Root openDelay={0}>
   <Tooltip.Trigger>
     <a href={url} target="_tauri">
-      <Icon weight="bold" class="text-primary hover:text-white" size="30" />
+      <svelte:component
+        this={Icon}
+        weight="bold"
+        size="30"
+        class="text-primary hover:text-white"
+      />
     </a>
   </Tooltip.Trigger>
   <Tooltip.Content transitionConfig={{ y: 8, duration: 150 }} sideOffset={8}>
