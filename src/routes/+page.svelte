@@ -1,7 +1,7 @@
 <script lang="ts">
   import { launchError } from "$lib/stores/launchStore";
   import AlertDialog from "$lib/components/AlertDialog.svelte";
-  import Form from "$lib/components/Form.svelte";
+  import Form from "$lib/components/ui/form/Form.svelte";
   import TownHall from "../assets/images/townhall.png";
 </script>
 
@@ -25,7 +25,7 @@
     <div class="flex flex-col items-end"></div>
   </div>
   <div
-    class="grid-item flex flex-col justify-center md:items-center md:mt-8 md:pb-16 lg:items-start lg:mt-36 lg:pb-0"
+    class="grid-item flex flex-col justify-center md:mt-8 md:pb-16 lg:items-start lg:mt-36 lg:pb-0"
   >
     <Form />
   </div>
