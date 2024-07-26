@@ -12,20 +12,24 @@
   let password = "";
   let confirmPassword = "";
   let selectedBuild = "https";
-  let errors = {
-    email: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-  };
-  let isRegister = false;
+
+  let isRegisterForm = false;
   let isChecked = false;
+
   let focusStates = {
     username: false,
     email: false,
     password: false,
     confirmPassword: false,
   };
+
+  let errors = {
+    email: "",
+    username: "",
+    password: "",
+    confirmPassword: "",
+  };
+
   const builds = [
     { value: "bymr-stable", label: "HTTPS" },
     { value: "bymr-http", label: "HTTP" },
@@ -62,19 +66,19 @@
   }
 
   $: {
-    if (isRegister && confirmPassword !== password) {
+    if (isRegisterForm && confirmPassword !== password) {
       errors.confirmPassword = "Passwords do not match";
     } else {
       errors.confirmPassword = "";
     }
   }
 
-  const showRegisterForm = () => (isRegister = !isRegister);
+  const showRegisterForm = () => (isRegisterForm = !isRegisterForm);
 
   const handleSubmit = (event: Event) => {
     event.preventDefault();
 
-    const hasErrors = isRegister
+    const hasErrors = isRegisterForm
       ? errors.username ||
         errors.email ||
         errors.password ||
@@ -82,8 +86,12 @@
       : errors.email || errors.password;
 
     if (hasErrors) return;
-  
+
     console.info("Form submitted successfully!");
+    // TODO:
+    // Submit form data to the server
+    // Once we receive a response that the user has been created or logged in
+    // Use the store to launch the game and pass the token to Flash
   };
 </script>
 
@@ -92,7 +100,7 @@
   on:submit={handleSubmit}
   class="flex flex-col gap-4 p-4 w-[450px]"
 >
-  {#if isRegister}
+  {#if isRegisterForm}
     <div class="flex items-center space-x-6">
       <input
         type="text"
@@ -125,7 +133,7 @@
       on:blur={() => (focusStates.email = false)}
       id="email"
       name="email"
-      class={`${errors.email ? "focus:outline-red" : isRegister ? "focus:outline-primary" : "focus:outline-secondary"} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
+      class={`${errors.email ? "focus:outline-red" : isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
       placeholder="Email"
       required
     />
@@ -148,7 +156,7 @@
       on:blur={() => (focusStates.password = false)}
       id="password"
       name="password"
-      class={`ms-reveal ${errors.password ? "focus:outline-red" : isRegister ? "focus:outline-primary" : "focus:outline-secondary"} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
+      class={`ms-reveal ${errors.password ? "focus:outline-red" : isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
       placeholder="Password"
       required
     />
@@ -163,7 +171,7 @@
       />
     {/if}
   </div>
-  {#if isRegister}
+  {#if isRegisterForm}
     <div class="flex items-center space-x-6">
       <input
         type="password"
@@ -194,7 +202,7 @@
     on:change={(event) => (selectedBuild = event.detail.value)}
   >
     <Select.Trigger
-      class={`${isRegister ? "focus:outline-primary" : "focus:outline-secondary"} w-full flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white`}
+      class={`${isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white`}
       aria-label="Connection Type"
     >
       <Select.Value
@@ -210,7 +218,7 @@
     >
       {#each builds as build}
         <Select.Item
-          class={`${isRegister ? "data-[highlighted]:bg-primary" : "data-[highlighted]:bg-secondary"} flex h-10 w-full select-none items-center rounded-button py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-75`}
+          class={`${isRegisterForm ? "data-[highlighted]:bg-primary" : "data-[highlighted]:bg-secondary"} flex h-10 w-full select-none items-center rounded-button py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-75`}
           value={build.value}
           label={build.label}
         >
@@ -226,7 +234,7 @@
     <Checkbox.Root
       id="remember-me-checkbox"
       aria-labelledby="remember-checkbox"
-      class={`${isRegister ? "bg-primary" : "bg-secondary"} peer inline-flex size-[25px] items-center justify-center rounded-sm border border-white/10 transition-all duration-150 ease-in-out active:scale-98 data-[state=unchecked]:border-border-input data-[state=unchecked]:bg-background`}
+      class={`${isRegisterForm ? "bg-primary" : "bg-secondary"} peer inline-flex size-[25px] items-center justify-center rounded-sm border border-white/10 transition-all duration-150 ease-in-out active:scale-98 data-[state=unchecked]:border-border-input data-[state=unchecked]:bg-background`}
       bind:checked={isChecked}
     >
       <Checkbox.Indicator let:isChecked>
@@ -245,8 +253,8 @@
   </div>
   <PrimaryButton
     on:click={handleSubmit}
-    buttonText={(isRegister ? "Register" : "Login").toUpperCase()}
-    color={isRegister ? "bg-primary" : "bg-secondary"}
+    buttonText={(isRegisterForm ? "Register" : "Login").toUpperCase()}
+    color={isRegisterForm ? "bg-primary" : "bg-secondary"}
   />
   <Label.Root
     id="register-label"
@@ -259,7 +267,7 @@
       role="button"
       tabindex="0"
     >
-      {#if isRegister}
+      {#if isRegisterForm}
         Already have an account? <span class="text-primary">Login here</span>
       {:else}
         Don't have an account? <span class="text-secondary">Register here</span>
