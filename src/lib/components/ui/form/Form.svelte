@@ -7,6 +7,7 @@
   import Tooltip from "../tooltip/Tooltip.svelte";
   import WarningDiamond from "phosphor-svelte/lib/WarningDiamond";
   import { invokeApiRequest, type FormData } from "./invokeApiRequest";
+  import AlertDialog from "$lib/components/AlertDialog.svelte";
 
   let username = "";
   let email = "";
@@ -14,6 +15,7 @@
   let confirmPassword = "";
   let connectionType = "https";
   let isRegisterForm = false;
+  let isRegistered = false;
   let isChecked = false;
 
   let focusStates = {
@@ -97,10 +99,16 @@
       formData
     );
 
-    console.info("User: ", response);
+    if (response && response.user && isRegisterForm) {
+      console.info("User registered successfully");
+      isRegisterForm = false;
+      isRegistered = true;
+      return;
+    }
   };
 </script>
 
+<AlertDialog bind:open={isRegistered} title="🚀 Registered successfully!"/>
 <form
   method="POST"
   on:submit={handleFormSubmit}
@@ -232,27 +240,29 @@
     </Select.Content>
   </Select.Root>
 
-  <div class="flex items-center space-x-3">
-    <Checkbox.Root
-      id="remember-me-checkbox"
-      aria-labelledby="remember-checkbox"
-      class={`${isRegisterForm ? "bg-primary" : "bg-secondary"} peer inline-flex size-[25px] items-center justify-center rounded-sm border border-white/10 transition-all duration-150 ease-in-out active:scale-98 data-[state=unchecked]:border-border-input data-[state=unchecked]:bg-background`}
-      bind:checked={isChecked}
-    >
-      <Checkbox.Indicator let:isChecked>
-        {#if isChecked}
-          <Check size={15} weight="bold" />
-        {/if}
-      </Checkbox.Indicator>
-    </Checkbox.Root>
-    <Label.Root
-      id="remember-me-label"
-      for="remember"
-      class="text-md leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-    >
-      Remember Me
-    </Label.Root>
-  </div>
+  {#if !isRegisterForm}
+    <div class="flex items-center space-x-3">
+      <Checkbox.Root
+        id="remember-me-checkbox"
+        aria-labelledby="remember-checkbox"
+        class="bg-secondary peer inline-flex size-[25px] items-center justify-center rounded-sm border border-white/10 transition-all duration-150 ease-in-out active:scale-98 data-[state=unchecked]:border-border-input data-[state=unchecked]:bg-background"
+        bind:checked={isChecked}
+      >
+        <Checkbox.Indicator let:isChecked>
+          {#if isChecked}
+            <Check size={15} weight="bold" />
+          {/if}
+        </Checkbox.Indicator>
+      </Checkbox.Root>
+      <Label.Root
+        id="remember-me-label"
+        for="remember"
+        class="text-md leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+      >
+        Remember Me
+      </Label.Root>
+    </div>
+  {/if}
   <PrimaryButton
     on:click={handleFormSubmit}
     buttonText={(isRegisterForm ? "Register" : "Login").toUpperCase()}

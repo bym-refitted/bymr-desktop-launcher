@@ -1,10 +1,6 @@
 <script lang="ts">
-  export let open = false;
-  export let error = "";
-
   import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
   import { exit } from "@tauri-apps/api/process";
-
   import {
     Dialog,
     DialogContent,
@@ -14,6 +10,10 @@
     DialogTitle,
   } from "$lib/components/ui/dialog";
 
+  export let title = "Oops! Something broke...";
+  export let open = false;
+  export let error = "";
+
   const quit = async () => await exit(0);
 </script>
 
@@ -21,7 +21,7 @@
   <DialogContent class="text-left bg-background text-foreground">
     <DialogHeader class="text-left">
       <DialogTitle class="font-display text-2xl select-none"
-        >Oops! Something broke...</DialogTitle
+        >{title}</DialogTitle
       >
       <DialogDescription>
         <p class="text-secondary-foreground mt-4 mb-4">
@@ -31,8 +31,8 @@
     </DialogHeader>
     <DialogFooter>
       <div class="flex justify-end gap-2">
-        <PrimaryButton on:click={() => (open = false)}>Continue</PrimaryButton>
-        <PrimaryButton on:click={() => quit()}>Quit</PrimaryButton>
+        <PrimaryButton buttonText="Continue" on:click={() => (open = false)} />
+        <PrimaryButton buttonText="Quit" on:click={() => quit()} />
       </div>
     </DialogFooter>
   </DialogContent>

@@ -6,12 +6,14 @@ export interface FormData {
   password: string;
 }
 
+interface Response<T> { user: T }
+
 // TODO: API Versioning should not be hardcoded, can we get this from manifest.json?
-export const invokeApiRequest = async (
+export const invokeApiRequest = async <T>(
   relPath: string,
   formData: FormData,
   method: string = "POST"
-): Promise<any> => {
+): Promise<Response<T>> => {
   try {
     const response = await fetch(
       `${BASE_URL}:${PORT}/api/v0.2.8-alpha/${relPath}`,
@@ -24,14 +26,10 @@ export const invokeApiRequest = async (
       }
     );
 
-    if (!response.ok) {
-      throw new Error("invokeApiRequest response was not ok");
-    }
+    if (!response.ok) throw new Error("invokeApiRequest response was not ok");
 
     return await response.json();
   } catch (error) {
-    // TODO: Add better error handling
-    console.error(error);
-    throw error;
+    throw new Error("invokeApiRequest failed");
   }
 };
