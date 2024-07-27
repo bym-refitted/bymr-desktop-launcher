@@ -6,13 +6,13 @@
   import Check from "phosphor-svelte/lib/Check";
   import Tooltip from "../tooltip/Tooltip.svelte";
   import WarningDiamond from "phosphor-svelte/lib/WarningDiamond";
+  import { invokeApiRequest, type FormData } from "./invokeApiRequest";
 
   let username = "";
   let email = "";
   let password = "";
   let confirmPassword = "";
-  let selectedBuild = "https";
-
+  let connectionType = "https";
   let isRegisterForm = false;
   let isChecked = false;
 
@@ -75,9 +75,8 @@
 
   const showRegisterForm = () => (isRegisterForm = !isRegisterForm);
 
-  const handleSubmit = (event: Event) => {
-    event.preventDefault();
-
+  const handleFormSubmit = async (e: Event) => {
+    e.preventDefault();
     const hasErrors = isRegisterForm
       ? errors.username ||
         errors.email ||
@@ -86,18 +85,25 @@
       : errors.email || errors.password;
 
     if (hasErrors) return;
+    await authenticateUser();
+  };
 
-    console.info("Form submitted successfully!");
-    // TODO:
-    // Submit form data to the server
-    // Once we receive a response that the user has been created or logged in
-    // Use the store to launch the game and pass the token to Flash
+  const authenticateUser = async () => {
+    const formData: FormData = { email, password };
+    if (isRegisterForm) formData.username = username;
+
+    const response = await invokeApiRequest(
+      isRegisterForm ? "player/register" : "player/getinfo",
+      formData
+    );
+
+    console.info("User: ", response);
   };
 </script>
 
 <form
   method="POST"
-  on:submit={handleSubmit}
+  on:submit={handleFormSubmit}
   class="flex flex-col gap-4 p-4 w-[450px]"
 >
   {#if isRegisterForm}
@@ -106,7 +112,6 @@
         type="text"
         bind:value={username}
         on:focus={() => (focusStates.username = true)}
-        on:blur={() => (focusStates.username = false)}
         id="username"
         name="username"
         class={`focus:outline-primary ${errors.username ? "focus:outline-red" : ""} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
@@ -130,7 +135,6 @@
       type="email"
       bind:value={email}
       on:focus={() => (focusStates.email = true)}
-      on:blur={() => (focusStates.email = false)}
       id="email"
       name="email"
       class={`${errors.email ? "focus:outline-red" : isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
@@ -153,7 +157,6 @@
       type="password"
       bind:value={password}
       on:focus={() => (focusStates.password = true)}
-      on:blur={() => (focusStates.password = false)}
       id="password"
       name="password"
       class={`ms-reveal ${errors.password ? "focus:outline-red" : isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
@@ -177,7 +180,6 @@
         type="password"
         bind:value={confirmPassword}
         on:focus={() => (focusStates.confirmPassword = true)}
-        on:blur={() => (focusStates.confirmPassword = false)}
         id="confirm-password"
         name="confirm-password"
         class={`ms-reveal focus:outline-primary ${errors.confirmPassword ? "focus:outline-red" : ""} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
@@ -199,7 +201,7 @@
 
   <Select.Root
     items={builds}
-    on:change={(event) => (selectedBuild = event.detail.value)}
+    on:change={(event) => (connectionType = event.detail.value)}
   >
     <Select.Trigger
       class={`${isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white`}
@@ -252,7 +254,7 @@
     </Label.Root>
   </div>
   <PrimaryButton
-    on:click={handleSubmit}
+    on:click={handleFormSubmit}
     buttonText={(isRegisterForm ? "Register" : "Login").toUpperCase()}
     color={isRegisterForm ? "bg-primary" : "bg-secondary"}
   />
