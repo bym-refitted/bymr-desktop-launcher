@@ -30,6 +30,14 @@ pub async fn get_server_manifest() -> Result<VersionManifest, networking::FetchE
         })
 }
 
+#[tauri::command]
+pub async fn get_current_game_version() -> Result<String, String> {
+    match get_server_manifest().await {
+        Ok(manifest) => Ok(manifest.current_game_version),
+        Err(err) => Err(err.to_string()),
+    }
+}
+
 fn ensure_folder_exists(runtime_path: &Path) -> std::io::Result<()> {
     if !runtime_path.exists() {
         fs::create_dir_all(runtime_path)?;

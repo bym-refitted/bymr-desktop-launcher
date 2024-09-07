@@ -1,4 +1,6 @@
 import { BASE_URL, PORT } from "$lib/globals";
+import { currentGameVersion } from "$lib/stores/loadState";
+import { get } from "svelte/store";
 
 export interface FormData {
   username: string;
@@ -12,15 +14,15 @@ interface Response<T> {
   token?: string;
 }
 
-// TODO: API Versioning should not be hardcoded, can we get this from manifest.json?
 export const invokeApiRequest = async <T>(
-  relPath: string,
+  route: string,
   formData: FormData,
   method: string = "POST"
 ): Promise<Response<T>> => {
   try {
+    const version = get(currentGameVersion);
     const response = await fetch(
-      `${BASE_URL}:${PORT}/api/v0.2.8-alpha/${relPath}`,
+      `${BASE_URL}:${PORT}/api/v${version}-alpha/${route}`,
       {
         method,
         headers: {

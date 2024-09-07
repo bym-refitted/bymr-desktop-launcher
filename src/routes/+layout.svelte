@@ -1,23 +1,27 @@
 <script lang="ts">
-  import { getVersion } from '@tauri-apps/api/app';
-  import '../app.pcss';
-  import { onUpdaterEvent } from '@tauri-apps/api/updater';
+  import { getVersion } from "@tauri-apps/api/app";
+  import "../app.pcss";
+  import { onUpdaterEvent } from "@tauri-apps/api/updater";
   import {
     addErrorLog,
     addInfoLog,
     addSuccessLog,
     setupLogListeners,
-  } from '$lib/stores/debugLogStore';
-  import { invoke } from '@tauri-apps/api';
-  import { onMount } from 'svelte';
-  import Loader from '$lib/components/svgs/Loader.svelte';
-  import Toast from '$lib/components/Toast.svelte';
-  import { hasLoaded, setLoaded } from '$lib/stores/loadState';
-  import Titlebar from '$lib/components/Titlebar.svelte';
-  import TabView from '$lib/components/ui/tabs/TabView.svelte';
-  import Navbar from '$lib/components/Navbar.svelte';
+  } from "$lib/stores/debugLogStore";
+  import { invoke } from "@tauri-apps/api";
+  import { onMount } from "svelte";
+  import Loader from "$lib/components/svgs/Loader.svelte";
+  import Toast from "$lib/components/Toast.svelte";
+  import {
+    currentGameVersion,
+    hasLoaded,
+    setLoaded,
+  } from "$lib/stores/loadState";
+  import Titlebar from "$lib/components/Titlebar.svelte";
+  import TabView from "$lib/components/ui/tabs/TabView.svelte";
+  import Navbar from "$lib/components/Navbar.svelte";
 
-  let launcherVersion = '0.0.0';
+  let launcherVersion = "0.0.0";
 
   onMount(() => {
     // Handle launcher update events
@@ -30,8 +34,16 @@
 
   const initializeLauncher = async () => {
     try {
-      launcherVersion = await getVersion();
-      await invoke('initialize_app');
+      const [launcherVersionManifest, currentGameVersionManifest, _] =
+        await Promise.all([
+          getVersion(),
+          invoke<string>("get_current_game_version"),
+          invoke("initialize_app"),
+        ]);
+
+      launcherVersion = launcherVersionManifest;
+      currentGameVersion.set(currentGameVersionManifest);
+
       addSuccessLog(`Launcher initialized! (▀̿Ĺ̯▀̿ ̿) 🚀`);
     } catch (error) {
       addErrorLog(`Error during launcher initialization: ${error}`);
@@ -41,7 +53,9 @@
   };
 
   const handleUpdaterEvent = ({ error, status }) => {
-    addInfoLog(`Launcher updater event: ${status ? status : ''} ${error ? error : ''}`);
+    addInfoLog(
+      `Launcher updater event: ${status ? status : ""} ${error ? error : ""}`
+    );
   };
 </script>
 

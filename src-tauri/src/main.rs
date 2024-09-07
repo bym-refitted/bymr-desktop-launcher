@@ -13,7 +13,11 @@ use window_shadows::set_shadow;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![initialize_app, launch_game])
+        .invoke_handler(tauri::generate_handler![
+            initialize_app,
+            launch_game,
+            get_current_game_version
+        ])
         .setup(|app| {
             set_window_decor(app);
             Ok(())
@@ -69,7 +73,11 @@ fn launch_game(build_name: &str) -> Result<(), String> {
     }
     let swf_url = format!(
         "http{}://{}bymr-{}.swf",
-        if build_name == "http" || build_name == "local" { "" } else { "s" },
+        if build_name == "http" || build_name == "local" {
+            ""
+        } else {
+            "s"
+        },
         LAUNCHER_DOWNLOADS_URL,
         build_name
     );
