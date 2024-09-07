@@ -8,6 +8,8 @@
   import WarningDiamond from "phosphor-svelte/lib/WarningDiamond";
   import { invokeApiRequest, type FormData } from "./invokeApiRequest";
   import AlertDialog from "$lib/components/AlertDialog.svelte";
+  import { Status } from "$lib/enums/StatusCodes";
+  import { launchSwf } from "$lib/stores/launchStore";
 
   let username = "";
   let email = "";
@@ -91,24 +93,30 @@
   };
 
   const authenticateUser = async () => {
-    const formData: FormData = { email, password };
+    const formData: FormData = { username, email, password };
     if (isRegisterForm) formData.username = username;
+    const route = isRegisterForm ? "player/register" : "player/getinfo";
 
-    const response = await invokeApiRequest(
-      isRegisterForm ? "player/register" : "player/getinfo",
-      formData
-    );
+    try {
+      const { status, data, token } = await invokeApiRequest(route, formData);
 
-    if (response && response.user && isRegisterForm) {
-      console.info("User registered successfully");
-      isRegisterForm = false;
-      isRegistered = true;
-      return;
+      if (isRegisterForm && status === Status.OK && data) {
+        isRegisterForm = false;
+        isRegistered = true;
+        return;
+      }
+
+      if (status === Status.OK && token) launchSwf("stable"); // TODO: Pass flash vars here & builds
+    } catch (error) {
+      console.error("Error during authentication:", error);
+      // TODO: Handle errors (e.g., show error message to the user)
+      // Server should return appropriate error messages 
+      // e.g. username has been taken, account exists, account not found, etc.
     }
   };
 </script>
 
-<AlertDialog bind:open={isRegistered} title="🚀 Registered successfully!"/>
+<AlertDialog bind:open={isRegistered} title="🚀 Registered successfully!" />
 <form
   method="POST"
   on:submit={handleFormSubmit}

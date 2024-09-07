@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { hasErrors, latestLog, platform } from "$lib/stores/debugLogStore";
+  import { hasErrors } from "$lib/stores/debugLogStore";
   import { hasLoaded } from "$lib/stores/loadState";
   import DebugLogs from "./DebugLogs.svelte";
   import SealCheck from "phosphor-svelte/lib/SealCheck";

@@ -16,8 +16,9 @@
         </h1>
       </a>
       <div class="pt-8">
-        <TabItem path="/" Icon={Controller} text="Refitted Servers" />
-        <TabItem path="/local" text="Local" Icon={Plugs} />
+        <TabItem path="/" Icon={Controller} text="BYM Refitted" />
+        <TabItem path="/minigame" Icon={Controller} text="Attack of the Pokies" />
+        <TabItem path="/local" Icon={Plugs} text="Local" />
       </div>
     </div></Menubar.Root
   >

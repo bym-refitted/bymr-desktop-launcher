@@ -69,7 +69,7 @@ fn launch_game(build_name: &str) -> Result<(), String> {
     }
     let swf_url = format!(
         "http{}://{}bymr-{}.swf",
-        if build_name == "stable" { "s" } else { "" },
+        if build_name == "http" || build_name == "local" { "" } else { "s" },
         LAUNCHER_DOWNLOADS_URL,
         build_name
     );
@@ -78,6 +78,7 @@ fn launch_game(build_name: &str) -> Result<(), String> {
     // Open the game in Flash Player
     Command::new(&flash_runtime_path)
         .arg(&swf_url)
+        // .arg("-fullscreen")
         .spawn()
         .map_err(|err| {
             format!(

@@ -1,12 +1,16 @@
 import { BASE_URL, PORT } from "$lib/globals";
 
 export interface FormData {
-  username?: string;
+  username: string;
   email: string;
   password: string;
 }
 
-interface Response<T> { user: T }
+interface Response<T> {
+  status: number;
+  data: T;
+  token?: string;
+}
 
 // TODO: API Versioning should not be hardcoded, can we get this from manifest.json?
 export const invokeApiRequest = async <T>(
@@ -28,7 +32,9 @@ export const invokeApiRequest = async <T>(
 
     if (!response.ok) throw new Error("invokeApiRequest response was not ok");
 
-    return await response.json();
+    const data = await response.json();
+    const token = data.token;
+    return { status: response.status, data, token };
   } catch (error) {
     throw new Error("invokeApiRequest failed");
   }
