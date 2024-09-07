@@ -1,21 +1,25 @@
 <script lang="ts">
   import { Select, Checkbox, Label } from "bits-ui";
-  import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
-  import { flyAndScale } from "$lib/utils";
   import CaretUpDown from "phosphor-svelte/lib/CaretUpDown";
   import Check from "phosphor-svelte/lib/Check";
-  import Tooltip from "../tooltip/Tooltip.svelte";
   import WarningDiamond from "phosphor-svelte/lib/WarningDiamond";
-  import { invokeApiRequest, type FormData } from "./invokeApiRequest";
+
+  import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
+  import Tooltip from "../tooltip/Tooltip.svelte";
   import AlertDialog from "$lib/components/AlertDialog.svelte";
+
+  import { flyAndScale } from "$lib/utils";
+  import { invokeApiRequest, type FormData } from "./invokeApiRequest";
   import { Status } from "$lib/enums/StatusCodes";
   import { launchSwf } from "$lib/stores/launchStore";
+  import { Protocol } from "$lib/enums/Protocol";
+  import { Builds } from "$lib/enums/Builds";
 
   let username = "";
   let email = "";
   let password = "";
   let confirmPassword = "";
-  let connectionType = "https";
+  let connectionType = Protocol.HTTPS;
   let isRegisterForm = false;
   let isRegistered = false;
   let isChecked = false;
@@ -35,9 +39,14 @@
   };
 
   const builds = [
-    { value: "bymr-stable", label: "HTTPS" },
-    { value: "bymr-http", label: "HTTP" },
+    { value: Builds.STABLE, label: Protocol.HTTPS },
+    { value: Builds.HTTP, label: Protocol.HTTP },
   ];
+
+  const selectBuild = {
+    [Builds.STABLE]: Protocol.HTTPS,
+    [Builds.HTTP]: Protocol.HTTP,
+  };
 
   // Form validation
   $: {
@@ -106,11 +115,14 @@
         return;
       }
 
-      if (status === Status.OK && token) launchSwf("stable"); // TODO: Pass flash vars here & builds
+      if (status === Status.OK && token)
+        launchSwf(
+          connectionType === Protocol.HTTPS ? Builds.STABLE : Builds.HTTP
+        );
     } catch (error) {
       console.error("Error during authentication:", error);
       // TODO: Handle errors (e.g., show error message to the user)
-      // Server should return appropriate error messages 
+      // Server should return appropriate error messages
       // e.g. username has been taken, account exists, account not found, etc.
     }
   };
@@ -215,40 +227,42 @@
     </div>
   {/if}
 
-  <Select.Root
-    items={builds}
-    on:change={(event) => (connectionType = event.detail.value)}
-  >
-    <Select.Trigger
-      class={`${isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white`}
-      aria-label="Connection Type"
-    >
-      <Select.Value
-        class="text-md text-unselected"
-        placeholder="Connection Type"
-      />
-      <CaretUpDown size={16} weight="bold" />
-    </Select.Trigger>
-    <Select.Content
-      class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none"
-      transition={flyAndScale}
-      sideOffset={8}
-    >
-      {#each builds as build}
-        <Select.Item
-          class={`${isRegisterForm ? "data-[highlighted]:bg-primary" : "data-[highlighted]:bg-secondary"} flex h-10 w-full select-none items-center rounded-button py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-75`}
-          value={build.value}
-          label={build.label}
-        >
-          {build.label}
-          <Select.ItemIndicator class="ml-auto" asChild={false}
-          ></Select.ItemIndicator>
-        </Select.Item>
-      {/each}
-    </Select.Content>
-  </Select.Root>
-
   {#if !isRegisterForm}
+    <Select.Root
+      items={builds}
+      onSelectedChange={(e) => {
+        connectionType = selectBuild[e.value];
+      }}
+    >
+      <Select.Trigger
+        class="focus:outline-secondary w-full flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white"
+        aria-label="Connection Type"
+      >
+        <Select.Value
+          class="text-md text-unselected"
+          placeholder="Connection Type"
+        />
+        <CaretUpDown size={16} weight="bold" />
+      </Select.Trigger>
+      <Select.Content
+        class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none"
+        transition={flyAndScale}
+        sideOffset={8}
+      >
+        {#each builds as build}
+          <Select.Item
+            class="data-[highlighted]:bg-secondary flex h-10 w-full select-none items-center rounded-button py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-75"
+            value={build.value}
+            label={build.label.toUpperCase()}
+          >
+            {build.label.toUpperCase()}
+            <Select.ItemIndicator class="ml-auto" asChild={false}
+            ></Select.ItemIndicator>
+          </Select.Item>
+        {/each}
+      </Select.Content>
+    </Select.Root>
+
     <div class="flex items-center space-x-3">
       <Checkbox.Root
         id="remember-me-checkbox"

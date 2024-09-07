@@ -78,7 +78,6 @@ fn launch_game(build_name: &str) -> Result<(), String> {
     // Open the game in Flash Player
     Command::new(&flash_runtime_path)
         .arg(&swf_url)
-        // .arg("-fullscreen")
         .spawn()
         .map_err(|err| {
             format!(
