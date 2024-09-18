@@ -116,10 +116,9 @@
       }
 
       if (status === Status.OK && token) {
-        const userToken = isChecked ? token : "";
         const build = connectionType === Protocol.HTTPS ? Builds.STABLE : Builds.HTTP;
 
-        launchSwf(build, userToken);
+        launchSwf(build, token);
       }
     } catch (error) {
       console.error("Error during authentication:", error);
