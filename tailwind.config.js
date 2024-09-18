@@ -27,6 +27,7 @@ const config = {
         accent: "hsl(var(--accent))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        btnDark: "hsl(var(--btn-dark))",
 
         // Element Colors
         border: "hsl(var(--border))",

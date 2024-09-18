@@ -23,6 +23,7 @@
   let isRegisterForm = false;
   let isRegistered = false;
   let isChecked = false;
+  let isUserSaved = false;
 
   let focusStates = {
     username: false,
@@ -47,6 +48,20 @@
     [Builds.STABLE]: Protocol.HTTPS,
     [Builds.HTTP]: Protocol.HTTP,
   };
+
+  // Load saved user details and token from localStorage
+  // TODO: Possibly move this to a store for efficient state management
+  $: {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+
+      username = user.savedUsername;
+      email = user.savedEmail;
+      password = user.savedPassword;
+      isUserSaved = true;
+    }
+  }
 
   // Form validation
   $: {
@@ -116,7 +131,21 @@
       }
 
       if (status === Status.OK && token) {
-        const build = connectionType === Protocol.HTTPS ? Builds.STABLE : Builds.HTTP;
+        const build =
+          connectionType === Protocol.HTTPS ? Builds.STABLE : Builds.HTTP;
+
+        const user = {
+          savedUsername: username,
+          savedEmail: email,
+          savedPassword: password,
+          savedToken: token,
+        };
+
+        // Save user details and token to localStorage
+        if (isChecked) {
+          localStorage.setItem("user", JSON.stringify(user));
+          isUserSaved = true;
+        }
 
         launchSwf(build, token);
       }
@@ -136,20 +165,46 @@
   class="flex flex-col gap-4 p-4 w-[450px]"
 >
   {#if isRegisterForm}
+    {#if !isUserSaved}
+      <div class="flex items-center space-x-6">
+        <input
+          type="text"
+          bind:value={username}
+          on:focus={() => (focusStates.username = true)}
+          id="username"
+          name="username"
+          class={`focus:outline-primary ${errors.username ? "focus:outline-red" : ""} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
+          placeholder="Username"
+          required
+        />
+        {#if errors.username && focusStates.username}
+          <Tooltip
+            tooltipText={errors.username}
+            error={true}
+            style="text-red"
+            tipColor="bg-red"
+            side="right"
+            Icon={WarningDiamond}
+          />
+        {/if}
+      </div>
+    {/if}
+  {/if}
+  {#if !isUserSaved}
     <div class="flex items-center space-x-6">
       <input
-        type="text"
-        bind:value={username}
-        on:focus={() => (focusStates.username = true)}
-        id="username"
-        name="username"
-        class={`focus:outline-primary ${errors.username ? "focus:outline-red" : ""} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
-        placeholder="Username"
+        type="email"
+        bind:value={email}
+        on:focus={() => (focusStates.email = true)}
+        id="email"
+        name="email"
+        class={`${errors.email ? "focus:outline-red" : isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
+        placeholder="Email"
         required
       />
-      {#if errors.username && focusStates.username}
+      {#if errors.email && focusStates.email}
         <Tooltip
-          tooltipText={errors.username}
+          tooltipText={errors.email}
           error={true}
           style="text-red"
           tipColor="bg-red"
@@ -159,65 +214,21 @@
       {/if}
     </div>
   {/if}
-  <div class="flex items-center space-x-6">
-    <input
-      type="email"
-      bind:value={email}
-      on:focus={() => (focusStates.email = true)}
-      id="email"
-      name="email"
-      class={`${errors.email ? "focus:outline-red" : isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
-      placeholder="Email"
-      required
-    />
-    {#if errors.email && focusStates.email}
-      <Tooltip
-        tooltipText={errors.email}
-        error={true}
-        style="text-red"
-        tipColor="bg-red"
-        side="right"
-        Icon={WarningDiamond}
-      />
-    {/if}
-  </div>
-  <div class="flex items-center space-x-6">
-    <input
-      type="password"
-      bind:value={password}
-      on:focus={() => (focusStates.password = true)}
-      id="password"
-      name="password"
-      class={`ms-reveal ${errors.password ? "focus:outline-red" : isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
-      placeholder="Password"
-      required
-    />
-    {#if errors.password && focusStates.password}
-      <Tooltip
-        tooltipText={errors.password}
-        error={true}
-        style="text-red"
-        tipColor="bg-red"
-        side="right"
-        Icon={WarningDiamond}
-      />
-    {/if}
-  </div>
-  {#if isRegisterForm}
+  {#if !isUserSaved}
     <div class="flex items-center space-x-6">
       <input
         type="password"
-        bind:value={confirmPassword}
-        on:focus={() => (focusStates.confirmPassword = true)}
-        id="confirm-password"
-        name="confirm-password"
-        class={`ms-reveal focus:outline-primary ${errors.confirmPassword ? "focus:outline-red" : ""} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
-        placeholder="Confirm Password"
+        bind:value={password}
+        on:focus={() => (focusStates.password = true)}
+        id="password"
+        name="password"
+        class={`ms-reveal ${errors.password ? "focus:outline-red" : isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
+        placeholder="Password"
         required
       />
-      {#if errors.confirmPassword && focusStates.confirmPassword}
+      {#if errors.password && focusStates.password}
         <Tooltip
-          tooltipText={errors.confirmPassword}
+          tooltipText={errors.password}
           error={true}
           style="text-red"
           tipColor="bg-red"
@@ -226,6 +237,32 @@
         />
       {/if}
     </div>
+  {/if}
+  {#if isRegisterForm}
+    {#if !isUserSaved}
+      <div class="flex items-center space-x-6">
+        <input
+          type="password"
+          bind:value={confirmPassword}
+          on:focus={() => (focusStates.confirmPassword = true)}
+          id="confirm-password"
+          name="confirm-password"
+          class={`ms-reveal focus:outline-primary ${errors.confirmPassword ? "focus:outline-red" : ""} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
+          placeholder="Confirm Password"
+          required
+        />
+        {#if errors.confirmPassword && focusStates.confirmPassword}
+          <Tooltip
+            tooltipText={errors.confirmPassword}
+            error={true}
+            style="text-red"
+            tipColor="bg-red"
+            side="right"
+            Icon={WarningDiamond}
+          />
+        {/if}
+      </div>
+    {/if}
   {/if}
 
   {#if !isRegisterForm}
@@ -265,50 +302,72 @@
     </Select.Root>
 
     <div class="flex items-center space-x-3">
-      <Checkbox.Root
-        id="remember-me-checkbox"
-        aria-labelledby="remember-checkbox"
-        class="bg-secondary peer inline-flex size-[25px] items-center justify-center rounded-sm border border-white/10 transition-all duration-150 ease-in-out active:scale-98 data-[state=unchecked]:border-border-input data-[state=unchecked]:bg-background"
-        bind:checked={isChecked}
-      >
-        <Checkbox.Indicator let:isChecked>
-          {#if isChecked}
-            <Check size={15} weight="bold" />
-          {/if}
-        </Checkbox.Indicator>
-      </Checkbox.Root>
-      <Label.Root
-        id="remember-me-label"
-        for="remember"
-        class="text-md leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-      >
-        Remember Me
-      </Label.Root>
+      {#if !isUserSaved}
+        <Checkbox.Root
+          id="remember-me-checkbox"
+          aria-labelledby="remember-checkbox"
+          class="bg-secondary peer inline-flex size-[25px] items-center justify-center rounded-sm border border-white/10 transition-all duration-150 ease-in-out active:scale-98 data-[state=unchecked]:border-border-input data-[state=unchecked]:bg-background"
+          bind:checked={isChecked}
+        >
+          <Checkbox.Indicator let:isChecked>
+            {#if isChecked}
+              <Check size={15} weight="bold" />
+            {/if}
+          </Checkbox.Indicator>
+        </Checkbox.Root>
+
+        <Label.Root
+          id="remember-me-label"
+          for="remember"
+          class="text-md leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          Remember Me
+        </Label.Root>
+      {/if}
     </div>
   {/if}
   <PrimaryButton
     on:click={handleFormSubmit}
-    buttonText={(isRegisterForm ? "Register" : "Login").toUpperCase()}
+    buttonText={(isUserSaved
+      ? "Play"
+      : isRegisterForm
+        ? "Register"
+        : "Login"
+    ).toUpperCase()}
     color={isRegisterForm ? "bg-primary" : "bg-secondary"}
   />
-  <Label.Root
-    id="register-label"
-    for="register"
-    class="text-md text-center pt-2 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-  >
-    <div
-      on:click={showRegisterForm}
-      on:keydown={showRegisterForm}
-      role="button"
-      tabindex="0"
+  {#if isUserSaved}
+    <PrimaryButton
+      on:click={() => {
+        localStorage.removeItem("user");
+        isUserSaved = false;
+      }}
+      buttonText={`Logout`.toUpperCase()}
+      color="bg-btnDark"
+    />
+  {/if}
+  {#if !isUserSaved}
+    <Label.Root
+      id="register-label"
+      for="register"
+      class="text-md text-center pt-2 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
     >
-      {#if isRegisterForm}
-        Already have an account? <span class="text-primary">Login here</span>
-      {:else}
-        Don't have an account? <span class="text-secondary">Register here</span>
-      {/if}
-    </div>
-  </Label.Root>
+      <div
+        on:click={showRegisterForm}
+        on:keydown={showRegisterForm}
+        role="button"
+        tabindex="0"
+      >
+        {#if isRegisterForm}
+          Already have an account? <span class="text-primary">Login here</span>
+        {:else}
+          Don't have an account? <span class="text-secondary"
+            >Register here</span
+          >
+        {/if}
+      </div>
+    </Label.Root>
+  {/if}
 </form>
 
 <style>

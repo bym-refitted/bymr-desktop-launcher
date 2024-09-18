@@ -11,7 +11,7 @@
     <div class="py-6">
       <h1 class="text-4xl font-display">Official Refitted Servers:</h1>
       <p class="text-md font-medium text-muted-foreground pt-4">
-        The official Backyard Monsters Refitted servers. A 1:1 preservation of
+        The official Backyard Monsters Refitted server. A 1:1 preservation of
         the original Adobe Flash game, with the adoption of Map Room 2. All
         buildings, monsters and gameplay mechanics on this server are from the
         classic vanilla version of the game. Just how you remember it! Join us
