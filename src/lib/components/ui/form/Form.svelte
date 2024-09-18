@@ -14,6 +14,12 @@
   import { launchSwf } from "$lib/stores/launchStore";
   import { Protocol } from "$lib/enums/Protocol";
   import { Builds } from "$lib/enums/Builds";
+  import {
+    isUserSaved,
+    loadUserFromLocalStorage,
+    removeUserFromLocalStorage,
+    saveUserToLocalStorage,
+  } from "$lib/stores/userStore";
 
   let username = "";
   let email = "";
@@ -23,7 +29,6 @@
   let isRegisterForm = false;
   let isRegistered = false;
   let isChecked = false;
-  let isUserSaved = false;
 
   let focusStates = {
     username: false,
@@ -50,18 +55,7 @@
   };
 
   // Load saved user details and token from localStorage
-  // TODO: Possibly move this to a store for efficient state management
-  $: {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      const user = JSON.parse(savedUser);
-
-      username = user.savedUsername;
-      email = user.savedEmail;
-      password = user.savedPassword;
-      isUserSaved = true;
-    }
-  }
+  loadUserFromLocalStorage();
 
   // Form validation
   $: {
@@ -134,7 +128,7 @@
         const build =
           connectionType === Protocol.HTTPS ? Builds.STABLE : Builds.HTTP;
 
-        const user = {
+        const userData = {
           savedUsername: username,
           savedEmail: email,
           savedPassword: password,
@@ -143,8 +137,7 @@
 
         // Save user details and token to localStorage
         if (isChecked) {
-          localStorage.setItem("user", JSON.stringify(user));
-          isUserSaved = true;
+          saveUserToLocalStorage(userData);
         }
 
         launchSwf(build, token);
@@ -165,7 +158,7 @@
   class="flex flex-col gap-4 p-4 w-[450px]"
 >
   {#if isRegisterForm}
-    {#if !isUserSaved}
+    {#if !$isUserSaved}
       <div class="flex items-center space-x-6">
         <input
           type="text"
@@ -190,7 +183,7 @@
       </div>
     {/if}
   {/if}
-  {#if !isUserSaved}
+  {#if !$isUserSaved}
     <div class="flex items-center space-x-6">
       <input
         type="email"
@@ -214,7 +207,7 @@
       {/if}
     </div>
   {/if}
-  {#if !isUserSaved}
+  {#if !$isUserSaved}
     <div class="flex items-center space-x-6">
       <input
         type="password"
@@ -239,7 +232,7 @@
     </div>
   {/if}
   {#if isRegisterForm}
-    {#if !isUserSaved}
+    {#if !$isUserSaved}
       <div class="flex items-center space-x-6">
         <input
           type="password"
@@ -302,7 +295,7 @@
     </Select.Root>
 
     <div class="flex items-center space-x-3">
-      {#if !isUserSaved}
+      {#if !$isUserSaved}
         <Checkbox.Root
           id="remember-me-checkbox"
           aria-labelledby="remember-checkbox"
@@ -328,7 +321,7 @@
   {/if}
   <PrimaryButton
     on:click={handleFormSubmit}
-    buttonText={(isUserSaved
+    buttonText={($isUserSaved
       ? "Play"
       : isRegisterForm
         ? "Register"
@@ -336,17 +329,16 @@
     ).toUpperCase()}
     color={isRegisterForm ? "bg-primary" : "bg-secondary"}
   />
-  {#if isUserSaved}
+  {#if $isUserSaved}
     <PrimaryButton
       on:click={() => {
-        localStorage.removeItem("user");
-        isUserSaved = false;
+        removeUserFromLocalStorage();
       }}
       buttonText={`Logout`.toUpperCase()}
       color="bg-btnDark"
     />
   {/if}
-  {#if !isUserSaved}
+  {#if !$isUserSaved}
     <Label.Root
       id="register-label"
       for="register"
