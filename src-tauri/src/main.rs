@@ -61,7 +61,7 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
 }
 
 #[command]
-fn launch_game(build_name: &str) -> Result<(), String> {
+fn launch_game(build_name: &str, token: Option<&str>) -> Result<(), String> {
     let (flash_runtime_path, _) = get_platform_flash_runtime(&env::consts::OS)?;
 
     if !flash_runtime_path.exists() {
@@ -71,7 +71,8 @@ fn launch_game(build_name: &str) -> Result<(), String> {
             flash_runtime_path.display()
         ));
     }
-    let swf_url = format!(
+
+    let mut swf_url = format!(
         "http{}://{}bymr-{}.swf",
         if build_name == "http" || build_name == "local" {
             ""
@@ -81,6 +82,12 @@ fn launch_game(build_name: &str) -> Result<(), String> {
         LAUNCHER_DOWNLOADS_URL,
         build_name
     );
+
+    // Append token to the URL if it exists
+    if let Some(token) = token {
+        swf_url = format!("{}?token={}", swf_url, token);
+    }
+
     println!("Opening: {:?}, {:?}", flash_runtime_path, swf_url);
 
     // Open the game in Flash Player
