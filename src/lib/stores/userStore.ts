@@ -1,14 +1,11 @@
 import { writable } from "svelte/store";
 
 interface User {
-  savedEmail: string;
-  savedToken?: string;
+  language?: string | unknown;
+  token?: string;
 }
 
-const initialUser: User = {
-  savedEmail: "",
-  savedToken: "",
-};
+const initialUser: User = { language: "", token: "" };
 
 export const user = writable<User>(initialUser);
 export const isUserRemembered = writable<boolean>(false);

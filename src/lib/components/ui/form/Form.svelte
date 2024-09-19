@@ -137,7 +137,7 @@
     if (!$isUserRemembered) {
       formData.email = email;
     } else {
-      formData.token = $user.savedToken;
+      formData.token = $user.token;
     }
 
     const route = isRegisterForm ? "/player/register" : "/player/getinfo";
@@ -152,13 +152,14 @@
 
       if (status === Status.OK && token) {
         const build = connectionType === Protocol.HTTPS ? Builds.STABLE : Builds.HTTP;
-        const userData = { savedEmail: email, savedToken: token};
 
         // Save user details to localStorage
-        if (isChecked) saveUserToLocalStorage(userData);
+        const userSaveData = { language, token };
+        if (isChecked) saveUserToLocalStorage(userSaveData);
 
         // Launch the SWF file
-        launchSwf(build, language as string, token);
+        const launchLanguage = $user.language || language;
+        launchSwf(build, launchLanguage, token);
       }
     } catch (error) {
       console.error("Error during authentication:", error);
