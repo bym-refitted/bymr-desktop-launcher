@@ -1,11 +1,13 @@
+import { Method } from "$lib/enums/Method";
 import { BASE_URL, PORT } from "$lib/globals";
 import { currentGameVersion } from "$lib/stores/loadState";
 import { get } from "svelte/store";
 
 export interface FormData {
   username: string;
-  email: string;
+  email?: string;
   password: string;
+  token?: string;
 }
 
 interface Response<T> {
@@ -17,20 +19,21 @@ interface Response<T> {
 export const invokeApiRequest = async <T>(
   route: string,
   formData: FormData,
-  method: string = "POST"
+  method: string = Method.POST
 ): Promise<Response<T>> => {
   try {
     const version = get(currentGameVersion);
-    const response = await fetch(
-      `${BASE_URL}:${PORT}/api/v${version}-alpha/${route}`,
-      {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      }
-    );
+    const options: RequestInit = {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    if (method !== Method.GET) options.body = JSON.stringify(formData);
+
+    const url = `${BASE_URL}:${PORT}/api/v${version}-alpha${route}`;
+    const response = await fetch(url, options);
 
     if (!response.ok) throw new Error("invokeApiRequest response was not ok");
 
@@ -38,6 +41,6 @@ export const invokeApiRequest = async <T>(
     const token = data.token;
     return { status: response.status, data, token };
   } catch (error) {
-    throw new Error("invokeApiRequest failed");
+    throw new Error("invokeApiRequest failed, Reason: " + error);
   }
 };

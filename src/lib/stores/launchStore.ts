@@ -5,16 +5,22 @@ import { addErrorLog } from "./debugLogStore";
 export let isLaunching = writable(false);
 export let launchError = writable({ code: "", show: false });
 
-export const launchSwf = async (buildName: string, token?: string) => {
-  const launchOptions = { buildName, token };
+export const launchSwf = async (
+  buildName: string,
+  language: any = "english",
+  token?: string
+) => {
+  const launchOptions = { buildName, language, token };
   localStorage.setItem("lastLaunch", JSON.stringify(launchOptions));
   isLaunching.set(true);
-  
+
   try {
     await invoke("launch_game", launchOptions);
     launchError.update(() => ({ code: "", show: false }));
   } catch (err) {
-    launchError.update(() => ({ code: err.code, show: true }));
+    console.log(err);
+    const error = err?.code || "An unknown error occurred during the launch process.";
+    launchError.update(() => ({ code: error, show: true }));
   } finally {
     isLaunching.set(false);
   }

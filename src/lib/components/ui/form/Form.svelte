@@ -7,19 +7,24 @@
   import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
   import Tooltip from "../tooltip/Tooltip.svelte";
   import AlertDialog from "$lib/components/AlertDialog.svelte";
-
   import { flyAndScale } from "$lib/utils";
-  import { invokeApiRequest, type FormData } from "./invokeApiRequest";
   import { Status } from "$lib/enums/StatusCodes";
   import { launchSwf } from "$lib/stores/launchStore";
   import { Protocol } from "$lib/enums/Protocol";
   import { Builds } from "$lib/enums/Builds";
   import {
-    isUserSaved,
+    isUserRemembered,
     loadUserFromLocalStorage,
     removeUserFromLocalStorage,
     saveUserToLocalStorage,
+    user,
   } from "$lib/stores/userStore";
+  import {
+    invokeApiRequest,
+    type FormData,
+  } from "../../../utils/invokeApiRequest";
+  import { onMount } from "svelte";
+  import { getAvailableLanguages } from "$lib/utils/getAvailableLanguages";
 
   let username = "";
   let email = "";
@@ -44,6 +49,9 @@
     confirmPassword: "",
   };
 
+  let language: string | unknown;
+  const languages = [];
+
   const builds = [
     { value: Builds.STABLE, label: Protocol.HTTPS },
     { value: Builds.HTTP, label: Protocol.HTTP },
@@ -54,8 +62,12 @@
     [Builds.HTTP]: Protocol.HTTP,
   };
 
-  // Load saved user details and token from localStorage
-  loadUserFromLocalStorage();
+  onMount(() => {
+    getAvailableLanguages(languages);
+
+    // Load saved user details and token from localStorage
+    loadUserFromLocalStorage();
+  });
 
   // Form validation
   $: {
@@ -99,6 +111,14 @@
 
   const handleFormSubmit = async (e: Event) => {
     e.preventDefault();
+
+    // Skip validation if the user is already remembered
+    if ($isUserRemembered) {
+      await authenticateUser();
+      return;
+    }
+
+    // Otherwise, validate the form fields
     const hasErrors = isRegisterForm
       ? errors.username ||
         errors.email ||
@@ -111,10 +131,16 @@
   };
 
   const authenticateUser = async () => {
-    const formData: FormData = { username, email, password };
-    if (isRegisterForm) formData.username = username;
-    const route = isRegisterForm ? "player/register" : "player/getinfo";
+    const formData: FormData = { username, password };
 
+    // User can be validated on the server by either email OR token
+    if (!$isUserRemembered) {
+      formData.email = email;
+    } else {
+      formData.token = $user.savedToken;
+    }
+
+    const route = isRegisterForm ? "/player/register" : "/player/getinfo";
     try {
       const { status, data, token } = await invokeApiRequest(route, formData);
 
@@ -125,22 +151,14 @@
       }
 
       if (status === Status.OK && token) {
-        const build =
-          connectionType === Protocol.HTTPS ? Builds.STABLE : Builds.HTTP;
+        const build = connectionType === Protocol.HTTPS ? Builds.STABLE : Builds.HTTP;
+        const userData = { savedEmail: email, savedToken: token};
 
-        const userData = {
-          savedUsername: username,
-          savedEmail: email,
-          savedPassword: password,
-          savedToken: token,
-        };
+        // Save user details to localStorage
+        if (isChecked) saveUserToLocalStorage(userData);
 
-        // Save user details and token to localStorage
-        if (isChecked) {
-          saveUserToLocalStorage(userData);
-        }
-
-        launchSwf(build, token);
+        // Launch the SWF file
+        launchSwf(build, language as string, token);
       }
     } catch (error) {
       console.error("Error during authentication:", error);
@@ -158,7 +176,7 @@
   class="flex flex-col gap-4 p-4 w-[450px]"
 >
   {#if isRegisterForm}
-    {#if !$isUserSaved}
+    {#if !$isUserRemembered}
       <div class="flex items-center space-x-6">
         <input
           type="text"
@@ -183,7 +201,7 @@
       </div>
     {/if}
   {/if}
-  {#if !$isUserSaved}
+  {#if !$isUserRemembered}
     <div class="flex items-center space-x-6">
       <input
         type="email"
@@ -207,7 +225,7 @@
       {/if}
     </div>
   {/if}
-  {#if !$isUserSaved}
+  {#if !$isUserRemembered}
     <div class="flex items-center space-x-6">
       <input
         type="password"
@@ -232,7 +250,7 @@
     </div>
   {/if}
   {#if isRegisterForm}
-    {#if !$isUserSaved}
+    {#if !$isUserRemembered}
       <div class="flex items-center space-x-6">
         <input
           type="password"
@@ -259,6 +277,42 @@
   {/if}
 
   {#if !isRegisterForm}
+    {#if !$isUserRemembered}
+      <Select.Root
+        items={languages}
+        onSelectedChange={(e) => {
+          language = e.label;
+        }}
+      >
+        <Select.Trigger
+          class="focus:outline-secondary w-full flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white"
+          aria-label="Language"
+        >
+          <Select.Value
+            class="text-md text-unselected"
+            placeholder="Language"
+          />
+          <CaretUpDown size={16} weight="bold" />
+        </Select.Trigger>
+        <Select.Content
+          class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none"
+          transition={flyAndScale}
+          sideOffset={8}
+        >
+          {#each languages as lang}
+            <Select.Item
+              class="data-[highlighted]:bg-secondary flex h-10 w-full select-none items-center rounded-button py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-75"
+              value={lang.value}
+              label={lang}
+            >
+              {lang}
+              <Select.ItemIndicator class="ml-auto" asChild={false}
+              ></Select.ItemIndicator>
+            </Select.Item>
+          {/each}
+        </Select.Content>
+      </Select.Root>
+    {/if}
     <Select.Root
       items={builds}
       onSelectedChange={(e) => {
@@ -293,9 +347,8 @@
         {/each}
       </Select.Content>
     </Select.Root>
-
     <div class="flex items-center space-x-3">
-      {#if !$isUserSaved}
+      {#if !$isUserRemembered}
         <Checkbox.Root
           id="remember-me-checkbox"
           aria-labelledby="remember-checkbox"
@@ -321,7 +374,7 @@
   {/if}
   <PrimaryButton
     on:click={handleFormSubmit}
-    buttonText={($isUserSaved
+    buttonText={($isUserRemembered
       ? "Play"
       : isRegisterForm
         ? "Register"
@@ -329,7 +382,7 @@
     ).toUpperCase()}
     color={isRegisterForm ? "bg-primary" : "bg-secondary"}
   />
-  {#if $isUserSaved}
+  {#if $isUserRemembered}
     <PrimaryButton
       on:click={() => {
         removeUserFromLocalStorage();
@@ -338,7 +391,7 @@
       color="bg-btnDark"
     />
   {/if}
-  {#if !$isUserSaved}
+  {#if !$isUserRemembered}
     <Label.Root
       id="register-label"
       for="register"
