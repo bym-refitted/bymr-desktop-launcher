@@ -1,5 +1,5 @@
 import { Method } from "$lib/enums/Method";
-import { BASE_URL, PORT } from "$lib/globals";
+import { BASE_URL } from "$lib/globals";
 import { currentGameVersion } from "$lib/stores/loadState";
 import { get } from "svelte/store";
 
@@ -32,7 +32,7 @@ export const invokeApiRequest = async <T>(
 
     if (method !== Method.GET) options.body = JSON.stringify(formData);
 
-    const url = `${BASE_URL}:${PORT}/api/v${version}-alpha${route}`;
+    const url = `${BASE_URL}/api/v${version}-alpha${route}`;
     const response = await fetch(url, options);
 
     if (!response.ok) throw new Error("invokeApiRequest response was not ok");

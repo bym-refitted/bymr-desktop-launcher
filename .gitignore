@@ -9,6 +9,7 @@ bymr-downloads
 flashplayer.*
 
 # Others
+.env*
 .idea
 .svelte-kit
 .tauri

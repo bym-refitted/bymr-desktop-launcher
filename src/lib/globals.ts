@@ -1,2 +1,1 @@
-export const BASE_URL = 'http://localhost';
-export const PORT = '3001';
+export const BASE_URL = import.meta.env.VITE_BASE_URL;
