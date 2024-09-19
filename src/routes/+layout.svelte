@@ -44,7 +44,7 @@
       launcherVersion = launcherVersionManifest;
       currentGameVersion.set(currentGameVersionManifest);
 
-      addSuccessLog(`Launcher initialized! (▀̿Ĺ̯▀̿ ̿) 🚀`);
+      addSuccessLog(`Launcher initialized! 🚀`);
     } catch (error) {
       addErrorLog(`Error during launcher initialization: ${error}`);
     } finally {
