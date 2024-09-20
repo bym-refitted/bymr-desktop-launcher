@@ -1,35 +1,38 @@
 <script lang="ts">
-  import { Select, Checkbox, Label } from 'bits-ui';
-  import CaretUpDown from 'phosphor-svelte/lib/CaretUpDown';
-  import Check from 'phosphor-svelte/lib/Check';
-  import WarningDiamond from 'phosphor-svelte/lib/WarningDiamond';
-  import Translate from 'phosphor-svelte/lib/Translate';
-  import ShieldWarning from 'phosphor-svelte/lib/ShieldWarning';
+  import { Select, Checkbox, Label } from "bits-ui";
+  import CaretUpDown from "phosphor-svelte/lib/CaretUpDown";
+  import Check from "phosphor-svelte/lib/Check";
+  import WarningDiamond from "phosphor-svelte/lib/WarningDiamond";
+  import Translate from "phosphor-svelte/lib/Translate";
+  import Shield from "phosphor-svelte/lib/Shield";
 
-  import PrimaryButton from '$lib/components/ui/button/PrimaryButton.svelte';
-  import Tooltip from '../tooltip/Tooltip.svelte';
-  import AlertDialog from '$lib/components/AlertDialog.svelte';
-  import { flyAndScale } from '$lib/utils';
-  import { Status } from '$lib/enums/StatusCodes';
-  import { launchSwf } from '$lib/stores/launchStore';
-  import { Protocol } from '$lib/enums/Protocol';
-  import { Builds } from '$lib/enums/Builds';
+  import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
+  import Tooltip from "../tooltip/Tooltip.svelte";
+  import AlertDialog from "$lib/components/AlertDialog.svelte";
+  import { flyAndScale } from "$lib/utils";
+  import { Status } from "$lib/enums/StatusCodes";
+  import { launchSwf } from "$lib/stores/launchStore";
+  import { Protocol } from "$lib/enums/Protocol";
+  import { Builds } from "$lib/enums/Builds";
   import {
     isUserRemembered,
     loadUserFromLocalStorage,
     removeUserFromLocalStorage,
     saveUserToLocalStorage,
     user,
-  } from '$lib/stores/userStore';
-  import { invokeApiRequest, type FormData } from '../../../utils/invokeApiRequest';
-  import { onMount } from 'svelte';
-  import { getAvailableLanguages } from '$lib/utils/getAvailableLanguages';
-  import { addErrorLog } from '$lib/stores/debugLogStore';
+  } from "$lib/stores/userStore";
+  import {
+    invokeApiRequest,
+    type FormData,
+  } from "../../../utils/invokeApiRequest";
+  import { onMount } from "svelte";
+  import { getAvailableLanguages } from "$lib/utils/getAvailableLanguages";
+  import { addErrorLog } from "$lib/stores/debugLogStore";
 
-  let username = '';
-  let email = '';
-  let password = '';
-  let confirmPassword = '';
+  let username = "";
+  let email = "";
+  let password = "";
+  let confirmPassword = "";
   let connectionType = Protocol.HTTPS;
   let isRegisterForm = false;
   let isRegistered = false;
@@ -43,13 +46,13 @@
   };
 
   let errors = {
-    email: '',
-    username: '',
-    password: '',
-    confirmPassword: '',
+    email: "",
+    username: "",
+    password: "",
+    confirmPassword: "",
   };
 
-  $: language = 'English';
+  $: language = "English";
   let languages = [];
 
   const builds = [
@@ -67,11 +70,13 @@
       .then((languageSet) => {
         languages = [...languageSet];
         language = languages[0];
-        console.log(language);
-        if (typeof $user.language === 'string' && languageSet.has($user.language)) {
+
+        if (
+          typeof $user.language === "string" &&
+          languageSet.has($user.language)
+        ) {
           language = $user.language;
         }
-        console.log(language);
       })
       .catch((errorMessage) => {
         addErrorLog(`Could not get available Languages:
@@ -85,20 +90,20 @@
   // Form validation
   $: {
     if (username.length < 2) {
-      errors.username = 'Usernames must be at least 2 characters long';
+      errors.username = "Usernames must be at least 2 characters long";
     } else if (username.length > 12) {
-      errors.username = 'Usernames cannot be longer than 12 characters';
+      errors.username = "Usernames cannot be longer than 12 characters";
     } else {
-      errors.username = '';
+      errors.username = "";
     }
   }
 
   $: {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      errors.email = 'Please enter a valid email address';
+      errors.email = "Please enter a valid email address";
     } else {
-      errors.email = '';
+      errors.email = "";
     }
   }
 
@@ -106,17 +111,17 @@
     const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
     if (!passwordRegex.test(password)) {
       errors.password =
-        'Password must be at least 8 characters long, contain at least 1 uppercase letter, and 1 special character';
+        "Password must be at least 8 characters long, contain at least 1 uppercase letter, and 1 special character";
     } else {
-      errors.password = '';
+      errors.password = "";
     }
   }
 
   $: {
     if (isRegisterForm && confirmPassword !== password) {
-      errors.confirmPassword = 'Passwords do not match';
+      errors.confirmPassword = "Passwords do not match";
     } else {
-      errors.confirmPassword = '';
+      errors.confirmPassword = "";
     }
   }
 
@@ -133,7 +138,10 @@
 
     // Otherwise, validate the form fields
     const hasErrors = isRegisterForm
-      ? errors.username || errors.email || errors.password || errors.confirmPassword
+      ? errors.username ||
+        errors.email ||
+        errors.password ||
+        errors.confirmPassword
       : errors.email || errors.password;
 
     if (hasErrors) return;
@@ -150,7 +158,7 @@
       formData.token = $user.token;
     }
 
-    const route = isRegisterForm ? '/player/register' : '/player/getinfo';
+    const route = isRegisterForm ? "/player/register" : "/player/getinfo";
     try {
       const { status, data, token } = await invokeApiRequest(route, formData);
 
@@ -161,7 +169,8 @@
       }
 
       if (status === Status.OK && token) {
-        const build = connectionType === Protocol.HTTPS ? Builds.STABLE : Builds.HTTP;
+        const build =
+          connectionType === Protocol.HTTPS ? Builds.STABLE : Builds.HTTP;
 
         // Save user details to localStorage
         const userSaveData = { language, token };
@@ -172,7 +181,7 @@
         launchSwf(build, launchLanguage, token);
       }
     } catch (error) {
-      console.error('Error during authentication:', error);
+      console.error("Error during authentication:", error);
       // TODO: Handle errors (e.g., show error message to the user)
       // Server should return appropriate error messages
       // e.g. username has been taken, account exists, account not found, etc.
@@ -181,8 +190,16 @@
   };
 </script>
 
-<AlertDialog bind:open={isRegistered} title="🚀 Registered successfully!" />
-<form method="POST" on:submit={handleFormSubmit} class="flex flex-col gap-4 p-4 w-[450px]">
+<AlertDialog
+  bind:open={isRegistered}
+  title="Registered successfully."
+  description="You have successfully registered an account. Please login to continue."
+/>
+<form
+  method="POST"
+  on:submit={handleFormSubmit}
+  class="flex flex-col gap-4 p-4 w-[450px]"
+>
   {#if isRegisterForm}
     {#if !$isUserRemembered}
       <div class="flex items-center space-x-6">
@@ -192,7 +209,7 @@
           on:focus={() => (focusStates.username = true)}
           id="username"
           name="username"
-          class={`focus:outline-primary ${errors.username ? 'focus:outline-red' : ''} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
+          class={`focus:outline-primary ${errors.username ? "focus:outline-red" : ""} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
           placeholder="Username"
           required
         />
@@ -217,7 +234,7 @@
         on:focus={() => (focusStates.email = true)}
         id="email"
         name="email"
-        class={`${errors.email ? 'focus:outline-red' : isRegisterForm ? 'focus:outline-primary' : 'focus:outline-secondary'} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
+        class={`${errors.email ? "focus:outline-red" : isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
         placeholder="Email"
         required
       />
@@ -241,7 +258,7 @@
         on:focus={() => (focusStates.password = true)}
         id="password"
         name="password"
-        class={`ms-reveal ${errors.password ? 'focus:outline-red' : isRegisterForm ? 'focus:outline-primary' : 'focus:outline-secondary'} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
+        class={`ms-reveal ${errors.password ? "focus:outline-red" : isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
         placeholder="Password"
         required
       />
@@ -266,7 +283,7 @@
           on:focus={() => (focusStates.confirmPassword = true)}
           id="confirm-password"
           name="confirm-password"
-          class={`ms-reveal focus:outline-primary ${errors.confirmPassword ? 'focus:outline-red' : ''} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
+          class={`ms-reveal focus:outline-primary ${errors.confirmPassword ? "focus:outline-red" : ""} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
           placeholder="Confirm Password"
           required
         />
@@ -298,8 +315,13 @@
           class="focus:outline-secondary w-full flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white"
           aria-label="Language"
         >
-          <Translate size={20} weight="bold" class="text-primary" />
-          <Select.Value class="text-md" placeholder={language} />
+          <div class="flex items-center">
+            <Translate size={20} weight="bold" class="text-primary mr-3" />
+            <Select.Value
+              class="text-md placeholder-unselected text-unselected"
+              placeholder={language}
+            />
+          </div>
           <CaretUpDown size={16} weight="bold" class="text-unselected" />
         </Select.Trigger>
         <Select.Content
@@ -314,7 +336,8 @@
               label={lang}
             >
               {lang}
-              <Select.ItemIndicator class="ml-auto" asChild={false}></Select.ItemIndicator>
+              <Select.ItemIndicator class="ml-auto" asChild={false}
+              ></Select.ItemIndicator>
             </Select.Item>
           {/each}
         </Select.Content>
@@ -330,8 +353,13 @@
         class="focus:outline-secondary w-full flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white"
         aria-label="Connection Type"
       >
-        <ShieldWarning size={20} weight="bold" class="text-primary" />
-        <Select.Value class="text-md uppercase" placeholder={connectionType} />
+        <div class="flex items-center">
+          <Shield size={20} weight="bold" class="text-primary mr-3" />
+          <Select.Value
+            class="text-md text-unselected placeholder-unselected"
+            placeholder="Connection Type"
+          />
+        </div>
         <CaretUpDown size={16} weight="bold" class="text-unselected" />
       </Select.Trigger>
       <Select.Content
@@ -346,7 +374,8 @@
             label={build.label.toUpperCase()}
           >
             {build.label.toUpperCase()}
-            <Select.ItemIndicator class="ml-auto" asChild={false}></Select.ItemIndicator>
+            <Select.ItemIndicator class="ml-auto" asChild={false}
+            ></Select.ItemIndicator>
           </Select.Item>
         {/each}
       </Select.Content>
@@ -378,8 +407,13 @@
   {/if}
   <PrimaryButton
     on:click={handleFormSubmit}
-    buttonText={($isUserRemembered ? 'Play' : isRegisterForm ? 'Register' : 'Login').toUpperCase()}
-    color={isRegisterForm ? 'bg-primary' : 'bg-secondary'}
+    buttonText={($isUserRemembered
+      ? "Play"
+      : isRegisterForm
+        ? "Register"
+        : "Login"
+    ).toUpperCase()}
+    color={isRegisterForm ? "bg-primary" : "bg-secondary"}
   />
   {#if $isUserRemembered}
     <PrimaryButton
@@ -396,11 +430,18 @@
       for="register"
       class="text-md text-center pt-2 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
     >
-      <div on:click={showRegisterForm} on:keydown={showRegisterForm} role="button" tabindex="0">
+      <div
+        on:click={showRegisterForm}
+        on:keydown={showRegisterForm}
+        role="button"
+        tabindex="0"
+      >
         {#if isRegisterForm}
           Already have an account? <span class="text-primary">Login here</span>
         {:else}
-          Don't have an account? <span class="text-secondary">Register here</span>
+          Don't have an account? <span class="text-secondary"
+            >Register here</span
+          >
         {/if}
       </div>
     </Label.Root>

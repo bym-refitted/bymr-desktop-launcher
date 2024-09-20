@@ -16,14 +16,14 @@
 {/if}
 <div
   role="button"
-  class="absolute bottom-10 right-10 z-30 w-full max-w-[328px] rounded-[12px] border border-dark-10 bg-background p-4"
+  class="absolute bottom-10 right-10 z-30 lg:w-full max-w-[280px] rounded-[12px] border border-dark-10 bg-background p-4"
   on:click={toggleLogs}
   on:keydown={toggleLogs}
   tabindex="0"
 >
   <div class="flex items-center">
     <div
-      class="mr-3 flex size-12 items-center justify-center rounded-full bg-muted"
+      class="flex size-12 items-center justify-center rounded-full bg-muted lg:mr-3"
     >
       {#if !$hasLoaded}
         <Plug size={26} color="orange" weight="bold" />
@@ -33,7 +33,7 @@
         <SealCheck size={26} color="green" weight="bold" />
       {/if}
     </div>
-    <div class="flex flex-col">
+    <div class="flex flex-col hidden lg:block">
       <h4 class="text-[17px] font-display leading-5 tracking-[-0.01em]">
         {#if !$hasLoaded}
           Connecting
