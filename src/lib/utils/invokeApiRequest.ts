@@ -1,7 +1,7 @@
-import { Method } from "$lib/enums/Method";
-import { BASE_URL } from "$lib/globals";
-import { currentGameVersion } from "$lib/stores/loadState";
-import { get } from "svelte/store";
+import { Method } from '$lib/enums/Method';
+import { BASE_URL } from '$lib/globals';
+import { currentGameVersion } from '$lib/stores/loadState';
+import { get } from 'svelte/store';
 
 export interface FormData {
   username: string;
@@ -26,7 +26,7 @@ export const invokeApiRequest = async <T>(
     const options: RequestInit = {
       method,
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     };
 
@@ -35,12 +35,12 @@ export const invokeApiRequest = async <T>(
     const url = `${BASE_URL}/api/v${version}-alpha${route}`;
     const response = await fetch(url, options);
 
-    if (!response.ok) throw new Error("invokeApiRequest response was not ok");
+    if (!response.ok) throw new Error(`Api response was not ok for ${route}`);
 
     const data = await response.json();
     const token = data.token;
     return { status: response.status, data, token };
   } catch (error) {
-    throw new Error("invokeApiRequest failed, Reason: " + error);
+    throw new Error(`invokeApiRequest failed, Reason: ${error}`);
   }
 };
