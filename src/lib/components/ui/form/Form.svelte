@@ -35,6 +35,8 @@
     validateConfirmPassword,
   } from "./validation";
   import ArrowCircleLeft from "phosphor-svelte/lib/ArrowCircleLeft";
+  import PaperPlaneTilt from "phosphor-svelte/lib/PaperPlaneTilt";
+  import { Method } from "$lib/enums/Method";
 
   let username = "";
   let email = "";
@@ -45,6 +47,7 @@
   let isRegistered = false;
   let isChecked = false;
   let hasForgotPassword = false;
+  let emailSent = false;
 
   let focusStates = {
     username: false,
@@ -176,11 +179,7 @@
         email,
       });
 
-      if (response.status === Status.OK) {
-        console.log(
-          "Password reset instructions have been sent to your email."
-        );
-      }
+      if (response.status === Status.OK) emailSent = true;
     } catch (error) {
       throw new Error(`Error during forgot password request: ${error}`);
     }
@@ -206,8 +205,16 @@
   title="Registered successfully."
   description="You have successfully registered an account. Please login to continue."
 />
+
+<AlertDialog
+  bind:open={emailSent}
+  title="Password Reset Email Sent"
+  description="If the email you entered is registered, you will receive an email with instructions to reset your password shortly. Please make sure to check your spam folder."
+  Icon={PaperPlaneTilt}
+/>
+
 <form
-  method="POST"
+  method={Method.POST}
   on:submit={handleFormSubmit}
   class="flex flex-col gap-4 p-4 w-[450px]"
 >
@@ -431,9 +438,7 @@
               class="text-md leading-none cursor-pointer hover:text-secondary"
               on:click={showForgotPassword}
             >
-              <Label.Root id="forgot-password-label" for="forgot-password">
-                Forgot password?
-              </Label.Root>
+              <p class="cursor:pointer">Forgot password?</p>
             </button>
           </div>
         {/if}
