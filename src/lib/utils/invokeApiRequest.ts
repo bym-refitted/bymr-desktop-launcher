@@ -4,9 +4,9 @@ import { currentGameVersion } from '$lib/stores/loadState';
 import { get } from 'svelte/store';
 
 export interface FormData {
-  username: string;
+  username?: string;
   email?: string;
-  password: string;
+  password?: string;
   token?: string;
 }
 
