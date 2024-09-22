@@ -38,17 +38,21 @@
   import PaperPlaneTilt from "phosphor-svelte/lib/PaperPlaneTilt";
   import { Method } from "$lib/enums/Method";
 
+  // User details
   let username = "";
   let email = "";
   let password = "";
   let confirmPassword = "";
-  let connectionType = Protocol.HTTPS;
+
+  // Form states
   let isRegisterForm = false;
   let isRegistered = false;
   let isChecked = false;
   let hasForgotPassword = false;
+  let isButtonDisabled = false;
   let emailSent = false;
 
+  // Form focus
   let focusStates = {
     username: false,
     email: false,
@@ -56,6 +60,17 @@
     confirmPassword: false,
   };
 
+  // Form validation
+  $: errors.username = validateUsername(username);
+  $: errors.email = validateEmail(email);
+  $: errors.password = validatePassword(password);
+  $: errors.confirmPassword = validateConfirmPassword(
+    password,
+    confirmPassword,
+    isRegisterForm
+  );
+
+  // Form errors
   let errors = {
     email: "",
     username: "",
@@ -63,9 +78,16 @@
     confirmPassword: "",
   };
 
+  // Response errors
+  let errorMessage = "";
+  $: isError = errorMessage !== "";
+
+  // Languages
   $: language = "English";
   let languages = [];
 
+  // Builds
+  let connectionType = Protocol.HTTPS;
   const builds = [
     { value: Builds.STABLE, label: Protocol.HTTPS },
     { value: Builds.HTTP, label: Protocol.HTTP },
@@ -76,6 +98,7 @@
     [Builds.HTTP]: Protocol.HTTP,
   };
 
+  // Page init load
   onMount(() => {
     getAvailableLanguages()
       .then((languageSet) => {
@@ -94,19 +117,9 @@
       ${errorMessage}`);
       });
 
-    // Load saved user details and token from localStorage
+    // Load user from local storage
     loadUserFromLocalStorage();
   });
-
-  // Form validation
-  $: errors.username = validateUsername(username);
-  $: errors.email = validateEmail(email);
-  $: errors.password = validatePassword(password);
-  $: errors.confirmPassword = validateConfirmPassword(
-    password,
-    confirmPassword,
-    isRegisterForm
-  );
 
   const showRegisterForm = () => (isRegisterForm = !isRegisterForm);
 
@@ -157,7 +170,7 @@
         const build =
           connectionType === Protocol.HTTPS ? Builds.STABLE : Builds.HTTP;
 
-        // Save user details to localStorage
+        // Save user details to local storage
         const userSaveData = { language, token };
         if (isChecked) saveUserToLocalStorage(userSaveData);
 
@@ -166,23 +179,33 @@
         launchSwf(build, launchLanguage, token);
       }
     } catch (error) {
-      // TODO: Handle errors (e.g., show error message to the user)
-      // Server should return appropriate error messages
-      // e.g. username has been taken, account exists, account not found, etc.
-      addErrorLog(`'Error during authentication: ${error}`);
+      errorMessage = error.message;
+      addErrorLog(`Error during authentication: ${error.message}`);
     }
   };
 
   const handleForgotPassword = async () => {
     try {
-      const response = await invokeApiRequest("/player/forgotPassword", {
+      const { status } = await invokeApiRequest("/player/forgotPassword", {
         email,
       });
 
-      if (response.status === Status.OK) emailSent = true;
+      if (status === Status.OK) emailSent = true;
     } catch (error) {
-      throw new Error(`Error during forgot password request: ${error}`);
+      errorMessage = error.message;
+      addErrorLog(`Error processing forgot password: ${error.message}`);
     }
+  };
+
+  const handleButtonClick = async (e: Event) => {
+    isButtonDisabled = true;
+    hasForgotPassword
+      ? await handleForgotPassword()
+      : await handleFormSubmit(e);
+
+    setTimeout(() => {
+      isButtonDisabled = false;
+    }, 5000);
   };
 
   // Get button texts
@@ -211,6 +234,13 @@
   title="Password Reset Email Sent"
   description="If the email you entered is registered, you will receive an email with instructions to reset your password shortly. Please make sure to check your spam folder."
   Icon={PaperPlaneTilt}
+/>
+
+<AlertDialog
+  bind:open={isError}
+  title="Oops!"
+  description={errorMessage}
+  Icon={WarningDiamond}
 />
 
 <form
@@ -446,9 +476,10 @@
     {/if}
   {/if}
   <PrimaryButton
-    on:click={hasForgotPassword ? handleForgotPassword : handleFormSubmit}
+    on:click={handleButtonClick}
     buttonText={buttonText.toUpperCase()}
     color={isRegisterForm ? "bg-primary" : "bg-secondary"}
+    disabled={isButtonDisabled}
   />
   {#if $isUserRemembered}
     <PrimaryButton
