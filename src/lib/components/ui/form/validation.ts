@@ -1,5 +1,8 @@
 export const validateUsername = (username: string): string => {
-  if (username.length < 2) {
+  const usernameRegex = /^[a-zA-Z0-9]+$/;
+  if (!usernameRegex.test(username)) {
+    return "Usernames can only contain numbers and letters";
+  } else if (username.length < 2) {
     return "Usernames must be at least 2 characters long";
   } else if (username.length > 12) {
     return "Usernames cannot be longer than 12 characters";
@@ -9,7 +12,7 @@ export const validateUsername = (username: string): string => {
 };
 
 export const validateEmail = (email: string): string => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
   if (!emailRegex.test(email)) {
     return "Please enter a valid email address";
   } else {
