@@ -61,21 +61,15 @@
   };
 
   // Form validation
-  $: errors.username = validateUsername(username);
-  $: errors.email = validateEmail(email);
-  $: errors.password = validatePassword(password);
-  $: errors.confirmPassword = validateConfirmPassword(
-    password,
-    confirmPassword,
-    isRegisterForm
-  );
-
-  // Form errors
-  let errors = {
-    email: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
+  $: errors = {
+    username: validateUsername(username),
+    email: validateEmail(email),
+    password: validatePassword(password),
+    confirmPassword: validateConfirmPassword(
+      password,
+      confirmPassword,
+      isRegisterForm
+    ),
   };
 
   // Response errors
@@ -142,8 +136,11 @@
         errors.confirmPassword
       : errors.email || errors.password;
 
-    if (hasErrors) return;
-    await authenticateUser();
+    if (hasErrors) {
+      // Update focus states for fields with errors
+      Object.keys(focusStates).forEach((key) => (focusStates[key] = true));
+      return;
+    } else await authenticateUser();
   };
 
   const authenticateUser = async () => {
