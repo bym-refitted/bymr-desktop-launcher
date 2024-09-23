@@ -21,10 +21,7 @@
     saveUserToLocalStorage,
     user,
   } from "$lib/stores/userStore";
-  import {
-    invokeApiRequest,
-    type FormData,
-  } from "../../../utils/invokeApiRequest";
+  import { invokeApiRequest } from "../../../utils/invokeApiRequest";
   import { onMount } from "svelte";
   import { getAvailableLanguages } from "$lib/utils/getAvailableLanguages";
   import { addErrorLog } from "$lib/stores/debugLogStore";
@@ -37,6 +34,13 @@
   import ArrowCircleLeft from "phosphor-svelte/lib/ArrowCircleLeft";
   import PaperPlaneTilt from "phosphor-svelte/lib/PaperPlaneTilt";
   import { Method } from "$lib/enums/Method";
+
+  interface FormData {
+    username?: string;
+    email?: string;
+    password?: string;
+    token?: string;
+  }
 
   // User details
   let username = "";
@@ -155,7 +159,10 @@
 
     const route = isRegisterForm ? "/player/register" : "/player/getinfo";
     try {
-      const { status, data, token } = await invokeApiRequest(route, formData);
+      const { status, data } = await invokeApiRequest<FormData>(
+        route,
+        formData
+      );
 
       if (isRegisterForm && status === Status.OK && data) {
         isRegisterForm = false;
@@ -163,17 +170,17 @@
         return;
       }
 
-      if (status === Status.OK && token) {
+      if (status === Status.OK && data.token) {
         const build =
           connectionType === Protocol.HTTPS ? Builds.STABLE : Builds.HTTP;
 
         // Save user details to local storage
-        const userSaveData = { language, token };
+        const userSaveData = { language, token: data.token };
         if (isChecked) saveUserToLocalStorage(userSaveData);
 
         // Launch the SWF file
         const launchLanguage = $user.language || language;
-        launchSwf(build, launchLanguage, token);
+        launchSwf(build, launchLanguage, data.token);
       }
     } catch (error) {
       errorMessage = error.message;

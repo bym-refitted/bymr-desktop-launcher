@@ -3,29 +3,38 @@ import { BASE_URL } from "$lib/globals";
 import { currentGameVersion } from "$lib/stores/loadState";
 import { get } from "svelte/store";
 
-export interface FormData {
-  username?: string;
-  email?: string;
-  password?: string;
-  token?: string;
-}
-
-interface Response<T> {
+/**
+ * Represents a generic API response.
+ * @template T - The type of the data in the response.
+ */
+interface ApiResponse<T> {
   status: number;
   data: T;
-  token?: string;
 }
 
+/**
+ * Represents an error response from the API.
+ */
 interface ErrorResponse {
   message: string;
   code: string;
 }
 
+/**
+ * Makes an API request to the specified route with the given form data and method.
+ * 
+ * @template T - The type of the data expected in the response.
+ * @param {string} route - The API route to request.
+ * @param {object} [formData={}] - The form data to send with the request.
+ * @param {string} [method=Method.POST] - The HTTP method to use for the request.
+ * @returns {Promise<ApiResponse<T>>} - A promise that resolves to the API response.
+ * @throws {Error} - Throws an error if the request fails or the response is not ok.
+ */
 export const invokeApiRequest = async <T>(
   route: string,
-  formData: FormData,
+  formData = {},
   method: string = Method.POST
-): Promise<Response<T>> => {
+): Promise<ApiResponse<T>> => {
   try {
     const version = get(currentGameVersion);
     const options: RequestInit = {
@@ -45,12 +54,10 @@ export const invokeApiRequest = async <T>(
       throw new Error(message);
     }
 
-    const data = await response.json();
-    const token = data.token;
-    return { status: response.status, data, token };
+    return { status: response.status, data: await response.json() };
   } catch (error) {
     throw new Error(
-      error?.message || 
+      error?.message ||
         `An unexpected error occurred while making a request to: '${route}'.`
     );
   }
