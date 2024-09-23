@@ -1,6 +1,5 @@
 <script lang="ts">
   import Controller from "phosphor-svelte/lib/GameController";
-  import Plugs from "phosphor-svelte/lib/Plugs";
   import { Menubar } from "bits-ui";
   import TabItem from "./TabItem.svelte";
 </script>
@@ -17,8 +16,11 @@
       </a>
       <div class="pt-8">
         <TabItem path="/" Icon={Controller} text="BYM Refitted" />
-        <TabItem path="/minigame" Icon={Controller} text="Attack of the Pokies" />
-        <TabItem path="/local" Icon={Plugs} text="Local" />
+        <TabItem
+          path="/minigame"
+          Icon={Controller}
+          text="Attack of the Pokies"
+        />
       </div>
     </div></Menubar.Root
   >
