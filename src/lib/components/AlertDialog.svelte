@@ -37,17 +37,9 @@
         </div>
       </DialogTitle>
       <DialogDescription>
-        {#if error}
-          <p class="text-secondary-foreground mt-4 mb-4">
-            The launcher caught the following error: <b
-              class="font-bold text-red capitalize">{error}</b
-            >
-          </p>
-        {:else}
-          <p class="text-secondary-foreground mt-4 mb-4">
-            {description}
-          </p>
-        {/if}
+        <p class="text-secondary-foreground mt-4 mb-4">
+          {error ? error : description}
+        </p>
       </DialogDescription>
     </DialogHeader>
     <DialogFooter>

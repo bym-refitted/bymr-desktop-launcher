@@ -196,7 +196,7 @@
 
       if (status === Status.OK) emailSent = true;
     } catch (error) {
-      errorMessage = error.message;
+      errorMessage = "Failed to send email. Please try again later.";
       addErrorLog(`Error processing forgot password: ${error.message}`);
     }
   };
@@ -236,14 +236,14 @@
 <AlertDialog
   bind:open={emailSent}
   title="Password Reset Email Sent"
-  description="If the email you entered is registered, you will receive an email with instructions to reset your password shortly. Please make sure to check your spam folder."
+  description="If the email you entered is registered, you will receive an email with instructions to reset your password shortly. The email expires in 10 minutes. Please make sure to check your spam folder."
   Icon={PaperPlaneTilt}
 />
 
 <AlertDialog
   bind:open={isError}
-  title="Oops!"
-  description={errorMessage}
+  error={errorMessage}
+  title="Oops! Something broke..."
   Icon={WarningDiamond}
 />
 
