@@ -5,15 +5,23 @@
   import WarningDiamond from "phosphor-svelte/lib/WarningDiamond";
   import Translate from "phosphor-svelte/lib/Translate";
   import Shield from "phosphor-svelte/lib/Shield";
-
   import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
   import Tooltip from "../tooltip/Tooltip.svelte";
   import AlertDialog from "$lib/components/AlertDialog.svelte";
+  import ArrowCircleLeft from "phosphor-svelte/lib/ArrowCircleLeft";
+  import PaperPlaneTilt from "phosphor-svelte/lib/PaperPlaneTilt";
+
   import { flyAndScale } from "$lib/utils";
   import { Status } from "$lib/enums/StatusCodes";
   import { launchSwf } from "$lib/stores/launchStore";
   import { Protocol } from "$lib/enums/Protocol";
   import { Builds } from "$lib/enums/Builds";
+  import { invokeApiRequest } from "../../../utils/invokeApiRequest";
+  import { onMount } from "svelte";
+  import { getAvailableLanguages } from "$lib/utils/getAvailableLanguages";
+  import { Method } from "$lib/enums/Method";
+  import { handleErrorMessage } from "$lib/errors/errorMessages";
+  import { addErrorLog } from "$lib/stores/debugLogStore";
   import {
     isUserRemembered,
     loadUserFromLocalStorage,
@@ -21,19 +29,13 @@
     saveUserToLocalStorage,
     user,
   } from "$lib/stores/userStore";
-  import { invokeApiRequest } from "../../../utils/invokeApiRequest";
-  import { onMount } from "svelte";
-  import { getAvailableLanguages } from "$lib/utils/getAvailableLanguages";
-  import { addErrorLog } from "$lib/stores/debugLogStore";
   import {
     validateUsername,
     validateEmail,
     validatePassword,
     validateConfirmPassword,
   } from "./validation";
-  import ArrowCircleLeft from "phosphor-svelte/lib/ArrowCircleLeft";
-  import PaperPlaneTilt from "phosphor-svelte/lib/PaperPlaneTilt";
-  import { Method } from "$lib/enums/Method";
+
 
   interface FormData {
     username?: string;
@@ -183,7 +185,7 @@
         launchSwf(build, launchLanguage, data.token);
       }
     } catch (error) {
-      errorMessage = error.message;
+      errorMessage = handleErrorMessage(error);
       addErrorLog(`Error during authentication: ${error.message}`);
     }
   };

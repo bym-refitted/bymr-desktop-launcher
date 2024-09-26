@@ -28,7 +28,6 @@ tauri = { version = "1.6.4", features = [
     "window-unmaximize",
     "window-hide",
     "updater",
-    "process-exit",
     "devtools",
 ] }
 tokio = { version = "1", features = ["io-util", "fs"] }

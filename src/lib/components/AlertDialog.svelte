@@ -1,6 +1,5 @@
 <script lang="ts">
   import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
-  import { exit } from "@tauri-apps/api/process";
   import {
     Dialog,
     DialogContent,
@@ -19,7 +18,6 @@
   export let open = false;
   export let error = "";
 
-  const quit = async () => await exit(0);
 </script>
 
 <Dialog bind:open>
@@ -45,9 +43,6 @@
     <DialogFooter>
       <div class="flex justify-end gap-2">
         <PrimaryButton buttonText="Continue" on:click={() => (open = false)} />
-        {#if error}
-          <PrimaryButton buttonText="Quit" on:click={() => quit()} />
-        {/if}
       </div>
     </DialogFooter>
   </DialogContent>
