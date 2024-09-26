@@ -198,7 +198,7 @@
 
       if (status === Status.OK) emailSent = true;
     } catch (error) {
-      errorMessage = "Failed to send email. Please try again later.";
+      errorMessage = handleErrorMessage(error);
       addErrorLog(`Error processing forgot password: ${error.message}`);
     }
   };
