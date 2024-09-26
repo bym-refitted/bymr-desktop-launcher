@@ -10,7 +10,6 @@
   } from "$lib/stores/debugLogStore";
   import { invoke } from "@tauri-apps/api";
   import { onMount } from "svelte";
-  import Loader from "$lib/components/svgs/Loader.svelte";
   import Toast from "$lib/components/Toast.svelte";
   import {
     currentGameVersion,
@@ -20,6 +19,7 @@
   import Titlebar from "$lib/components/Titlebar.svelte";
   import TabView from "$lib/components/ui/tabs/TabView.svelte";
   import Navbar from "$lib/components/Navbar.svelte";
+  import Loader from "$lib/components/Loader.svelte";
 
   let launcherVersion = "0.0.0";
 
@@ -68,7 +68,7 @@
   >
     {#if !$hasLoaded}
       <div class="w-full h-full flex justify-center items-center" role="status">
-        <Loader />
+        <Loader size={3} />
       </div>
     {:else}
       <TabView>
