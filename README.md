@@ -31,7 +31,9 @@ It is recommended to locate your `.cargo` directory and modify the `config.toml`
 [target.x86_64-pc-windows-msvc]
 linker = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\link.exe"
 ar = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\lib.exe"
-``` 
+```
+
+Please refer to the following docs for getting started with Tauri: https://v1.tauri.app/v1/guides/getting-started/prerequisites/
 
 <br />
 
