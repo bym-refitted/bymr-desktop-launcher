@@ -79,7 +79,7 @@ fn launch_game(build_name: &str, language: &str, token: Option<&str>) -> Result<
         } else {
             "s"
         },
-        SWFS_DIR,
+        SWFS_URL,
         build_name,
         language.to_lowercase()
     );
