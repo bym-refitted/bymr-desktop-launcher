@@ -1,10 +1,13 @@
-use std::path::PathBuf;
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use crate::networking::{self, download_file, fetch_json_with_http_retry};
 use serde::{Deserialize, Serialize};
 
 pub const VERSION_MANIFEST_URL: &str = "cdn.bymrefitted.com/versionManifest.json";
-pub const LAUNCHER_DOWNLOADS_URL: &str = "cdn.bymrefitted.com/launcher/downloads/";
+pub const SWFS_URL: &str = "cdn.bymrefitted.com/launcher/swfs";
 pub const RUNTIMES_DIR: &str = "bymr-downloads/runtimes";
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
@@ -27,10 +30,27 @@ pub async fn get_server_manifest() -> Result<VersionManifest, networking::FetchE
         })
 }
 
+#[tauri::command]
+pub async fn get_current_game_version() -> Result<String, String> {
+    match get_server_manifest().await {
+        Ok(manifest) => Ok(manifest.current_game_version),
+        Err(err) => Err(err.to_string()),
+    }
+}
+
+fn ensure_folder_exists(runtime_path: &Path) -> std::io::Result<()> {
+    if !runtime_path.exists() {
+        fs::create_dir_all(runtime_path)?;
+    }
+    Ok(())
+}
+
 pub async fn download_runtime(
     (runtime_path, file_extension): (PathBuf, String),
     use_https: bool,
 ) -> Result<(), String> {
+    ensure_folder_exists(Path::new(RUNTIMES_DIR)).expect("Could not create runtimes folder");
+
     download_file(&runtime_path, &file_extension, use_https)
         .await
         .map_err(|err| err.to_string())

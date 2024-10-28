@@ -13,6 +13,17 @@
     "allowlist": {
       "process": {
         "exit": true
+      },
+      "window": {
+        "all": false,
+        "close": true,
+        "hide": true,
+        "show": true,
+        "maximize": true,
+        "minimize": true,
+        "unmaximize": true,
+        "unminimize": true,
+        "startDragging": true
       }
     },
     "bundle": {
@@ -56,17 +67,21 @@
         "installMode": "passive"
       },
       "active": true,
-      "endpoints": ["https://gist.github.com/React1-X/30d54091783e2434d697e557606ed70a/raw"],
+      "endpoints": [
+        "https://gist.github.com/React1-X/30d54091783e2434d697e557606ed70a/raw"
+      ],
       "dialog": true,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEJBQzY1N0EzQzJCRUNBQzkKUldUSnlyN0NvMWZHdXB3dml4WGNvdHdRZVZraWpkVks0UVhHVTZvMlkvSjBlZlRQOGd1RVMxRk0K"
     },
     "windows": [
       {
-        "fullscreen": false,
-        "height": 600,
-        "resizable": true,
         "title": "Backyard Monsters: Refitted | Launcher",
-        "width": 620
+        "fullscreen": false,
+        "resizable": true,
+        "maximized": true,
+        "minWidth": 1000,
+        "minHeight": 600,
+        "decorations": false
       }
     ]
   }

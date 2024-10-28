@@ -9,8 +9,9 @@ bymr-downloads
 flashplayer.*
 
 # Others
+.env*
 .idea
 .svelte-kit
 .tauri
-cheeky_script.sh
+build_script.sh
 vite.config.ts*

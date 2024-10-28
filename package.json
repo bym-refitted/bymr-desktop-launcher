@@ -17,6 +17,7 @@
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@tauri-apps/cli": "^1.5.14",
 		"autoprefixer": "^10.4.19",
+		"phosphor-svelte": "^2.0.1",
 		"postcss": "^8.4.32",
 		"postcss-load-config": "^5.0.2",
 		"svelte": "^4.2.7",
@@ -31,7 +32,6 @@
 		"@tauri-apps/api": "^1.5.6",
 		"bits-ui": "^0.16.0",
 		"clsx": "^2.1.1",
-		"lucide-svelte": "^0.321.0",
 		"tailwind-merge": "^2.2.1",
 		"tailwind-variants": "^0.1.20"
 	}

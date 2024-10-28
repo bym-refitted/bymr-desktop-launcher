@@ -1,134 +1,39 @@
 <script lang="ts">
-  import { Button } from "$lib/components/ui/button";
-  import * as Select from "$lib/components/ui/select";
-  import { Loader2 } from "lucide-svelte";
+  import { launchError } from "$lib/stores/launchStore";
   import AlertDialog from "$lib/components/AlertDialog.svelte";
-  import Loader from "../../src/assets/svgs/Loader.svelte";
-
-  import { exit } from "@tauri-apps/api/process";
-  import { listen } from "@tauri-apps/api/event";
-  import { invoke } from "@tauri-apps/api/tauri";
-  import { onUpdaterEvent } from "@tauri-apps/api/updater";
-  import DebugLogs from "$lib/components/DebugLogs.svelte";
-
-  interface Build {
-    value: string;
-    label: string;
-  }
-
-  interface EventLog {
-    message: string;
-  }
-
-  // Dynamically set during initialLoad event
-  const builds: Build[] = [
-    { label: "Stable", value: "stable" },
-    { label: "Http", value: "http" },
-    { label: "Local", value: "local" },
-  ];
-  let build: Build = builds[0];
-
-  // Debug Variables
-  let disabled = true;
-  let loading = true;
-  let showError = false;
-  let errorCode = "";
-  type LogEntry = string | { class: string; msg: string };
-  let debugLogs: LogEntry[] = [];
-
-  onUpdaterEvent(({ error, status }) => {
-    if (error) {
-      // This will log all updater events, including status updates and errors.
-      debugLogs = [
-        ...debugLogs,
-        `Launcher updater event: ${status ? status : ""} ${error ? error : ""}`,
-      ];
-    }
-  });
-
-  listen<EventLog>("infoLog", (event) => {
-    debugLogs = [...debugLogs, event.payload.message];
-  });
-
-  listen<EventLog>("errorLog", (event) => {
-    debugLogs = [
-      ...debugLogs,
-      { msg: event.payload.message, class: "text-red-500" },
-    ];
-  });
-
-  (async () => {
-    try {
-      await invoke("initialize_app");
-      debugLogs = [
-        ...debugLogs,
-        { msg: "Launcher initialized! (▀̿Ĺ̯▀̿ ̿) 🚀", class: "text-green-500" },
-      ];
-      loading = false;
-      disabled = false;
-    } catch (error) {
-      debugLogs = [
-        ...debugLogs,
-        { msg: `Error initializing launcher`, class: "text-red-500" },
-        `${error}`,
-      ];
-    }
-  })();
-
-  const launch = async () => {
-    disabled = true;
-    try {
-      await invoke("launch_game", {
-        buildName: build.value,
-      });
-      showError = false;
-      await exit(0);
-    } catch (err) {
-      errorCode = err;
-      showError = true;
-    } finally {
-      disabled = false;
-    }
-  };
+  import Form from "$lib/components/ui/form/Form.svelte";
+  import TownHall from "../assets/images/townhall.png";
+  import WarningDiamond from "phosphor-svelte/lib/WarningDiamond";
 </script>
 
-<DebugLogs {debugLogs} />
-{#if loading}
-  <div class="w-full h-full flex justify-center items-center" role="status">
-    <Loader />
+<div class="grid grid-cols-1 gap-x-8 lg:grid-cols-2 lg:grid-rows-[800px]">
+  <div class="grid-item flex flex-col lg:p-16 lg:justify-center">
+    <img src={TownHall} alt="townhall" width="150" />
+    <div class="py-6">
+      <h1 class="text-4xl font-display">Official Refitted Servers:</h1>
+      <p class="text-md font-medium text-muted-foreground pt-4">
+        The official Backyard Monsters Refitted server. A 1:1 preservation of
+        the original Adobe Flash game, with the adoption of Map Room 2. All
+        buildings, monsters and gameplay mechanics on this server are from the
+        classic vanilla version of the game. Just how you remember it! Join us
+        now and relive the nostalgia.
+        <br />
+        <br />
+        <b class="text-primary">Rules:</b> This server has strict monitoring for
+        cheating to ensure a fair and enjoyable experience for all players.
+      </p>
+    </div>
+    <div class="flex flex-col items-end"></div>
   </div>
-{:else}
-  <div class="mt-auto w-full flex justify-between">
-    <label for="swf-build" class="font-display">Game Server:</label>
-    <Select.Root bind:selected={build} portal={null}>
-      <Select.Trigger class="w-[180px] rounded">
-        <Select.Value class="text-left" />
-      </Select.Trigger>
-      <Select.Content>
-        <Select.Group>
-          {#each builds as build}
-            <Select.Item value={build.value} label={build.label}
-              >{build.label}</Select.Item
-            >
-          {/each}
-        </Select.Group>
-      </Select.Content>
-      <Select.Input name="build" />
-    </Select.Root>
+  <div
+    class="grid-item flex flex-col justify-center md:mt-8 md:pb-16 lg:items-start lg:mt-36 lg:pb-0"
+  >
+    <Form />
   </div>
-  <div class="mt-auto w-full flex justify-between">
-    <Button
-      variant="default"
-      class="p-4 rounded w-32"
-      on:click={launch}
-      {disabled}
-    >
-      {#if disabled}
-        <Loader2 class="animate-spin" />
-      {:else}
-        Launch Game
-      {/if}
-    </Button>
-  </div>
-{/if}
-<AlertDialog bind:open={showError} error={errorCode}></AlertDialog>
+</div>
+
+<AlertDialog
+  bind:open={$launchError.show}
+  error={$launchError.code}
+  Icon={WarningDiamond}
+></AlertDialog>

@@ -1,10 +1,5 @@
 <script lang="ts">
-  export let open = false;
-  export let error = "";
-
-  import { Button } from "$lib/components/ui/button";
-  import { exit } from "@tauri-apps/api/process";
-
+  import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
   import {
     Dialog,
     DialogContent,
@@ -13,35 +8,41 @@
     DialogHeader,
     DialogTitle,
   } from "$lib/components/ui/dialog";
+  import RocketLaunch from "phosphor-svelte/lib/RocketLaunch";
+  import type { IconProps, SvelteComponent } from "phosphor-svelte/lib/shared";
 
-  import type { ButtonEventHandler } from "bits-ui/dist/bits/button/types";
+  export let title = "Oops! Something broke...";
+  export let description = "";
+  export let Icon: typeof SvelteComponent<IconProps> = RocketLaunch;
 
-  const quit = async () => await exit(0);
+  export let open = false;
+  export let error = "";
+
 </script>
 
 <Dialog bind:open>
   <DialogContent class="text-left bg-background text-foreground">
     <DialogHeader class="text-left">
-      <DialogTitle class="font-display text-2xl select-none"
-        >Oops! Something broke...</DialogTitle
-      >
+      <DialogTitle class="font-display text-2xl select-none">
+        <div class="flex flex-row">
+          <svelte:component
+            this={Icon}
+            weight="bold"
+            size="30"
+            class={`mr-3 ${error ? "text-red" : "text-primary"}`}
+          />
+          {title}
+        </div>
+      </DialogTitle>
       <DialogDescription>
         <p class="text-secondary-foreground mt-4 mb-4">
-          Launcher caught an error: <b class="font-bold capitalize">{error}</b>
+          {error ? error : description}
         </p>
       </DialogDescription>
     </DialogHeader>
     <DialogFooter>
       <div class="flex justify-end gap-2">
-        <Button
-          class="p-4 rounded"
-          variant="default"
-          type="button"
-          on:click={() => (open = false)}>Continue</Button
-        >
-        <Button class="p-4 rounded" type="button" on:click={() => quit()}
-          >Quit</Button
-        >
+        <PrimaryButton buttonText="Continue" on:click={() => (open = false)} />
       </div>
     </DialogFooter>
   </DialogContent>

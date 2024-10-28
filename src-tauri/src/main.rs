@@ -8,11 +8,20 @@ use crate::version_manager::*;
 use serde::Serialize;
 use std::env;
 use std::process::Command;
-use tauri::{command, AppHandle, Manager};
+use tauri::{command, App, AppHandle, Manager};
+use window_shadows::set_shadow;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![initialize_app, launch_game])
+        .invoke_handler(tauri::generate_handler![
+            initialize_app,
+            launch_game,
+            get_current_game_version
+        ])
+        .setup(|app| {
+            set_window_decor(app);
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -52,7 +61,7 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
 }
 
 #[command]
-fn launch_game(build_name: &str) -> Result<(), String> {
+fn launch_game(build_name: &str, language: &str, token: Option<&str>) -> Result<(), String> {
     let (flash_runtime_path, _) = get_platform_flash_runtime(&env::consts::OS)?;
 
     if !flash_runtime_path.exists() {
@@ -62,12 +71,24 @@ fn launch_game(build_name: &str) -> Result<(), String> {
             flash_runtime_path.display()
         ));
     }
-    let swf_url = format!(
-        "http{}://{}bymr-{}.swf",
-        if build_name == "stable" { "s" } else { "" },
-        LAUNCHER_DOWNLOADS_URL,
-        build_name
+
+    let mut swf_url = format!(
+        "http{}://{}bymr-{}.swf?language={}",
+        if build_name == "http" || build_name == "local" {
+            ""
+        } else {
+            "s"
+        },
+        SWFS_URL,
+        build_name,
+        language.to_lowercase()
     );
+
+    // Append token to the URL if it exists
+    if let Some(token) = token {
+        swf_url = format!("{}&token={}", swf_url, token);
+    }
+
     println!("Opening: {:?}, {:?}", flash_runtime_path, swf_url);
 
     // Open the game in Flash Player
@@ -85,8 +106,24 @@ fn launch_game(build_name: &str) -> Result<(), String> {
 }
 
 #[derive(Clone, Serialize)]
-struct EventLog { message: String }
+struct EventLog {
+    message: String,
+}
 
-pub fn emit_event(app: &AppHandle, event_type: &str, message: String) {
+fn emit_event(app: &AppHandle, event_type: &str, message: String) {
     app.emit_all(event_type, EventLog { message }).unwrap();
+}
+
+/** This is a temporary filthy hack to create a window shadow when using custom titlebars/no window decorations
+ * because of tauri's shitty implementation which doesn't provide fine-tune control over native window elements.
+ * Tauri 2.0 beta supports this, however, we are using stable.
+ * Beta Docs: https://v2.tauri.app/reference/javascript/api/namespacewindow/#setshadow
+ * Explanation: https://github.com/tauri-apps/tauri/discussions/3093#discussioncomment-1854703
+ */
+fn set_window_decor(app: &App) {
+    if env::consts::OS == "linux" {
+        return;
+    }
+    let window = app.get_window("main").unwrap();
+    set_shadow(&window, true).expect("Unsupported platform!");
 }
