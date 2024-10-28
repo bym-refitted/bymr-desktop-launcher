@@ -1,5 +1,5 @@
 export const validateUsername = (username: string): string => {
-  const usernameRegex = /^[a-zA-Z0-9]+$/;
+  const usernameRegex = /^[a-zA-Z0-9_]+$/;
   if (!usernameRegex.test(username)) {
     return "Usernames can only contain numbers and letters";
   } else if (username.length < 2) {
@@ -21,7 +21,7 @@ export const validateEmail = (email: string): string => {
 };
 
 export const validatePassword = (password: string): string => {
-  const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
+  const passwordRegex = /^(?=.*[A-Z])(?=.*[\W_])(?=.{8,})/;
   if (!passwordRegex.test(password)) {
     return "Password must be at least 8 characters long, contain at least 1 uppercase letter, and 1 special character";
   } else {
