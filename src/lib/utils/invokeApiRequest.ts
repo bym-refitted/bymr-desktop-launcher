@@ -2,6 +2,13 @@ import { Method } from "$lib/enums/Method";
 import { BASE_URL } from "$lib/globals";
 import { currentGameVersion } from "$lib/stores/loadState";
 import { get } from "svelte/store";
+import {
+  Body,
+  fetch,
+  type FetchOptions,
+  type HttpVerb,
+  ResponseType,
+} from "@tauri-apps/api/http";
 
 /**
  * Represents a generic API response.
@@ -33,28 +40,29 @@ interface ErrorResponse {
 export const invokeApiRequest = async <T>(
   route: string,
   formData = {},
-  method: string = Method.POST
+  method: HttpVerb = Method.POST
 ): Promise<ApiResponse<T>> => {
   try {
     const version = get(currentGameVersion);
-    const options: RequestInit = {
+    const options: FetchOptions = {
       method,
       headers: {
         "Content-Type": "application/json",
       },
+      responseType: ResponseType.JSON,
     };
 
-    if (method !== Method.GET) options.body = JSON.stringify(formData);
+    let body: Body = Body.json(formData);
+    if (method !== Method.GET) options.body = body;
 
     const url = `${BASE_URL}/api/v${version}-beta${route}`;
-    const response = await fetch(url, options);
-
+    const response = await fetch<any>(url, options);
+    
     if (!response.ok) {
-      const { message }: ErrorResponse = await response.json();
+      const { message }: ErrorResponse = response.data;
       throw new Error(message);
     }
-
-    return { status: response.status, data: await response.json() };
+    return { status: response.status, data: response.data };
   } catch (error) {
     throw new Error(
       error?.message ||
