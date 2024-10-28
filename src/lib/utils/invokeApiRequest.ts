@@ -46,7 +46,7 @@ export const invokeApiRequest = async <T>(
 
     if (method !== Method.GET) options.body = JSON.stringify(formData);
 
-    const url = `${BASE_URL}/api/v${version}-alpha${route}`;
+    const url = `${BASE_URL}/api/v${version}-beta${route}`;
     const response = await fetch(url, options);
 
     if (!response.ok) {
