@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 pub const VERSION_MANIFEST_URL: &str = "cdn.bymrefitted.com/versionManifest.json";
 pub const SWFS_URL: &str = "cdn.bymrefitted.com/launcher/swfs/";
-pub const RUNTIMES_DIR: &str = "bymr-downloads/runtimes";
+pub const RUNTIMES_DIR: &str = "cdn.bymrefitted.com/launcher/runtimes/";
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct VersionManifest {
