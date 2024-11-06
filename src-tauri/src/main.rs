@@ -1,22 +1,28 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use crate::version_manager::*;
 mod networking;
 mod version_manager;
-
-use crate::version_manager::*;
-use serde::Serialize;
-use std::env;
 use std::process::Command;
+use serde::Serialize;
+use std::{
+    env,
+    fs,
+    path::PathBuf,
+};
 use tauri::{command, App, AppHandle, Manager};
 use window_shadows::set_shadow;
 
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
+            // main.rs
             initialize_app,
             launch_game,
-            get_current_game_version
+
+            // version_manager.rs
+            get_current_game_version,
         ])
         .setup(|app| {
             set_window_decor(app);
@@ -25,6 +31,10 @@ fn main() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
+fn get_appdata_path(app_handle: &AppHandle) -> PathBuf {
+    return app_handle.path_resolver().app_data_dir().unwrap();
+  }
 
 #[command]
 async fn initialize_app(app: AppHandle) -> Result<(), String> {
@@ -50,19 +60,34 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
         }
     };
 
-    let file_info = get_platform_flash_runtime(&env::consts::OS)?;
-    if !file_info.0.exists() {
+    let appdata_path = get_appdata_path(&app);
+
+    // Creates AppData folder if it does not exist
+    if !get_appdata_path(&app).exists() {
+        fs::create_dir_all(&appdata_path).expect("Could not create appdata folder!");
+    }
+
+    // Downloads flash runtime for your platform in case its not found
+    let (
+        flash_runtime_path, 
+        flash_runtime_executable
+    ) = get_platform_flash_runtime( &env::consts::OS, appdata_path )?;  
+
+    if !flash_runtime_path.exists() {
         let log = "Downloading flash player for your platform...";
         emit_event(&app, "infoLog", log.to_string());
-        download_runtime(file_info, use_https).await?;
+        download_runtime(flash_runtime_path, flash_runtime_executable, use_https).await?;
     }
 
     Ok(())
 }
 
 #[command]
-fn launch_game(build_name: &str, language: &str, token: Option<&str>) -> Result<(), String> {
-    let (flash_runtime_path, _) = get_platform_flash_runtime(&env::consts::OS)?;
+fn launch_game(app: AppHandle, build_name: &str, language: &str, token: Option<&str>) -> Result<(), String> {
+    let (flash_runtime_path, _) = get_platform_flash_runtime(
+        &env::consts::OS, 
+        get_appdata_path(&app)
+    )?;
 
     if !flash_runtime_path.exists() {
         eprintln!("cannot find file: {}", flash_runtime_path.display());
