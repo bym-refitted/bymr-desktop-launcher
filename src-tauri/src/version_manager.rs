@@ -57,12 +57,22 @@ pub async fn download_runtime(
 }
 
 pub fn get_platform_flash_runtime(platform: &str) -> Result<(PathBuf, String), String> {
+    // NOTE: This match case was only meant to match darwin, but it is named macos (for a long time now)
     let flash_runtimes = match platform {
         "windows" => Ok("flashplayer.exe".to_string()),
-        "darwin" => Ok("flashplayer.dmg".to_string()),
+        "darwin" | "macos" => Ok("flashplayer.dmg".to_string()),
         "linux" => Ok("flashplayer".to_string()),
         _ => Err(format!("unsupported platform: {}", platform)),
     };
 
-    flash_runtimes.map(|runtime| (PathBuf::from(RUNTIMES_DIR).join(runtime.clone()), runtime))
+    flash_runtimes.map(|runtime| {
+        if matches!(platform, "darwin" | "macos") {
+            // Return path to the systems Flash Player explicitly
+            (PathBuf::from("/Applications/Flash Player.app/Contents/MacOS/Flash Player"), runtime)
+        }
+        else {
+            // Use RUNTIMES_DIR as usual
+            (PathBuf::from(RUNTIMES_DIR).join(runtime.clone()), runtime)
+        }
+    })
 }

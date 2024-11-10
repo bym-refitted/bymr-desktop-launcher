@@ -21,6 +21,20 @@
       {
         "type": "lldb",
         "request": "launch",
+        "name": "Tauri Development Debug yarn tauri dev",
+        "cargo": {
+          "args": [
+            "build",
+            "--manifest-path=./src-tauri/Cargo.toml",
+            "--no-default-features"
+          ],
+        },
+        // task for the `beforeDevCommand` if used, must be configured in `.vscode/tasks.json`
+        "postDebugTask": "ui:tauri-dev"
+      },
+      {
+        "type": "lldb",
+        "request": "launch",
         "name": "Tauri Production Debug",
         "cargo": {
           "args": ["build", "--release", "--manifest-path=./src-tauri/Cargo.toml"],
