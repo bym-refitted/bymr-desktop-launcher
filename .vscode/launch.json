@@ -13,7 +13,10 @@
             "build",
             "--manifest-path=./src-tauri/Cargo.toml",
             "--no-default-features"
-          ]
+          ],
+          "env": {
+            "PATH": "/Users/darkn/.jenv/shims:/Users/darkn/.jenv/bin:/usr/local/texlive/2022/bin/universal-darwin/:/usr/local/texlive/2022/bin/x86_64-linux/:/Users/darkn/.nvm/versions/node/v22.11.0/bin:/Users/darkn/Documents/Scripts/7zip/:/opt/homebrew/lib:/opt/homebrew/bin:/usr/local/opt/llvm/bin:/opt/conda/miniconda/condabin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Library/TeX/texbin:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Users/darkn/Android/Sdk/tools:/Users/darkn/Android/Sdk/platform-tools:/Users/darkn/Documents/Programming/Libraries/gradle-4.10.3/bin"
+          },
         },
         // task for the `beforeDevCommand` if used, must be configured in `.vscode/tasks.json`
         "preLaunchTask": "ui:dev"
@@ -23,7 +26,10 @@
         "request": "launch",
         "name": "Tauri Production Debug",
         "cargo": {
-          "args": ["build", "--release", "--manifest-path=./src-tauri/Cargo.toml"]
+          "args": ["build", "--release", "--manifest-path=./src-tauri/Cargo.toml"],
+          "env": {
+            "PATH": "/Users/darkn/.jenv/shims:/Users/darkn/.jenv/bin:/usr/local/texlive/2022/bin/universal-darwin/:/usr/local/texlive/2022/bin/x86_64-linux/:/Users/darkn/.nvm/versions/node/v22.11.0/bin:/Users/darkn/Documents/Scripts/7zip/:/opt/homebrew/lib:/opt/homebrew/bin:/usr/local/opt/llvm/bin:/opt/conda/miniconda/condabin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Library/TeX/texbin:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Users/darkn/Android/Sdk/tools:/Users/darkn/Android/Sdk/platform-tools:/Users/darkn/Documents/Programming/Libraries/gradle-4.10.3/bin"
+          },
         },
         // task for the `beforeBuildCommand` if used, must be configured in `.vscode/tasks.json`
         "preLaunchTask": "ui:build"

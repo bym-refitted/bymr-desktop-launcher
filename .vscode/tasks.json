@@ -11,15 +11,31 @@
         // see https://code.visualstudio.com/docs/editor/tasks#_can-a-background-task-be-used-as-a-prelaunchtask-in-launchjson
         "isBackground": true,
         // change this to your `beforeDevCommand`:
-        "command": "yarn",
-        "args": ["dev"]
+        "command": "npm",
+        "args": ["run", "dev",],
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "showReuseMessage": true,
+          "clear": false
+        },
       },
       {
         "label": "ui:build",
         "type": "shell",
         // change this to your `beforeBuildCommand`:
-        "command": "yarn",
-        "args": ["build"]
+        "command": "npm",
+        "args": ["run", "build",],
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "showReuseMessage": true,
+          "clear": false
+        },
       }
     ]
   }
