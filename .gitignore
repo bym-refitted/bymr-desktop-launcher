@@ -15,3 +15,9 @@ flashplayer.*
 .tauri
 build_script.sh
 vite.config.ts*
+
+# System files
+desktop.ini
+**/desktop.ini
+.DS_Store
+**/.DS_Store
