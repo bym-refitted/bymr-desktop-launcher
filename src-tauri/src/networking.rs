@@ -133,23 +133,27 @@ fn get_protocol(use_https: bool) -> &'static str {
 
 pub async fn download_file(
     file_path: &PathBuf,
-    url: &str,
+    web_path: &str,
     use_https: bool,
 ) -> Result<(), FetchError> {
+    println!("download_file:: runtime_path and file_extension turned into: file_path={:?}, url={:?}", file_path, web_path);
     let full_url = format!(
         "{}://{}{}",
         get_protocol(use_https),
         SWFS_URL,
-        url
+        web_path
     );
+    println!("Full download url: {:?}", full_url);
     let mut response = reqwest::Client::new().get(&full_url).send().await?;
     // Exit early on bad code
     if !response.status().is_success() {
         return Err(FetchError::InvalidStatusCode(response.status().as_u16()));
     }
+    println!("Downloading to path: {:?}", file_path);
     let mut out = File::create(file_path).await?;
     while let Some(chunk) = response.chunk().await? {
         out.write_all(chunk.as_ref()).await?;
     }
+    println!("Download okay");
     Ok(())
 }

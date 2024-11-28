@@ -50,11 +50,13 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
         }
     };
 
-    let file_info = get_platform_flash_runtime(&env::consts::OS)?;
-    if !file_info.0.exists() {
+    let platform = &env::consts::OS;
+    let runtime_info = get_platform_flash_runtime(platform)?;
+    println!("main:: Received runtime info ({:?}, {:?}, {:?})", runtime_info.0, runtime_info.1, runtime_info.2);
+    if !runtime_info.0.exists() || true {
         let log = "Downloading flash player for your platform...";
         emit_event(&app, "infoLog", log.to_string());
-        download_runtime(file_info, use_https).await?;
+        download_and_extract_runtime(runtime_info, platform, use_https).await?;
     }
 
     Ok(())
@@ -62,7 +64,7 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
 
 #[command]
 fn launch_game(app: AppHandle, build_name: &str, language: &str, token: Option<&str>) -> Result<(), String> {
-    let (flash_runtime_path, _) = get_platform_flash_runtime(&env::consts::OS)?;
+    let (flash_runtime_path, _, _) = get_platform_flash_runtime(&env::consts::OS)?;
     emit_event(&app, "infoLog", ("Flash runtime path: ").to_string() + &flash_runtime_path.clone().into_os_string().into_string().unwrap());
 
     if !flash_runtime_path.exists() {
