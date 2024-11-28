@@ -1,10 +1,12 @@
 use std::{
     fs,
     path::{Path, PathBuf},
+    process::Command,
 };
 
 use crate::networking::{self, download_file, fetch_json_with_http_retry};
 use serde::{Deserialize, Serialize};
+use regex::Regex;
 
 pub const VERSION_MANIFEST_URL: &str = "cdn.bymrefitted.com/versionManifest.json";
 pub const SWFS_URL: &str = "cdn.bymrefitted.com/launcher/swfs/";
@@ -52,17 +54,60 @@ pub async fn download_and_extract_runtime(
 ) -> Result<(), String> {
     ensure_folder_exists(Path::new(RUNTIMES_DIR)).expect("Could not create runtimes folder");
 
-    download_file(&runtime_path, &file_extension, use_https)
+    download_file(&package_path, &package_file_name, use_https)
         .await
-        .map_err(|err| err.to_string())
+        .map_err(|err| err.to_string())?;
+
+    potentially_extract_runtime(executable_path, package_path, platform)
 }
 
-pub fn get_platform_flash_runtime(platform: &str) -> Result<(PathBuf, String), String> {
-    // NOTE: This match case was only meant to match darwin, but it is named macos (for a long time now)
-    let flash_runtimes = match platform {
-        "windows" => Ok("flashplayer.exe".to_string()),
-        "darwin" | "macos" => Ok("flashplayer.dmg".to_string()),
-        "linux" => Ok("flashplayer".to_string()),
+fn potentially_extract_runtime(
+    executable_path: PathBuf,
+    package_path: PathBuf,
+    platform: &str,
+) -> Result<(), String> {
+    if executable_path == package_path {
+        // Nothing to do
+        return Ok(());
+    }
+    match platform {
+        "darwin" | "macos" => extract_runtime_macos(executable_path, package_path),
+        _ => Err("Runtime extraction not supported on this platform".to_string())
+    }
+}
+
+// TODO
+fn extract_runtime_macos(
+    executable_path: PathBuf,
+    package_path: PathBuf,
+) -> Result<(), String> {
+    let hdiutil_process = Command::new("hdiutil")
+        .arg("attach")
+        .arg("-nobrowse")
+        .arg(package_path)
+        .output()
+        .map_err(|err| err.to_string())?;
+
+    if !hdiutil_process.status.success() {
+        return Err(format!(
+            "Mounting .dmg failed: {}",
+            String::from_utf8_lossy(&hdiutil_process.stderr)
+        ));
+    }
+    
+    // Extract path to mounted volume from process output
+    let regex = Regex::new(r"(/Volumes/[\w\s]+)").unwrap();
+    let hdiutil_output_string = String::from_utf8_lossy(&hdiutil_process.stdout);
+    if let Some(matching_volume_capture) = regex.captures(&hdiutil_output_string) {
+        let matching_volume = matching_volume_capture.get(0).unwrap().as_str();
+        println!("Newly mounted volume: {}", matching_volume);
+    }
+    else {
+        return Err("Mount command returned no path to the volume".to_string());
+    }
+    
+    Ok(())
+}
 
 /// Returns path to runtime executable, path to runtime package, file name of runtime package
 pub fn get_platform_flash_runtime(platform: &str) -> Result<(PathBuf, PathBuf, String), String> {

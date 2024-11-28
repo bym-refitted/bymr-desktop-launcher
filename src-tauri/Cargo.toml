@@ -34,6 +34,7 @@ tauri = { version = "1.6.4", features = [ "http-all",
 tokio = { version = "1", features = ["io-util", "fs"] }
 tauri-webview2 = "0.1.2"
 window-shadows = "0.2.2" # optional, for window shadows on Windows (unmaintained) - tauri@v2 will have this feature built-in.
+regex = "1"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.
