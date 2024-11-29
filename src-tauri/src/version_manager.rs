@@ -138,14 +138,15 @@ fn extract_runtime_macos(
     let copy_process = Command::new("cp")
         .arg("-rf")
         .arg(source_app_folder)
-        .arg(dest_folder)
+        .arg(&dest_folder)
         .output()
         .map_err(|err| err.to_string())?;
 
     if !copy_process.status.success() {
         return Err(format!(
-            "Copying .app from: {:?} to {}",
+            "Copying .app from: {:?} to {}, error: {}",
             source_app_folder,
+            dest_folder,
             String::from_utf8_lossy(&hdiutil_process.stderr),
         ));
     }

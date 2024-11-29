@@ -52,7 +52,7 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
 
     let platform = &env::consts::OS;
     let runtime_info = get_platform_flash_runtime(platform)?;
-    if !runtime_info.0.exists() || true {
+    if !runtime_info.0.exists() {
         let log = "Downloading flash player for your platform...";
         emit_event(&app, "infoLog", log.to_string());
         download_and_extract_runtime(runtime_info, platform, use_https).await?;
