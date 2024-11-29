@@ -113,10 +113,6 @@ fn extract_runtime_macos(
         .filter_map(|file_entry| {
             let file_entry = file_entry.ok()?;
             let file_path = file_entry.path();
-            /*if file_path.is_file() && let Some(extension) = file_path.extension() && extension.eq(app) {
-                println!("Extension: {:?}", extension);
-                println!("Extension is app: {:?}", extension.eq("app"));
-            }*/
             if !file_path.is_file() && file_path.extension()?.eq("app") {
                 Some(file_path)
             }

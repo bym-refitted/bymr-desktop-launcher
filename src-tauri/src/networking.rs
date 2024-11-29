@@ -136,7 +136,6 @@ pub async fn download_file(
     web_path: &str,
     use_https: bool,
 ) -> Result<(), FetchError> {
-    println!("download_file:: runtime_path and file_extension turned into: file_path={:?}, url={:?}", file_path, web_path);
     let full_url = format!(
         "{}://{}{}",
         get_protocol(use_https),
@@ -154,6 +153,5 @@ pub async fn download_file(
     while let Some(chunk) = response.chunk().await? {
         out.write_all(chunk.as_ref()).await?;
     }
-    println!("Download okay");
     Ok(())
 }
