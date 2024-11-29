@@ -76,7 +76,6 @@ fn potentially_extract_runtime(
     }
 }
 
-// TODO
 fn extract_runtime_macos(
     executable_path: PathBuf,
     package_path: PathBuf,
@@ -98,12 +97,69 @@ fn extract_runtime_macos(
     // Extract path to mounted volume from process output
     let regex = Regex::new(r"(/Volumes/[\w\s]+)").unwrap();
     let hdiutil_output_string = String::from_utf8_lossy(&hdiutil_process.stdout);
+    let mounted_volume;
     if let Some(matching_volume_capture) = regex.captures(&hdiutil_output_string) {
-        let matching_volume = matching_volume_capture.get(0).unwrap().as_str();
-        println!("Newly mounted volume: {}", matching_volume);
+        mounted_volume = matching_volume_capture.get(0).unwrap().as_str().trim();
     }
     else {
         return Err("Mount command returned no path to the volume".to_string());
+    }
+
+    // Copy runtime executable from volume to runtime folder
+    let volume_read_result = fs::read_dir(mounted_volume)
+        .map_err(|err| err.to_string())?;
+
+    let volume_apps: Vec<_> = volume_read_result
+        .filter_map(|file_entry| {
+            let file_entry = file_entry.ok()?;
+            let file_path = file_entry.path();
+            /*if file_path.is_file() && let Some(extension) = file_path.extension() && extension.eq(app) {
+                println!("Extension: {:?}", extension);
+                println!("Extension is app: {:?}", extension.eq("app"));
+            }*/
+            if !file_path.is_file() && file_path.extension()?.eq("app") {
+                Some(file_path)
+            }
+            else {
+                None
+            }
+        })
+        .collect();
+
+    // Ensure only one .app is contained
+    let app_file_count = volume_apps.len();
+    if app_file_count != 1 {
+        return Err(format!(
+            "Unexpected number of app files within volume: {}, expected 1, contained files: {:?}",
+            app_file_count,
+            volume_apps,
+        ));
+    }
+
+    // Copy the only .app folder to runtime folder using system copy command
+    let source_app_folder = volume_apps.first().unwrap();
+    let dest_folder = format!("{}/", RUNTIMES_DIR);
+    let copy_process = Command::new("cp")
+        .arg("-rf")
+        .arg(source_app_folder)
+        .arg(dest_folder)
+        .output()
+        .map_err(|err| err.to_string())?;
+
+    if !copy_process.status.success() {
+        return Err(format!(
+            "Copying .app from: {:?} to {}",
+            source_app_folder,
+            String::from_utf8_lossy(&hdiutil_process.stderr),
+        ));
+    }
+
+    // Finally check if the executable path is now available
+    if !executable_path.exists() {
+        return Err(format!(
+            "After extraction, the expected executable path is still not available: {:?}",
+            executable_path,
+        ));
     }
     
     Ok(())
