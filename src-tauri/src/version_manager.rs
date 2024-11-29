@@ -55,6 +55,10 @@ pub async fn download_and_extract_runtime(
 
     // If there is a package path, download to that path. If not, fallback to the executable path
     let file_path = package_path.clone().unwrap_or(executable_path.clone());
+    println!("Package path: {:?}", package_path);
+    println!("Executable path: {:?}", executable_path);
+    println!("Download to path: {:?}", file_path);
+    println!("Package file name: {:?}", package_file_name);
 
     download_file(&file_path, &package_file_name, use_https)
         .await
@@ -82,16 +86,17 @@ pub fn get_platform_flash_runtime(platform: &str) -> Result<(PathBuf, Option<Pat
         _ => Err(format!("unsupported platform: {}", platform)),
     };
 
-    fn get_runtime_dir_path_buf(path_str: String) -> PathBuf {
+    fn get_runtime_dir_path_buf(path_str: &str) -> PathBuf {
         PathBuf::from(RUNTIMES_DIR).join(path_str)
     }
 
     flash_runtime_executable_and_package.map(|executable_and_package| {
         // Convert all path strings to runtime directory PathBufs
-        let runtime_executable = executable_and_package.0;
-        let runtime_executable_pathbuf = get_runtime_dir_path_buf(runtime_executable.clone());
+        let executable = executable_and_package.0.clone();
+        let executable_pathbuf = get_runtime_dir_path_buf(&executable);
         // If the runtime package is None, leave it untouched
-        let runtime_package_pathbuf = executable_and_package.1.map(|path_str| get_runtime_dir_path_buf(path_str));
-        (runtime_executable_pathbuf, runtime_package_pathbuf, runtime_executable)
+        let package = executable_and_package.1;
+        let package_pathbuf = package.clone().map(|path_str| get_runtime_dir_path_buf(&path_str));
+        (executable_pathbuf, package_pathbuf, package.unwrap_or(executable))
     })
 }
