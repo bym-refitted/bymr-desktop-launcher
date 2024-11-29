@@ -62,9 +62,8 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
 }
 
 #[command]
-fn launch_game(app: AppHandle, build_name: &str, language: &str, token: Option<&str>) -> Result<(), String> {
+fn launch_game(build_name: &str, language: &str, token: Option<&str>) -> Result<(), String> {
     let (flash_runtime_path, _, _) = get_platform_flash_runtime(&env::consts::OS)?;
-    emit_event(&app, "infoLog", ("Flash runtime path: ").to_string() + &flash_runtime_path.clone().into_os_string().into_string().unwrap());
 
     if !flash_runtime_path.exists() {
         eprintln!("cannot find file: {}", flash_runtime_path.display());
