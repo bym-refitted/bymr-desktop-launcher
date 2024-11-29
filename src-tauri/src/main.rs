@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod networking;
+mod runtime_extraction;
 mod version_manager;
 
 use crate::version_manager::*;
@@ -50,11 +51,12 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
         }
     };
 
-    let file_info = get_platform_flash_runtime(&env::consts::OS)?;
-    if !file_info.0.exists() {
+    let platform = &env::consts::OS;
+    let runtime_info = get_platform_flash_runtime(platform)?;
+    if !runtime_info.0.exists() {
         let log = "Downloading flash player for your platform...";
         emit_event(&app, "infoLog", log.to_string());
-        download_runtime(file_info, use_https).await?;
+        download_and_extract_runtime(runtime_info, platform, use_https).await?;
     }
 
     Ok(())
@@ -62,7 +64,7 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
 
 #[command]
 fn launch_game(build_name: &str, language: &str, token: Option<&str>) -> Result<(), String> {
-    let (flash_runtime_path, _) = get_platform_flash_runtime(&env::consts::OS)?;
+    let (flash_runtime_path, _, _) = get_platform_flash_runtime(&env::consts::OS)?;
 
     if !flash_runtime_path.exists() {
         eprintln!("cannot find file: {}", flash_runtime_path.display());

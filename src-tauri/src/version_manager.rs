@@ -4,6 +4,7 @@ use std::{
 };
 
 use crate::networking::{self, download_file, fetch_json_with_http_retry};
+use crate::runtime_extraction::potentially_extract_runtime;
 use serde::{Deserialize, Serialize};
 
 pub const VERSION_MANIFEST_URL: &str = "cdn.bymrefitted.com/versionManifest.json";
@@ -45,24 +46,57 @@ fn ensure_folder_exists(runtime_path: &Path) -> std::io::Result<()> {
     Ok(())
 }
 
-pub async fn download_runtime(
-    (runtime_path, file_extension): (PathBuf, String),
+pub async fn download_and_extract_runtime(
+    (executable_path, package_path, package_file_name): (PathBuf, Option<PathBuf>, String),
+    platform: &str,
     use_https: bool,
 ) -> Result<(), String> {
     ensure_folder_exists(Path::new(RUNTIMES_DIR)).expect("Could not create runtimes folder");
 
-    download_file(&runtime_path, &file_extension, use_https)
+    // If there is a package path, download to that path. If not, fallback to the executable path
+    let file_path = package_path.clone().unwrap_or(executable_path.clone());
+    println!("Package path: {:?}", package_path);
+    println!("Executable path: {:?}", executable_path);
+    println!("Download to path: {:?}", file_path);
+    println!("Package file name: {:?}", package_file_name);
+
+    download_file(&file_path, &package_file_name, use_https)
         .await
-        .map_err(|err| err.to_string())
+        .map_err(|err| err.to_string())?;
+
+    if let Some(package_path) = package_path {
+        potentially_extract_runtime(executable_path, package_path, platform)
+    }
+    else {
+        // As there is no package path, definitely no extraction step is necessary
+        Ok(())
+    }
 }
 
-pub fn get_platform_flash_runtime(platform: &str) -> Result<(PathBuf, String), String> {
-    let flash_runtimes = match platform {
-        "windows" => Ok("flashplayer.exe".to_string()),
-        "darwin" => Ok("flashplayer.dmg".to_string()),
-        "linux" => Ok("flashplayer".to_string()),
+/// Returns path to runtime executable, path to runtime package, file name of runtime package
+pub fn get_platform_flash_runtime(platform: &str) -> Result<(PathBuf, Option<PathBuf>, String), String> {
+    // If the package (second value) is None, it is the same as the executable (first value)
+    let flash_runtime_executable_and_package = match platform {
+        "windows" => Ok(("flashplayer.exe".to_string(), None)),
+        "darwin" | "macos" => Ok((
+            "Flash Player.app/Contents/MacOS/Flash Player".to_string(),
+            Some("flashplayer.dmg".to_string())
+        )),
+        "linux" => Ok(("flashplayer".to_string(), None)),
         _ => Err(format!("unsupported platform: {}", platform)),
     };
 
-    flash_runtimes.map(|runtime| (PathBuf::from(RUNTIMES_DIR).join(runtime.clone()), runtime))
+    fn get_runtime_dir_path_buf(path_str: &str) -> PathBuf {
+        PathBuf::from(RUNTIMES_DIR).join(path_str)
+    }
+
+    flash_runtime_executable_and_package.map(|executable_and_package| {
+        // Convert all path strings to runtime directory PathBufs
+        let executable = executable_and_package.0.clone();
+        let executable_pathbuf = get_runtime_dir_path_buf(&executable);
+        // If the runtime package is None, leave it untouched
+        let package = executable_and_package.1;
+        let package_pathbuf = package.clone().map(|path_str| get_runtime_dir_path_buf(&path_str));
+        (executable_pathbuf, package_pathbuf, package.unwrap_or(executable))
+    })
 }
