@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod networking;
+mod runtime_extraction;
 mod version_manager;
 
 use crate::version_manager::*;
