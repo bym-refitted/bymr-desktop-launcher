@@ -34,11 +34,8 @@
 
   const initializeLauncher = async () => {
     try {
-      const [
-        launcherVersionManifest,
-        currentGameVersionManifest,
-        _
-      ] = await Promise.all([
+      const [launcherVersionManifest, currentGameVersionManifest, _] =
+        await Promise.all([
           getVersion(),
           invoke<string>("get_current_game_version"),
           invoke("initialize_app"),

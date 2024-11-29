@@ -9,7 +9,6 @@ import {
   type HttpVerb,
   ResponseType,
 } from "@tauri-apps/api/http";
-import { addInfoLog } from "$lib/stores/debugLogStore";
 
 /**
  * Represents a generic API response.
