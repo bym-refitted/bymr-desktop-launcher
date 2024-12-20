@@ -8,7 +8,7 @@
 <div class="h-20 flex justify-end items-center pr-12 pt-8">
   <div class="flex items-center space-x-4">
     <Tooltip
-      url="https://discord.gg/ajZAccxNMA"
+      url="https://discord.gg/bymrefitted"
       tooltipText="Discord"
       Icon={Discord}
     />

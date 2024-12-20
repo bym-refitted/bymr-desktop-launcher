@@ -23,13 +23,13 @@ interface ApiResponse<T> {
  * Represents an error response from the API.
  */
 interface ErrorResponse {
-  message: string;
+  error: string;
   code: string;
 }
 
 /**
  * Makes an API request to the specified route with the given form data and method.
- * 
+ *
  * @template T - The type of the data expected in the response.
  * @param {string} route - The API route to request.
  * @param {object} [formData={}] - The form data to send with the request.
@@ -41,7 +41,7 @@ export const invokeApiRequest = async <T>(
   route: string,
   formData = {},
   method: HttpVerb = Method.POST
-): Promise<ApiResponse<T>> => {
+): Promise<ApiResponse<T> | string> => {
   try {
     const version = get(currentGameVersion);
     const options: FetchOptions = {
@@ -57,16 +57,14 @@ export const invokeApiRequest = async <T>(
 
     const url = `${BASE_URL}/api/v${version}-beta${route}`;
     const response = await fetch<any>(url, options);
-    
+
     if (!response.ok) {
-      const { message }: ErrorResponse = response.data;
-      throw new Error(message);
+      const errorResponse: ErrorResponse = response.data;
+      throw new Error(errorResponse.error);
     }
     return { status: response.status, data: response.data };
   } catch (error) {
-    throw new Error(
-      error?.message ||
-        `An unexpected error occurred while making a request to: '${route}'.`
-    );
+    const errorMessage = error.message || `An unexpected error occurred while making this request.`;
+    throw new Error(errorMessage);
   }
 };
