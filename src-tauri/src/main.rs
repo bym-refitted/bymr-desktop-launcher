@@ -1,12 +1,13 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use crate::version_manager::*;
 mod networking;
 mod version_manager;
+
+use crate::version_manager::*;
 use serde::Serialize;
+use std::env;
 use std::process::Command;
-use std::{env, fs};
 use tauri::{command, App, AppHandle, Manager};
 use window_shadows::set_shadow;
 
@@ -49,21 +50,11 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
         }
     };
 
-    let app_data_path = get_appdata_path(&app);
-
-    // Creates AppData folder if it does not exist
-    if !get_appdata_path(&app).exists() {
-        fs::create_dir_all(&app_data_path).expect("Could not create appdata folder!");
-    }
-
-    // Downloads flash runtime for your platform in case its not found
-    let (flash_runtime_path, flash_runtime_executable) =
-        get_platform_flash_runtime(&env::consts::OS, app_data_path)?;
-
-    if !flash_runtime_path.exists() {
+    let file_info = get_platform_flash_runtime(&app, &env::consts::OS)?;
+    if !file_info.0.exists() {
         let log = "Downloading flash player for your platform...";
         emit_event(&app, "infoLog", log.to_string());
-        download_runtime(flash_runtime_path, flash_runtime_executable, use_https).await?;
+        download_runtime(&app, file_info, use_https).await?;
     }
 
     Ok(())
@@ -71,9 +62,7 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
 
 #[command]
 fn launch_game(app: AppHandle, build_name: &str, language: &str, token: Option<&str>) -> Result<(), String> {
-
-    let app_data_path = get_appdata_path(&app);
-    let (flash_runtime_path, _) = get_platform_flash_runtime(&env::consts::OS, app_data_path)?;
+    let (flash_runtime_path, _) = get_platform_flash_runtime(&app, &env::consts::OS)?;
 
     if !flash_runtime_path.exists() {
         eprintln!("cannot find file: {}", flash_runtime_path.display());
@@ -116,6 +105,14 @@ fn launch_game(app: AppHandle, build_name: &str, language: &str, token: Option<&
     Ok(())
 }
 
+#[command]
+async fn get_current_game_version() -> Result<String, String> {
+    match get_server_manifest().await {
+        Ok(manifest) => Ok(manifest.current_game_version),
+        Err(err) => Err(err.to_string()),
+    }
+}
+
 #[derive(Clone, Serialize)]
 struct EventLog {
     message: String,
@@ -132,9 +129,10 @@ fn emit_event(app: &AppHandle, event_type: &str, message: String) {
  * Explanation: https://github.com/tauri-apps/tauri/discussions/3093#discussioncomment-1854703
  */
 fn set_window_decor(app: &App) {
-    if env::consts::OS == "linux" {
+    if cfg!(target_os = "linux") {
         return;
     }
+
     let window = app.get_window("main").unwrap();
     set_shadow(&window, true).expect("Unsupported platform!");
 }

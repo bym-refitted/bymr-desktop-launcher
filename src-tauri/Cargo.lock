@@ -197,7 +197,7 @@ checksum = "79296716171880943b8470b5f8d03aa55eb2e645a4874bdbb28adb49162e012c"
 
 [[package]]
 name = "bym-refitted-launcher"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "reqwest 0.12.5",
  "serde",
