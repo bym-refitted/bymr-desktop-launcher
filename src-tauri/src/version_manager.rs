@@ -38,25 +38,17 @@ pub async fn get_current_game_version() -> Result<String, String> {
     }
 }
 
-fn ensure_folder_exists(runtime_path: &Path) -> std::io::Result<()> {
-    if !runtime_path.exists() {
-        fs::create_dir_all(runtime_path)?;
-    }
-    Ok(())
-}
-
 pub async fn download_runtime(
-    (runtime_path, file_extension): (PathBuf, String),
+    runtime_path: PathBuf, 
+    runtime_executable: String,
     use_https: bool,
 ) -> Result<(), String> {
-    ensure_folder_exists(Path::new(RUNTIMES_DIR)).expect("Could not create runtimes folder");
-
-    download_file(&runtime_path, &file_extension, use_https)
+    download_file(&runtime_path, &runtime_executable, use_https)
         .await
         .map_err(|err| err.to_string())
 }
 
-pub fn get_platform_flash_runtime(platform: &str) -> Result<(PathBuf, String), String> {
+pub fn get_platform_flash_runtime(platform: &str, appdata_path: PathBuf) -> Result<(PathBuf, String), String> {
     let flash_runtimes = match platform {
         "windows" => Ok("flashplayer.exe".to_string()),
         "darwin" => Ok("flashplayer.dmg".to_string()),
@@ -64,5 +56,5 @@ pub fn get_platform_flash_runtime(platform: &str) -> Result<(PathBuf, String), S
         _ => Err(format!("unsupported platform: {}", platform)),
     };
 
-    flash_runtimes.map(|runtime| (PathBuf::from(RUNTIMES_DIR).join(runtime.clone()), runtime))
+    flash_runtimes.map(|runtime| (appdata_path.join(runtime.clone()), runtime))
 }
