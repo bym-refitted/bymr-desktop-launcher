@@ -28,7 +28,7 @@
       "http": {
         "all": true,
         "request": true,
-        "scope": ["https://localhost/*", "https://api.bymrefitted.com/*"]
+        "scope": ["http://localhost:3001/*", "https://api.bymrefitted.com/*"] 
       }
     },
     "bundle": {

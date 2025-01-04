@@ -1,8 +1,8 @@
 [package]
-name = "BYMR"
+name = "BYM Refitted Launcher"
 version = "0.2.3"
 description = "A Tauri App"
-authors = ["BYM Team"]
+authors = ["Backyard Monsters Refitted team"]
 license = ""
 repository = ""
 default-run = "BYMR"
