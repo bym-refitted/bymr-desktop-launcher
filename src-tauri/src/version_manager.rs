@@ -1,14 +1,11 @@
-use std::{
-    fs,
-    path::{Path, PathBuf},
-};
+use std::path::PathBuf;
 
 use crate::networking::{self, download_file, fetch_json_with_http_retry};
 use serde::{Deserialize, Serialize};
+use tauri::AppHandle;
 
 pub const VERSION_MANIFEST_URL: &str = "cdn.bymrefitted.com/versionManifest.json";
 pub const SWFS_URL: &str = "cdn.bymrefitted.com/launcher/swfs/";
-pub const RUNTIMES_DIR: &str = "bymr-downloads/runtimes";
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct VersionManifest {
@@ -57,4 +54,8 @@ pub fn get_platform_flash_runtime(platform: &str, appdata_path: PathBuf) -> Resu
     };
 
     flash_runtimes.map(|runtime| (appdata_path.join(runtime.clone()), runtime))
+}
+
+pub fn get_appdata_path(app_handle: &AppHandle) -> PathBuf {
+    return app_handle.path_resolver().app_data_dir().unwrap();
 }
