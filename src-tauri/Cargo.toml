@@ -1,11 +1,10 @@
 [package]
-name = "BYM Refitted Launcher"
+name = "bym-refitted-launcher"
 version = "0.2.3"
 description = "A Tauri App"
 authors = ["Backyard Monsters Refitted team"]
 license = ""
 repository = ""
-default-run = "BYMR"
 edition = "2021"
 rust-version = "1.60"
 
