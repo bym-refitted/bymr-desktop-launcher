@@ -1,11 +1,11 @@
 [package]
-name = "app"
-version = "0.2.2"
+name = "BYMR"
+version = "0.2.3"
 description = "A Tauri App"
-authors = ["you"]
+authors = ["BYM Team"]
 license = ""
 repository = ""
-default-run = "app"
+default-run = "BYMR"
 edition = "2021"
 rust-version = "1.60"
 
