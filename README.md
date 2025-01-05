@@ -1,4 +1,4 @@
-![launcher](https://github.com/bym-refitted/bymr-desktop-launcher/assets/157532981/a089982e-d2da-4ccb-9950-d16bba9485a4)
+![launcher](https://github.com/user-attachments/assets/c941aeaa-9a8b-4519-ad5c-566dde65b6ac)
 
 <br />
 <br />
