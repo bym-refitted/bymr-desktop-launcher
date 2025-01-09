@@ -8,20 +8,18 @@ use crate::version_manager::*;
 use serde::Serialize;
 use std::env;
 use std::process::Command;
-use tauri::{command, App, AppHandle, Manager};
-use window_shadows::set_shadow;
+use tauri::{command, AppHandle, Emitter};
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_http::init())
         .invoke_handler(tauri::generate_handler![
             initialize_app,
             launch_game,
             get_current_game_version
         ])
-        .setup(|app| {
-            set_window_decor(app);
-            Ok(())
-        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -61,7 +59,12 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
 }
 
 #[command]
-fn launch_game(app: AppHandle, build_name: &str, language: &str, token: Option<&str>) -> Result<(), String> {
+fn launch_game(
+    app: AppHandle,
+    build_name: &str,
+    language: &str,
+    token: Option<&str>,
+) -> Result<(), String> {
     let (flash_runtime_path, _) = get_platform_flash_runtime(&app, &env::consts::OS)?;
 
     if !flash_runtime_path.exists() {
@@ -119,20 +122,5 @@ struct EventLog {
 }
 
 fn emit_event(app: &AppHandle, event_type: &str, message: String) {
-    app.emit_all(event_type, EventLog { message }).unwrap();
-}
-
-/** This is a temporary filthy hack to create a window shadow when using custom titlebars/no window decorations
- * because of tauri's shitty implementation which doesn't provide fine-tune control over native window elements.
- * Tauri 2.0 beta supports this, however, we are using stable.
- * Beta Docs: https://v2.tauri.app/reference/javascript/api/namespacewindow/#setshadow
- * Explanation: https://github.com/tauri-apps/tauri/discussions/3093#discussioncomment-1854703
- */
-fn set_window_decor(app: &App) {
-    if cfg!(target_os = "linux") {
-        return;
-    }
-
-    let window = app.get_window("main").unwrap();
-    set_shadow(&window, true).expect("Unsupported platform!");
+    app.emit(event_type, EventLog { message }).unwrap();
 }

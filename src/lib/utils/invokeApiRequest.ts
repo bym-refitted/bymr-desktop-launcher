@@ -2,13 +2,7 @@ import { Method } from "$lib/enums/Method";
 import { BASE_URL } from "$lib/globals";
 import { currentGameVersion } from "$lib/stores/loadState";
 import { get } from "svelte/store";
-import {
-  Body,
-  fetch,
-  type FetchOptions,
-  type HttpVerb,
-  ResponseType,
-} from "@tauri-apps/api/http";
+import { fetch } from "@tauri-apps/plugin-http";
 
 /**
  * Represents a generic API response.
@@ -40,31 +34,32 @@ interface ErrorResponse {
 export const invokeApiRequest = async <T>(
   route: string,
   formData = {},
-  method: HttpVerb = Method.POST
-): Promise<ApiResponse<T> | string> => {
+  method: Method = Method.POST
+): Promise<ApiResponse<T>> => {
   try {
     const version = get(currentGameVersion);
-    const options: FetchOptions = {
+    const options = {
       method,
       headers: {
         "Content-Type": "application/json",
       },
-      responseType: ResponseType.JSON,
+      body: method !== Method.GET ? JSON.stringify(formData) : undefined,
     };
 
-    let body: Body = Body.json(formData);
-    if (method !== Method.GET) options.body = body;
-
     const url = `${BASE_URL}/api/v${version}-beta${route}`;
-    const response = await fetch<any>(url, options);
+    const response = await fetch(url, options);
 
     if (!response.ok) {
-      const errorResponse: ErrorResponse = response.data;
+      const errorResponse: ErrorResponse = await response.json();
       throw new Error(errorResponse.error);
     }
-    return { status: response.status, data: response.data };
+
+    const data = await response.json();
+    return { status: response.status, data };
   } catch (error) {
-    const errorMessage = error.message || `An unexpected error occurred while making this request.`;
+    const errorMessage =
+      error.message ||
+      `An unexpected error occurred while making this request.`;
     throw new Error(errorMessage);
   }
 };

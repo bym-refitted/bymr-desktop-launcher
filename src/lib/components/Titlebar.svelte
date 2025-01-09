@@ -1,8 +1,10 @@
 <script lang="ts">
-  import { appWindow } from "@tauri-apps/api/window";
+  import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
   import FrameCorners from "phosphor-svelte/lib/FrameCorners";
   import Minus from "phosphor-svelte/lib/Minus";
   import Close from "phosphor-svelte/lib/X";
+
+  const appWindow = getCurrentWebviewWindow();
 
   const toggleMaximize = async () => {
     const isMaximized = await appWindow.isMaximized();
@@ -29,7 +31,7 @@
   >
     <div
       class="absolute inset-0 bg-transparent group-hover:bg-white group-hover:opacity-10"
-    />
+    ></div>
     <Minus size={15} class="z-10 text-white/50" weight="bold" />
   </div>
   <div
@@ -42,7 +44,7 @@
   >
     <div
       class="absolute inset-0 bg-transparent group-hover:bg-white group-hover:opacity-10"
-    />
+    ></div>
 
     <FrameCorners size={15} class="z-10 text-white/50" weight="bold" />
   </div>
@@ -54,7 +56,7 @@
     class="group inline-flex items-center justify-center w-7 h-7 relative"
     id="titlebar-close"
   >
-    <div class="absolute inset-0 bg-transparent group-hover:bg-red" />
+    <div class="absolute inset-0 bg-transparent group-hover:bg-red" ></div>
     <Close size={15} class="z-10 text-white/50" weight="bold" />
   </div>
 </div>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
+  import RocketLaunch from "phosphor-svelte/lib/RocketLaunch";
   import {
     Dialog,
     DialogContent,
@@ -8,12 +9,12 @@
     DialogHeader,
     DialogTitle,
   } from "$lib/components/ui/dialog";
-  import RocketLaunch from "phosphor-svelte/lib/RocketLaunch";
-  import type { IconProps, SvelteComponent } from "phosphor-svelte/lib/shared";
+  import type { Component } from "svelte";
+  import type { IconComponentProps } from "phosphor-svelte/lib/shared";
 
   export let title = "Oops! Something broke...";
   export let description = "";
-  export let Icon: typeof SvelteComponent<IconProps> = RocketLaunch;
+  export let Icon: Component<IconComponentProps> = RocketLaunch;
 
   export let open = false;
   export let error = "";

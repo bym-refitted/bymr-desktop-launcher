@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { Tooltip } from "bits-ui";
   import SketchLogo from "phosphor-svelte/lib/SketchLogo";
-  import type { IconProps, SvelteComponent } from "phosphor-svelte/lib/shared";
+
+  import { Tooltip } from "bits-ui";
+  import type { Component } from "svelte";
+  import type { IconComponentProps } from "phosphor-svelte/lib/shared";
 
   export let url = "";
-  export let Icon: typeof SvelteComponent<IconProps> = SketchLogo;
+  export let Icon: Component<IconComponentProps> = SketchLogo;
   export let tooltipText = "";
   export let side: "top" | "bottom" | "left" | "right" = "bottom";
   export let style = "text-primary hover:text-white";

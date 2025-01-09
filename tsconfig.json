@@ -27,17 +27,23 @@
 		 */
 		"checkJs": true,
 		"paths": {
-		  "$lib": ["./src/lib"],
-		  "$lib/*": ["./src/lib/*"]
+			"$lib": [
+				"./src/lib"
+			],
+			"$lib/*": [
+				"./src/lib/*"
+			]
 		}
-	  },
-	  /**
+	},
+	/**
 	   * Use global.d.ts instead of compilerOptions.types
 	   * to avoid limiting type declarations.
 	   */
-	  "include": [
+	"include": [
 		"src/**/*.d.ts",
 		"src/**/*.ts",
-		"src/**/*.svelte"
-, "src/lib/components/ui/dialog/index.ts", "src/lib/components/ui/button/index.ts"	  ]
+		"src/**/*.svelte",
+		"src/lib/components/ui/dialog/index.ts",
+		"src/lib/components/ui/button/index.ts"
+	]
 }

@@ -1,11 +1,13 @@
 <script lang="ts">
   import { Menubar } from "bits-ui";
+  import type { Component } from "svelte";
+  import type { IconComponentProps } from "phosphor-svelte/lib/shared";
   import Controller from "phosphor-svelte/lib/GameController";
-  import type { IconProps, SvelteComponent } from "phosphor-svelte/lib/shared";
+  
   import { page } from "$app/stores";
 
   export let path = "/";
-  export let Icon: typeof SvelteComponent<IconProps> = Controller;
+  export let Icon: Component<IconComponentProps> = Controller;
   export let text = "";
   $: active = path === $page.url.pathname;
   $: bgActive = active ? "bg-white/10" : "bg-transparent";

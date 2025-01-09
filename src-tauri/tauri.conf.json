@@ -2,82 +2,60 @@
   "build": {
     "beforeBuildCommand": "npm run build",
     "beforeDevCommand": "npm run dev",
-    "devPath": "http://localhost:5173",
-    "distDir": "../build"
+    "frontendDist": "../build",
+    "devUrl": "http://localhost:5173"
   },
-  "package": {
-    "productName": "bymr-launcher",
-    "version": "0.2.5"
-  },
-  "tauri": {
-    "allowlist": {
-      "process": {
-        "exit": true
-      },
-      "window": {
-        "all": false,
-        "close": true,
-        "hide": true,
-        "show": true,
-        "maximize": true,
-        "minimize": true,
-        "unmaximize": true,
-        "unminimize": true,
-        "startDragging": true
-      },
-      "http": {
-        "all": true,
-        "request": true,
-        "scope": ["http://localhost:3001/*", "https://api.bymrefitted.com/*"] 
-      }
+  "bundle": {
+    "active": true,
+    "category": "DeveloperTool",
+    "copyright": "",
+    "targets": "all",
+    "externalBin": [],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
     },
-    "bundle": {
-      "active": true,
-      "category": "DeveloperTool",
-      "copyright": "",
+    "longDescription": "",
+    "macOS": {
+      "entitlements": null,
+      "exceptionDomain": "",
+      "frameworks": [],
+      "providerShortName": null,
+      "signingIdentity": null
+    },
+    "resources": [],
+    "shortDescription": "",
+    "linux": {
       "deb": {
         "depends": []
-      },
-      "externalBin": [],
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ],
-      "identifier": "com.bymr.launcher",
-      "longDescription": "",
-      "macOS": {
-        "entitlements": null,
-        "exceptionDomain": "",
-        "frameworks": [],
-        "providerShortName": null,
-        "signingIdentity": null
-      },
-      "resources": [],
-      "shortDescription": "",
-      "targets": "all",
-      "windows": {
-        "certificateThumbprint": null,
-        "digestAlgorithm": "sha256",
-        "timestampUrl": ""
       }
     },
-    "security": {
-      "csp": null
-    },
+    "createUpdaterArtifacts": "v1Compatible"
+  },
+  "productName": "bymr-launcher",
+  "mainBinaryName": "bymr-launcher",
+  "version": "0.2.5",
+  "identifier": "com.bymr.launcher",
+  "plugins": {
     "updater": {
       "windows": {
         "installMode": "passive"
       },
-      "active": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEJBQzY1N0EzQzJCRUNBQzkKUldUSnlyN0NvMWZHdXB3dml4WGNvdHdRZVZraWpkVks0UVhHVTZvMlkvSjBlZlRQOGd1RVMxRk0K",
       "endpoints": [
         "https://gist.github.com/React1-X/30d54091783e2434d697e557606ed70a/raw"
-      ],
-      "dialog": true,
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEJBQzY1N0EzQzJCRUNBQzkKUldUSnlyN0NvMWZHdXB3dml4WGNvdHdRZVZraWpkVks0UVhHVTZvMlkvSjBlZlRQOGd1RVMxRk0K"
-    },
+      ]
+    }
+  },
+  "app": {
     "windows": [
       {
         "title": "Backyard Monsters: Refitted | Launcher",
@@ -86,8 +64,13 @@
         "maximized": true,
         "minWidth": 1000,
         "minHeight": 600,
-        "decorations": false
+        "transparent": true,
+        "decorations": false,
+        "useHttpsScheme": true
       }
-    ]
+    ],
+    "security": {
+      "csp": null
+    }
   }
 }

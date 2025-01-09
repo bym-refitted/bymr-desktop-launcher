@@ -1,14 +1,16 @@
 <script lang="ts">
-  import { getVersion } from "@tauri-apps/api/app";
   import "../app.pcss";
-  import { onUpdaterEvent } from "@tauri-apps/api/updater";
+
+  import { getVersion } from "@tauri-apps/api/app";
+  import { check } from "@tauri-apps/plugin-updater";
+  import { relaunch } from "@tauri-apps/plugin-process";
   import {
     addErrorLog,
     addInfoLog,
     addSuccessLog,
     setupLogListeners,
   } from "$lib/stores/debugLogStore";
-  import { invoke } from "@tauri-apps/api";
+  import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
   import Toast from "$lib/components/Toast.svelte";
   import {
@@ -23,9 +25,14 @@
 
   let launcherVersion = "0.0.0";
 
-  onMount(() => {
+  onMount(async () => {
     // Handle launcher update events
-    onUpdaterEvent(handleUpdaterEvent);
+    const update = await check();
+
+    if (update?.available) {
+      await update.downloadAndInstall();
+      await relaunch();
+    }
     // Set up the debug log listeners
     setupLogListeners();
     // Initialize the launcher

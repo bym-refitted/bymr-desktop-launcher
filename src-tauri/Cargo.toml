@@ -11,31 +11,25 @@ rust-version = "1.60"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.5.2", features = [] }
+tauri-build = { version = "2.0.4", features = [] }
 
 [dependencies]
-serde_json = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-reqwest = { version = "0.12", features = ["json"] }
-tauri = { version = "1.6.4", features = [ "http-all",
-    "process-exit",
-    "window-close",
-    "window-maximize",
-    "window-show",
-    "window-start-dragging",
-    "window-minimize",
-    "window-unminimize",
-    "window-unmaximize",
-    "window-hide",
-    "updater",
+serde_json = "^1.0.135"
+serde = { version = "^1.0.217", features = ["derive"] }
+reqwest = { version = "^0.12.12", features = ["json"] }
+tauri = { version = "2.2.0", features = [
     "devtools",
 ] }
-tokio = { version = "1", features = ["io-util", "fs"] }
+tokio = { version = "^1.43", features = ["io-util", "fs"] }
 tauri-webview2 = "0.1.2"
-window-shadows = "0.2.2" # optional, for window shadows on Windows (unmaintained) - tauri@v2 will have this feature built-in.
+tauri-plugin-http = "2.2.0"
+tauri-plugin-process = "2.2.0"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.
 # If you use cargo directly instead of tauri's cli you can use this feature flag to switch between tauri's `dev` and `build` modes.
 # DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
+
+[target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
+tauri-plugin-updater = "2.3.1"

@@ -6,7 +6,7 @@ use std::{
 
 use crate::networking::{self, download_file, fetch_json_with_http_retry};
 use serde::{Deserialize, Serialize};
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager};
 
 pub const VERSION_MANIFEST_URL: &str = "cdn.bymrefitted.com/versionManifest.json";
 pub const SWFS_URL: &str = "cdn.bymrefitted.com/launcher/swfs/";
@@ -39,7 +39,7 @@ pub async fn download_runtime(
 ) -> Result<(), String> {
     // Resolve the correct directory for Linux (app data dir) or use default for others
     let runtimes_dir = if env::consts::OS == "linux" {
-        let app_data_dir = app_handle.path_resolver().app_data_dir().unwrap();
+        let app_data_dir = app_handle.path().app_data_dir().unwrap();
         app_data_dir.join(RUNTIMES_DIR)
     } else {
         PathBuf::from(RUNTIMES_DIR)
@@ -77,7 +77,10 @@ pub async fn download_runtime(
     Ok(())
 }
 
-pub fn get_platform_flash_runtime(app_handle: &AppHandle, platform: &str,) -> Result<(PathBuf, String), String> {
+pub fn get_platform_flash_runtime(
+    app_handle: &AppHandle,
+    platform: &str,
+) -> Result<(PathBuf, String), String> {
     let flash_runtimes = match platform {
         "windows" => Ok("flashplayer.exe".to_string()),
         "darwin" => Ok("flashplayer.dmg".to_string()),
@@ -88,7 +91,7 @@ pub fn get_platform_flash_runtime(app_handle: &AppHandle, platform: &str,) -> Re
     flash_runtimes.map(|runtime| {
         let runtimes_dir = if platform == "linux" {
             app_handle
-                .path_resolver()
+                .path()
                 .app_data_dir()
                 .unwrap()
                 .join(RUNTIMES_DIR)
