@@ -28,12 +28,16 @@ tauri-build = { version = "2.0.4", features = [] }
 [dependencies]
 serde_json = "^1.0.135"
 serde = { version = "^1.0.217", features = ["derive"] }
-reqwest = { version = "^0.12.12", features = ["json"] }
+reqwest = { version = "^0.12.12", default-features = false, features = [
+  "json",
+  "rustls-tls",
+] }
 tauri = { version = "2.2.0", features = ["devtools"] }
 tokio = { version = "^1.43", features = ["io-util", "fs"] }
 # tauri-webview2 = "0.1.2" # Surprisingly this isn't needed? compiles without it but messes with android build
 tauri-plugin-http = "2.2.0"
 tauri-plugin-process = "2.2.0"
+tauri-plugin-opener = "2"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.
@@ -45,4 +49,4 @@ custom-protocol = ["tauri/custom-protocol"]
 tauri-plugin-updater = "2"
 
 [target.'cfg(target_os = "android")'.dependencies]
-openssl = { version = "0.10.35", features = ["vendored"] }
+# openssl = { version = "0.10.35", features = ["vendored"] }
