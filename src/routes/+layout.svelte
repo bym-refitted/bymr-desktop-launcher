@@ -2,8 +2,8 @@
   import "../app.pcss";
 
   import { getVersion } from "@tauri-apps/api/app";
-  import { check } from "@tauri-apps/plugin-updater";
-  import { relaunch } from "@tauri-apps/plugin-process";
+  // import { check } from "@tauri-apps/plugin-updater";
+  // import { relaunch } from "@tauri-apps/plugin-process";
   import {
     addErrorLog,
     addInfoLog,
@@ -24,15 +24,25 @@
   import Loader from "$lib/components/Loader.svelte";
 
   let launcherVersion = "0.0.0";
+  let isAndroid = false;
 
   onMount(async () => {
-    // Handle launcher update events
-    const update = await check();
-
-    if (update?.available) {
-      await update.downloadAndInstall();
-      await relaunch();
+    isAndroid = /Android/i.test(navigator.userAgent);
+    
+    // Conditionally load plugins
+    if (!isAndroid) {
+      const {check} = (await import("@tauri-apps/plugin-updater"));
+      const { relaunch } = (await import("@tauri-apps/plugin-process"));
+      
+      // Handle launcher update events
+      const update = await check();
+      
+      if (update?.available) {
+        await update.downloadAndInstall();
+        await relaunch();
+      }
     }
+    
     // Set up the debug log listeners
     setupLogListeners();
     // Initialize the launcher
@@ -41,12 +51,17 @@
 
   const initializeLauncher = async () => {
     try {
-      const [launcherVersionManifest, currentGameVersionManifest, _] =
-        await Promise.all([
-          getVersion(),
-          invoke<string>("get_current_game_version"),
-          invoke("initialize_app"),
-        ]);
+      const [launcherVersionManifest, currentGameVersionManifest, _] = isAndroid 
+        ? await Promise.all([
+            getVersion(),
+            invoke<string>("get_current_game_version"),
+            invoke("initialize_android_app"),
+        ])
+        : await Promise.all([
+            getVersion(),
+            invoke<string>("get_current_game_version"),
+            invoke("initialize_desktop_app"),
+          ]);
 
       launcherVersion = launcherVersionManifest;
       currentGameVersion.set(currentGameVersionManifest);
@@ -67,7 +82,9 @@
 </script>
 
 <!-- Custom Titlebar -->
-<Titlebar />
+{#if !isAndroid}
+  <Titlebar />
+{/if}
 <!-- Content -->
 <div class="flex flex-col h-screen">
   <main

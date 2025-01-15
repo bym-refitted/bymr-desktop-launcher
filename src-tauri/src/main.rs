@@ -2,5 +2,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 pub fn main() {
-    bym_refitted_launcher_lib::run();
+    if cfg!(target_os = "android") {
+        bym_refitted_launcher_lib::run_mobile();
+    } else {
+        bym_refitted_launcher_lib::run_desktop();
+    }
 }
