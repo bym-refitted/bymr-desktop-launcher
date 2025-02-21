@@ -1,4 +1,6 @@
 {
+  "productName": "bymr-launcher",
+  "version": "0.2.7",
   "build": {
     "beforeBuildCommand": "npm run build",
     "beforeDevCommand": "npm run dev",
@@ -36,13 +38,16 @@
     "linux": {
       "deb": {
         "depends": []
+      },
+      "appimage": {
+        "files": {
+          "/usr/lib/x86_64-linux-gnu/webkit2gtk-4.1/injected-bundle/libwebkit2gtkinjectedbundle.so": "/lib/x86_64-linux-gnu/webkit2gtk-4.1/injected-bundle/libwebkit2gtkinjectedbundle.so"
+        }
       }
     },
     "createUpdaterArtifacts": "v1Compatible"
   },
-  "productName": "bymr-launcher",
   "mainBinaryName": "bymr-launcher",
-  "version": "0.2.6",
   "identifier": "com.bymr.launcher",
   "plugins": {
     "updater": {
@@ -65,8 +70,7 @@
         "minWidth": 1000,
         "minHeight": 600,
         "transparent": true,
-        "decorations": false,
-        "useHttpsScheme": true
+        "decorations": false
       }
     ],
     "security": {

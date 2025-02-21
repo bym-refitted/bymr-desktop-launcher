@@ -58,7 +58,7 @@ export const invokeApiRequest = async <T>(
     return { status: response.status, data };
   } catch (error) {
     const errorMessage =
-      error.message || `${error || 'unknown'}`;
+      `An unexpected error occurred: ${error}` || "Could not get error details";
     throw new Error(errorMessage);
   }
 };
