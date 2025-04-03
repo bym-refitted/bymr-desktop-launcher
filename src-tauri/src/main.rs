@@ -59,12 +59,7 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
 }
 
 #[command]
-fn launch_game(
-    app: AppHandle,
-    build_name: &str,
-    language: &str,
-    token: Option<&str>,
-) -> Result<(), String> {
+fn launch_game(app: AppHandle, language: &str, token: Option<&str>) -> Result<(), String> {
     let (flash_runtime_path, _) = get_platform_flash_runtime(&app, &env::consts::OS)?;
 
     if !flash_runtime_path.exists() {
@@ -76,14 +71,8 @@ fn launch_game(
     }
 
     let mut swf_url = format!(
-        "http{}://{}bymr-{}.swf?language={}",
-        if build_name == "http" || build_name == "local" {
-            ""
-        } else {
-            "s"
-        },
+        "https://{}bymr-stable.swf?language={}",
         SWFS_URL,
-        build_name,
         language.to_lowercase()
     );
 
@@ -100,8 +89,8 @@ fn launch_game(
         .spawn()
         .map_err(|err| {
             format!(
-                "[BYMR LAUNCHER] Failed to start BYMR build {}: {:?}",
-                build_name, err
+                "[BYMR LAUNCHER] Failed to start BYMR build with error {:?}",
+                err
             )
         })?;
 

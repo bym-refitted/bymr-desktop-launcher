@@ -1,6 +1,6 @@
 [package]
 name = "bym-refitted-launcher"
-version = "0.2.7"
+version = "0.2.8"
 description = "A Tauri App"
 authors = ["Backyard Monsters Refitted team"]
 license = ""
@@ -19,9 +19,9 @@ serde = { version = "^1.0.218", features = ["derive"] }
 reqwest = { version = "^0.12.12", features = ["json"] }
 tauri = { version = "2.2.5", features = ["devtools"] }
 tokio = { version = "^1.43", features = ["io-util", "fs"] }
-tauri-webview2 = "0.1.2"
 tauri-plugin-http = "2.3.0"
 tauri-plugin-process = "2.2.0"
+tauri-bundler = "2.2.3"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.

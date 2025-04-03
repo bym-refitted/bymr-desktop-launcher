@@ -4,7 +4,6 @@
   import Check from "phosphor-svelte/lib/Check";
   import WarningDiamond from "phosphor-svelte/lib/WarningDiamond";
   import Translate from "phosphor-svelte/lib/Translate";
-  import Shield from "phosphor-svelte/lib/Shield";
   import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
   import Tooltip from "../tooltip/Tooltip.svelte";
   import AlertDialog from "$lib/components/AlertDialog.svelte";
@@ -14,7 +13,6 @@
   import { flyAndScale } from "$lib/utils";
   import { Status } from "$lib/enums/StatusCodes";
   import { launchSwf } from "$lib/stores/launchStore";
-  import { Protocol } from "$lib/enums/Protocol";
   import { Builds } from "$lib/enums/Builds";
   import { invokeApiRequest } from "../../../utils/invokeApiRequest";
   import { onMount } from "svelte";
@@ -85,18 +83,6 @@
   // Languages
   $: language = "English";
   let languages = [];
-
-  // Builds
-  let connectionType = Protocol.HTTPS;
-  const builds = [
-    { value: Builds.STABLE, label: Protocol.HTTPS },
-    { value: Builds.HTTP, label: Protocol.HTTP },
-  ];
-
-  const selectBuild = {
-    [Builds.STABLE]: Protocol.HTTPS,
-    [Builds.HTTP]: Protocol.HTTP,
-  };
 
   // Page init load
   onMount(() => {
@@ -173,16 +159,13 @@
       }
 
       if (status === Status.OK && data.token) {
-        const build =
-          connectionType === Protocol.HTTPS ? Builds.STABLE : Builds.HTTP;
-
         // Save user details to local storage
         const userSaveData = { language, token: data.token };
         if (isChecked) saveUserToLocalStorage(userSaveData);
 
         // Launch the SWF file
         const launchLanguage = $user.language || language;
-        launchSwf(build, launchLanguage, data.token);
+        launchSwf(launchLanguage, data.token);
       }
     } catch (error) {
       errorMessage = handleErrorMessage(error);
@@ -409,44 +392,6 @@
           </Select.Content>
         </Select.Root>
       {/if}
-
-      <Select.Root
-        items={builds}
-        onSelectedChange={(e) => {
-          connectionType = selectBuild[e.value];
-        }}
-      >
-        <Select.Trigger
-          class="focus:outline-secondary w-full flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white"
-          aria-label="Connection Type"
-        >
-          <div class="flex items-center">
-            <Shield size={20} weight="bold" class="text-primary mr-3" />
-            <Select.Value
-              class="text-md text-unselected placeholder-unselected"
-              placeholder="Connection Type"
-            />
-          </div>
-          <CaretUpDown size={16} weight="bold" class="text-unselected" />
-        </Select.Trigger>
-        <Select.Content
-          class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none"
-          transition={flyAndScale}
-          sideOffset={8}
-        >
-          {#each builds as build}
-            <Select.Item
-              class="data-[highlighted]:bg-secondary flex h-10 w-full select-none items-center rounded-button py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-75"
-              value={build.value}
-              label={build.label.toUpperCase()}
-            >
-              {build.label.toUpperCase()}
-              <Select.ItemIndicator class="ml-auto" asChild={false}
-              ></Select.ItemIndicator>
-            </Select.Item>
-          {/each}
-        </Select.Content>
-      </Select.Root>
       <div class="flex items-center space-x-3 mt-4">
         {#if !$isUserRemembered}
           <Checkbox.Root

@@ -6,11 +6,10 @@ export let isLaunching = writable(false);
 export let launchError = writable({ code: "", show: false });
 
 export const launchSwf = async (
-  buildName: string,
   language: string | unknown = "english",
   token?: string
 ) => {
-  const launchOptions = { buildName, language, token };
+  const launchOptions = { language, token };
   //localStorage.setItem("lastLaunch", JSON.stringify(launchOptions));
   isLaunching.set(true);
 
@@ -19,7 +18,8 @@ export const launchSwf = async (
     launchError.update(() => ({ code: "", show: false }));
   } catch (err) {
     console.log(err);
-    const error = err?.code || `Error during launch process: ${err || 'unknown'}`;
+    const error =
+      err?.code || `Error during launch process: ${err || "unknown"}`;
     launchError.update(() => ({ code: error, show: true }));
   } finally {
     isLaunching.set(false);
