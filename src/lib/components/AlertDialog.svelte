@@ -1,6 +1,6 @@
 <script lang="ts">
   import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
-  import RocketLaunch from "phosphor-svelte/lib/RocketLaunch";
+  import { RocketLaunch } from "phosphor-svelte";
   import {
     Dialog,
     DialogContent,

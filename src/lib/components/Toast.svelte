@@ -1,10 +1,8 @@
 <script lang="ts">
   import { hasErrors } from "$lib/stores/debugLogStore";
   import { hasLoaded } from "$lib/stores/loadState";
+  import { Plug, XCircle, SealCheck } from "phosphor-svelte";
   import DebugLogs from "./DebugLogs.svelte";
-  import SealCheck from "phosphor-svelte/lib/SealCheck";
-  import XCircle from "phosphor-svelte/lib/XCircle";
-  import Plug from "phosphor-svelte/lib/Plug";
 
   export let launcherVersion = "";
   let viewLogs = false;

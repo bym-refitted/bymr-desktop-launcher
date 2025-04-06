@@ -58,12 +58,6 @@
       setLoaded();
     }
   };
-
-  const handleUpdaterEvent = ({ error, status }) => {
-    addInfoLog(
-      `Launcher updater event: ${status ? status : ""} ${error ? error : ""}`
-    );
-  };
 </script>
 
 <!-- Custom Titlebar -->

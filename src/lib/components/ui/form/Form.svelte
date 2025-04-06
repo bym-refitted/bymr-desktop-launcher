@@ -1,14 +1,8 @@
 <script lang="ts">
   import { Select, Checkbox, Label } from "bits-ui";
-  import CaretUpDown from "phosphor-svelte/lib/CaretUpDown";
-  import Check from "phosphor-svelte/lib/Check";
-  import WarningDiamond from "phosphor-svelte/lib/WarningDiamond";
-  import Translate from "phosphor-svelte/lib/Translate";
   import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
   import Tooltip from "../tooltip/Tooltip.svelte";
   import AlertDialog from "$lib/components/AlertDialog.svelte";
-  import ArrowCircleLeft from "phosphor-svelte/lib/ArrowCircleLeft";
-  import PaperPlaneTilt from "phosphor-svelte/lib/PaperPlaneTilt";
 
   import { flyAndScale } from "$lib/utils";
   import { Status } from "$lib/enums/StatusCodes";
@@ -33,7 +27,15 @@
     validatePassword,
     validateConfirmPassword,
   } from "./validation";
-
+  import {
+    Package,
+    PaperPlaneTilt,
+    ArrowCircleLeft,
+    Translate,
+    WarningDiamond,
+    Check,
+    CaretUpDown,
+  } from "phosphor-svelte";
 
   interface FormData {
     username?: string;
@@ -83,6 +85,13 @@
   // Languages
   $: language = "English";
   let languages = [];
+
+  // Builds
+  $: selectedBuild = Builds.STABLE;
+  const builds = Object.values(Builds).map((build) => ({
+    value: build,
+    label: build.charAt(0).toUpperCase() + build.slice(1).toLowerCase(),
+  }));
 
   // Page init load
   onMount(() => {
@@ -165,7 +174,7 @@
 
         // Launch the SWF file
         const launchLanguage = $user.language || language;
-        launchSwf(launchLanguage, data.token);
+        launchSwf(selectedBuild, launchLanguage, data.token);
       }
     } catch (error) {
       errorMessage = handleErrorMessage(error);
@@ -392,6 +401,43 @@
           </Select.Content>
         </Select.Root>
       {/if}
+      <Select.Root
+        items={builds}
+        onSelectedChange={(e) => {
+          selectedBuild = e.value;
+        }}
+      >
+        <Select.Trigger
+          class="focus:outline-secondary w-full flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white"
+          aria-label="Build"
+        >
+          <div class="flex items-center">
+            <Package size={20} weight="bold" class="text-primary mr-3" />
+            <Select.Value
+              class="text-md text-unselected placeholder-unselected"
+              placeholder="Build"
+            />
+          </div>
+          <CaretUpDown size={16} weight="bold" class="text-unselected" />
+        </Select.Trigger>
+        <Select.Content
+          class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none"
+          transition={flyAndScale}
+          sideOffset={8}
+        >
+          {#each builds as build}
+            <Select.Item
+              class="data-[highlighted]:bg-secondary flex h-10 w-full select-none items-center rounded-button py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-75"
+              value={build.value}
+              label={build.label}
+            >
+            {build.label}
+            <Select.ItemIndicator class="ml-auto" asChild={false}
+              ></Select.ItemIndicator>
+            </Select.Item>
+          {/each}
+        </Select.Content>
+      </Select.Root>
       <div class="flex items-center space-x-3 mt-4">
         {#if !$isUserRemembered}
           <Checkbox.Root

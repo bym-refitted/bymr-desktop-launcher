@@ -1,8 +1,6 @@
 <script lang="ts">
   import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-  import FrameCorners from "phosphor-svelte/lib/FrameCorners";
-  import Minus from "phosphor-svelte/lib/Minus";
-  import Close from "phosphor-svelte/lib/X";
+  import {FrameCorners, Minus, X as Close} from "phosphor-svelte";
 
   const appWindow = getCurrentWebviewWindow();
 

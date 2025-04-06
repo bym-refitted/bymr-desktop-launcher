@@ -2,7 +2,7 @@
   import { Dialog as DialogPrimitive } from "bits-ui";
   import * as Dialog from ".";
   import { cn, flyAndScale } from "$lib/utils";
-  import X from "phosphor-svelte/lib/X";
+  import { X as Close } from "phosphor-svelte";
   let className = undefined;
   export let transition = flyAndScale;
   export let transitionConfig = {
@@ -26,7 +26,7 @@
     <DialogPrimitive.Close
       class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
     >
-      <X color="white" weight="bold" size={18} />
+      <Close color="white" weight="bold" size={18} />
       <span class="sr-only">Close</span>
     </DialogPrimitive.Close>
   </DialogPrimitive.Content>

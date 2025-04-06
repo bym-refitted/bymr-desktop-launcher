@@ -1,5 +1,5 @@
 <script lang="ts">
-  import SketchLogo from "phosphor-svelte/lib/SketchLogo";
+  import { SketchLogo } from "phosphor-svelte";
 
   import { Tooltip } from "bits-ui";
   import type { Component } from "svelte";

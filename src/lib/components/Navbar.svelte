@@ -1,7 +1,5 @@
 <script lang="ts">
-  import Discord from "phosphor-svelte/lib/DiscordLogo";
-  import GitHub from "phosphor-svelte/lib/GithubLogo";
-  import SketchLogo from "phosphor-svelte/lib/SketchLogo";
+  import { SketchLogo, DiscordLogo, GithubLogo } from "phosphor-svelte";
   import Tooltip from "./ui/tooltip/Tooltip.svelte";
 </script>
 
@@ -10,12 +8,12 @@
     <Tooltip
       url="https://discord.gg/bymrefitted"
       tooltipText="Discord"
-      Icon={Discord}
+      Icon={DiscordLogo}
     />
     <Tooltip
       url="https://github.com/orgs/bym-refitted/repositories"
       tooltipText="GitHub"
-      Icon={GitHub}
+      Icon={GithubLogo}
     />
     <Tooltip
       url="https://bymrefitted.com/donations/checkout"

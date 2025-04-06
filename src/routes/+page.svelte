@@ -3,7 +3,7 @@
   import AlertDialog from "$lib/components/AlertDialog.svelte";
   import Form from "$lib/components/ui/form/Form.svelte";
   import TownHall from "../assets/images/townhall.png";
-  import WarningDiamond from "phosphor-svelte/lib/WarningDiamond";
+  import { WarningDiamond } from "phosphor-svelte";
 </script>
 
 <div class="grid grid-cols-1 gap-x-8 lg:grid-cols-2 lg:grid-rows-[800px]">
