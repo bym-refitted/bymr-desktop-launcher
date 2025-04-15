@@ -3,6 +3,10 @@ import { BASE_URL } from "$lib/globals";
 import { currentGameVersion } from "$lib/stores/loadState";
 import { get } from "svelte/store";
 import { fetch } from "@tauri-apps/plugin-http";
+import {
+  connectErrorMessage,
+  handleErrorMessage,
+} from "$lib/errors/errorMessages";
 
 /**
  * Represents a generic API response.
@@ -49,16 +53,29 @@ export const invokeApiRequest = async <T>(
     const url = `${BASE_URL}/api/v${version}-beta${route}`;
     const response = await fetch(url, options);
 
-    if (!response.ok) {
-      const errorResponse: ErrorResponse = await response.json();
-      throw new Error(errorResponse.error);
-    }
+    if (!response.ok) await handleApiError(response);
 
     const data = await response.json();
     return { status: response.status, data };
   } catch (error) {
-    const errorMessage =
-      `An unexpected error occurred: ${error}` || "Could not get error details";
-    throw new Error(errorMessage);
+    throw new Error(handleErrorMessage(error));
   }
+};
+
+/**
+ * Handles API error responses by attempting to parse JSON and extract error details.
+ *
+ * @param {Response} response - The fetch Response object to process
+ * @returns {Promise<never>} always throws an error
+ * @throws Error with an appropriate error message
+ */
+const handleApiError = async (response: Response): Promise<never> => {
+  let errorMessage = connectErrorMessage;
+
+  try {
+    const errorResponse: ErrorResponse = await response.json();
+    errorMessage = handleErrorMessage(errorResponse.error);
+  } catch {}
+
+  throw new Error(errorMessage);
 };

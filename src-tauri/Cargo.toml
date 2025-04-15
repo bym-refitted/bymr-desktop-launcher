@@ -1,6 +1,6 @@
 [package]
 name = "bym-refitted-launcher"
-version = "0.2.9"
+version = "0.3.0"
 description = "A Tauri App"
 authors = ["Backyard Monsters Refitted team"]
 license = ""
