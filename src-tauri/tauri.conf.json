@@ -40,9 +40,7 @@
         "depends": []
       },
       "appimage": {
-        "files": {
-          "/usr/lib/x86_64-linux-gnu/webkit2gtk-4.1/injected-bundle/libwebkit2gtkinjectedbundle.so": "/lib/x86_64-linux-gnu/webkit2gtk-4.1/injected-bundle/libwebkit2gtkinjectedbundle.so"
-        }
+        "files": {}
       }
     },
     "createUpdaterArtifacts": "v1Compatible"

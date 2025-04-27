@@ -6,7 +6,6 @@
   import { relaunch } from "@tauri-apps/plugin-process";
   import {
     addErrorLog,
-    addInfoLog,
     addSuccessLog,
     setupLogListeners,
   } from "$lib/stores/debugLogStore";
@@ -26,16 +25,13 @@
   let launcherVersion = "0.0.0";
 
   onMount(async () => {
-    // Handle launcher update events
     const update = await check();
 
-    if (update?.available) {
+    if (update) {
       await update.downloadAndInstall();
       await relaunch();
     }
-    // Set up the debug log listeners
     setupLogListeners();
-    // Initialize the launcher
     initializeLauncher();
   });
 
