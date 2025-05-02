@@ -48,11 +48,13 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
         }
     };
 
-    let file_info = get_platform_flash_runtime(&app, &env::consts::OS)?;
-    if !file_info.0.exists() {
-        let log = "Downloading flash player for your platform...";
-        emit_event(&app, "infoLog", log.to_string());
-        download_runtime(&app, file_info, use_https).await?;
+    if env::consts::OS != "macos" {
+        let file_info = get_platform_flash_runtime(&app, &env::consts::OS)?;
+        if !file_info.0.exists() {
+            let log = "Downloading flash player for your platform...";
+            emit_event(&app, "infoLog", log.to_string());
+            download_runtime(&app, file_info, use_https).await?;
+        }
     }
 
     Ok(())
