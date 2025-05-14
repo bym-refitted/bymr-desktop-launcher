@@ -1,6 +1,6 @@
 [package]
 name = "bym-refitted-launcher"
-version = "0.3.0"
+version = "0.3.1"
 description = "The Backyard Monsters Refitted Launcher"
 authors = ["Backyard Monsters Refitted team"]
 license = "GPL-3.0"
