@@ -2,12 +2,12 @@
   import { Menubar } from "bits-ui";
   import type { Component } from "svelte";
   import type { IconComponentProps } from "phosphor-svelte/lib/shared";
-  import { GameController } from "phosphor-svelte";
+  import { Play } from "phosphor-svelte";
   
   import { page } from "$app/stores";
 
   export let path = "/";
-  export let Icon: Component<IconComponentProps> = GameController;
+  export let Icon: Component<IconComponentProps> = Play;
   export let text = "";
   $: active = path === $page.url.pathname;
   $: bgActive = active ? "bg-white/10" : "bg-transparent";
@@ -25,6 +25,6 @@
       size="26"
       class={`${textActive}`}
     />
-    <h4 class={`font-display ${textActive}`}>{text}</h4>
+    <h4 class={`font-display ${textActive} whitespace-nowrap`}>{text}</h4>
   </a>
 </Menubar.Menu>
