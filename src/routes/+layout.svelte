@@ -1,48 +1,39 @@
 <script lang="ts">
-  import "../app.pcss";
+  import '../app.pcss';
 
-  import { getVersion } from "@tauri-apps/api/app";
-  import { check } from "@tauri-apps/plugin-updater";
-  import { relaunch } from "@tauri-apps/plugin-process";
-  import {
-    addErrorLog,
-    addSuccessLog,
-    setupLogListeners,
-  } from "$lib/stores/debugLogStore";
-  import { invoke } from "@tauri-apps/api/core";
-  import { onMount } from "svelte";
-  import Toast from "$lib/components/Toast.svelte";
-  import {
-    currentGameVersion,
-    hasLoaded,
-    setLoaded,
-  } from "$lib/stores/loadState";
-  import Titlebar from "$lib/components/Titlebar.svelte";
-  import TabView from "$lib/components/ui/tabs/TabView.svelte";
-  import Navbar from "$lib/components/Navbar.svelte";
-  import Loader from "$lib/components/Loader.svelte";
+  import { getVersion } from '@tauri-apps/api/app';
+  import { check } from '@tauri-apps/plugin-updater';
+  import { relaunch } from '@tauri-apps/plugin-process';
+  import { addErrorLog, addSuccessLog, setupLogListeners } from '$lib/stores/debugLogStore';
+  import { invoke } from '@tauri-apps/api/core';
+  import { onMount } from 'svelte';
+  import Toast from '$lib/components/Toast.svelte';
+  import { currentGameVersion, hasLoaded, setLoaded } from '$lib/stores/loadState';
+  import Titlebar from '$lib/components/Titlebar.svelte';
+  import TabView from '$lib/components/ui/tabs/TabView.svelte';
+  import Navbar from '$lib/components/Navbar.svelte';
+  import Loader from '$lib/components/Loader.svelte';
 
-  let launcherVersion = "0.0.0";
+  let launcherVersion = '0.0.0';
 
   onMount(async () => {
-    const update = await check();
+    // const update = await check();
 
-    if (update) {
-      await update.downloadAndInstall();
-      await relaunch();
-    }
+    // if (update) {
+    //   await update.downloadAndInstall();
+    //   await relaunch();
+    // }
     setupLogListeners();
     initializeLauncher();
   });
 
   const initializeLauncher = async () => {
     try {
-      const [launcherVersionManifest, currentGameVersionManifest, _] =
-        await Promise.all([
-          getVersion(),
-          invoke<string>("get_current_game_version"),
-          invoke("initialize_app"),
-        ]);
+      const [launcherVersionManifest, currentGameVersionManifest, _] = await Promise.all([
+        getVersion(),
+        invoke<string>('get_current_game_version'),
+        invoke('initialize_app'),
+      ]);
 
       launcherVersion = launcherVersionManifest;
       currentGameVersion.set(currentGameVersionManifest);
