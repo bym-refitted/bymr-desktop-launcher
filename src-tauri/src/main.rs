@@ -70,10 +70,15 @@ fn launch_game(app: AppHandle, build_name: &str, language: &str, token: Option<&
         ));
     }
 
+    let swf_filename = match build_name {
+        "stable" => "gameloader".to_string(),
+        _ => format!("bymr-{}", build_name),
+    };
+
     let mut swf_url = format!(
-        "https://{}bymr-{}.swf?language={}",
+        "http://{}{}.swf?language={}",
         SWFS_URL,
-        build_name,
+        swf_filename,
         language.to_lowercase()
     );
 
