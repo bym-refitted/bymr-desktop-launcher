@@ -57,6 +57,7 @@
   let hasForgotPassword = false;
   let isButtonDisabled = false;
   let emailSent = false;
+  let sessionExpired = false;
 
   // Form focus
   let focusStates = {
@@ -177,6 +178,13 @@
         launchSwf(selectedBuild, launchLanguage, data.token);
       }
     } catch (error) {
+      // If user is remembered and there's an error, reset the user state
+      if ($isUserRemembered) {
+        removeUserFromLocalStorage();
+        sessionExpired = true;
+        return;
+      }
+      
       errorMessage = handleErrorMessage(error);
       addErrorLog(`Error during authentication: ${error.message}`);
     }
@@ -220,6 +228,13 @@
     }
   })();
 </script>
+
+<AlertDialog
+  bind:open={sessionExpired}
+  title="Session Expired"
+  error="Your saved session has expired. Please login again to continue."
+  Icon={WarningDiamond}
+/>
 
 <AlertDialog
   bind:open={isRegistered}

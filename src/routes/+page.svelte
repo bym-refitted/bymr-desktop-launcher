@@ -37,7 +37,10 @@
             Verified Discord account:
           </div>
           Requires a verified Discord account to play on the server. Visit our discord
-          to verify your account in the<code>#claim-account</code> channel.
+          to verify your account in our <a
+            href="https://discord.com/channels/1126689848426774572/1301213524047171616"
+            ><span class="text-primary underline">#claim-account</span> channel.
+          </a>
         </div>
       </div>
     </div>

@@ -115,8 +115,8 @@
 </svelte:head>
 
 <!-- Main Container -->
-<div class="mb-16 flex justify-center items-center lg:py-16 lg:mt-[6%] lg:py-0">
-  <div class="mx-auto w-full lg:w-3/5">
+<div class="mb-16 flex justify-start items-start lg:py-16 lg:mt-[6%] lg:py-0">
+  <div class="w-full lg:w-3/5 mx-4 lg:ml-[12%] lg:mr-0">
     <!-- Header Section -->
     <div class="flex flex-col items-center text-muted-foreground">
       <h1
@@ -131,7 +131,7 @@
     </div>
 
     <div id="leaderboard" class="mt-16">
-      <div class="flex flex-col sm:flex-row gap-4 lg:gap-2">
+      <div class="flex flex-col gap-4 lg:gap-2 lg:flex-row">
         <!-- Map Room version select -->
         <Select.Root
           items={mapVersions}
@@ -141,17 +141,16 @@
           }}
         >
           <Select.Trigger
-            class="focus:outline-secondary flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white"
+            class="focus:outline-secondary flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white min-w-0"
             aria-label="Map Version"
           >
-            <div class="flex items-center">
-              <MapTrifold size={20} weight="bold" class="text-primary mr-3" />
+            <div class="flex items-center min-w-0">
+              <MapTrifold size={20} weight="bold" class="text-primary mr-3 flex-shrink-0" />
               <Select.Value
-                class="text-md placeholder-unselected text-unselected"
-                placeholder={mapVersion}
+                class="text-md placeholder-unselected text-unselected truncate"
               />
             </div>
-            <CaretDown size={16} weight="bold" class="text-unselected ml-8" />
+            <CaretDown size={16} weight="bold" class="text-unselected ml-2 flex-shrink-0" />
           </Select.Trigger>
           <Select.Content
             class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none"
@@ -186,17 +185,17 @@
           }}
         >
           <Select.Trigger
-            class="focus:outline-secondary flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white"
+            class="focus:outline-secondary flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white min-w-0"
             aria-label="Worlds"
           >
-            <div class="flex items-center">
-              <Hexagon size={20} weight="bold" class="text-primary mr-3" />
+            <div class="flex items-center min-w-0">
+              <Hexagon size={20} weight="bold" class="text-primary mr-3 flex-shrink-0" />
               <Select.Value
-                class="text-md placeholder-unselected text-unselected"
+                class="text-md placeholder-unselected text-unselected truncate"
                 placeholder={worldName}
               />
             </div>
-            <CaretDown size={16} weight="bold" class="text-unselected ml-8" />
+            <CaretDown size={16} weight="bold" class="text-unselected ml-2 flex-shrink-0" />
           </Select.Trigger>
           <Select.Content
             class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none"
@@ -218,7 +217,7 @@
         </Select.Root>
 
         <!-- Tooltip -->
-        <div class="hidden sm:block ml-auto">
+        <div class="hidden lg:block ml-auto">
           <Tooltip.Root openDelay={0}>
             <Tooltip.Trigger>
               <div
