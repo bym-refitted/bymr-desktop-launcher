@@ -1,4 +1,4 @@
-![launcher](https://github.com/user-attachments/assets/c941aeaa-9a8b-4519-ad5c-566dde65b6ac)
+![launcher](https://github.com/user-attachments/assets/98d5d0d9-2774-435b-adaa-0c1b27c134ce)
 
 <br />
 <br />
