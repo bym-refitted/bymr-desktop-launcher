@@ -4,10 +4,14 @@
   import TownHall from "../../assets/images/pokey.png";
   import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
   import { WarningDiamond } from "phosphor-svelte";
+  import { fly } from "svelte/transition";
 </script>
 
 <div class="grid grid-cols-1 gap-x-8 lg:grid-cols-2 lg:grid-rows-[800px]">
-  <div class="grid-item flex flex-col lg:p-16 lg:justify-center">
+  <div 
+    class="grid-item flex flex-col lg:p-16 lg:justify-center"
+    in:fly={{ y: 30, duration: 600, delay: 100 }}
+  >
     <img src={TownHall} alt="townhall" width="200" />
     <div class="py-6">
       <h1 class="font-title leading-snug text-6xl">Attack of the Pokies:</h1>

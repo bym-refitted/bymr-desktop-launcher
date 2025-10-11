@@ -259,273 +259,291 @@
 <form
   method={Method.POST}
   on:submit={handleFormSubmit}
-  class="flex flex-col gap-4 p-4 w-[450px]"
+  class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 shadow-lg w-full transition-all duration-300 hover:border-white/20"
 >
-  {#if isRegisterForm}
-    {#if !$isUserRemembered}
-      <div class="flex items-center space-x-6">
-        <input
-          type="text"
-          bind:value={username}
-          on:focus={() => (focusStates.username = true)}
-          id="username"
-          name="username"
-          class={`focus:outline-primary ${errors.username ? "focus:outline-red" : ""} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
-          placeholder="Username"
-          required
-        />
-        {#if errors.username && focusStates.username}
-          <Tooltip
-            tooltipText={errors.username}
-            error={true}
-            style="text-red"
-            tipColor="bg-red"
-            side="right"
-            Icon={WarningDiamond}
-          />
-        {/if}
-      </div>
-    {/if}
-  {/if}
-  {#if hasForgotPassword}
-    <button on:click={() => (hasForgotPassword = false)}>
-      <ArrowCircleLeft
-        size={30}
-        weight="bold"
-        class="text-primary cursor-pointer"
-      />
-    </button>
-  {/if}
-  {#if !$isUserRemembered}
-    <div class="flex items-center space-x-6">
-      <input
-        type="email"
-        bind:value={email}
-        on:focus={() => (focusStates.email = true)}
-        id="email"
-        name="email"
-        class={`${errors.email ? "focus:outline-red" : isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
-        placeholder="Email"
-        required
-      />
-      {#if errors.email && focusStates.email}
-        <Tooltip
-          tooltipText={errors.email}
-          error={true}
-          style="text-red"
-          tipColor="bg-red"
-          side="right"
-          Icon={WarningDiamond}
-        />
+  <div class="mb-6 text-center">
+    <h2 class="text-2xl font-title text-foreground mb-2">
+      {#if $isUserRemembered}
+        Welcome Back!
+      {:else if isRegisterForm}
+        Create Account
+      {:else if hasForgotPassword}
+        Reset Password
+      {:else}
+        Login to Play
       {/if}
-    </div>
-  {/if}
-  {#if !$isUserRemembered}
-    {#if !hasForgotPassword}
-      <div class="flex items-center space-x-6">
-        <input
-          type="password"
-          bind:value={password}
-          on:focus={() => (focusStates.password = true)}
-          id="password"
-          name="password"
-          class={`ms-reveal ${errors.password ? "focus:outline-red" : isRegisterForm ? "focus:outline-primary" : "focus:outline-secondary"} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
-          placeholder="Password"
-          required
-        />
-        {#if errors.password && focusStates.password}
-          <Tooltip
-            tooltipText={errors.password}
-            error={true}
-            style="text-red"
-            tipColor="bg-red"
-            side="right"
-            Icon={WarningDiamond}
-          />
-        {/if}
-      </div>
-    {/if}
-  {/if}
-  {#if isRegisterForm}
-    {#if !$isUserRemembered}
-      <div class="flex items-center space-x-6">
-        <input
-          type="password"
-          bind:value={confirmPassword}
-          on:focus={() => (focusStates.confirmPassword = true)}
-          id="confirm-password"
-          name="confirm-password"
-          class={`ms-reveal focus:outline-primary ${errors.confirmPassword ? "focus:outline-red" : ""} w-full bg-white/10 h-10 rounded-md text-md px-6 placeholder-unselected focus:outline-none focus:bg-transparent focus:placeholder-white`}
-          placeholder="Confirm Password"
-          required
-        />
-        {#if errors.confirmPassword && focusStates.confirmPassword}
-          <Tooltip
-            tooltipText={errors.confirmPassword}
-            error={true}
-            style="text-red"
-            tipColor="bg-red"
-            side="right"
-            Icon={WarningDiamond}
-          />
-        {/if}
-      </div>
-    {/if}
-  {/if}
+    </h2>
+    <p class="text-sm text-muted-foreground">
+      {#if $isUserRemembered}
+        Click below to jump back into the action
+      {:else if isRegisterForm}
+        Join the Backyard Monsters community
+      {:else if hasForgotPassword}
+        Enter your email to receive a reset link
+      {:else}
+        Enter your credentials to continue
+      {/if}
+    </p>
+  </div>
 
-  {#if !isRegisterForm}
-    {#if !hasForgotPassword}
-      <small class="mt-2">Settings</small>
+  <!-- Form Fields -->
+  <div class="flex flex-col gap-4">
+    {#if isRegisterForm}
       {#if !$isUserRemembered}
+        <div class="relative">
+          <input
+            type="text"
+            bind:value={username}
+            on:focus={() => (focusStates.username = true)}
+            id="username"
+            name="username"
+            class={`${errors.username && focusStates.username ? "border-red/50 focus:border-red" : "border-white/10 focus:border-primary"} w-full bg-white/5 h-12 rounded-lg text-md px-4 border-2 placeholder-muted-foreground/50 focus:outline-none focus:bg-white/10 transition-all duration-200`}
+            placeholder="Username"
+            required
+          />
+          {#if errors.username && focusStates.username}
+            <div class="flex items-start gap-2 mt-1.5 text-red text-xs">
+              <WarningDiamond size={14} weight="bold" class="flex-shrink-0 mt-0.5" />
+              <span>{errors.username}</span>
+            </div>
+          {/if}
+        </div>
+      {/if}
+    {/if}
+    {#if hasForgotPassword}
+      <button 
+        type="button"
+        on:click={() => (hasForgotPassword = false)}
+        class="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-2"
+      >
+        <ArrowCircleLeft size={20} weight="bold" />
+        Back to login
+      </button>
+    {/if}
+    
+    {#if !$isUserRemembered}
+      <div class="relative">
+        <input
+          type="email"
+          bind:value={email}
+          on:focus={() => (focusStates.email = true)}
+          id="email"
+          name="email"
+          class={`${errors.email && focusStates.email ? "border-red/50 focus:border-red" : isRegisterForm ? "border-white/10 focus:border-primary" : "border-white/10 focus:border-secondary"} w-full bg-white/5 h-12 rounded-lg text-md px-4 border-2 placeholder-muted-foreground/50 focus:outline-none focus:bg-white/10 transition-all duration-200`}
+          placeholder="Email"
+          required
+        />
+        {#if errors.email && focusStates.email}
+          <div class="flex items-start gap-2 mt-1.5 text-red text-xs">
+            <WarningDiamond size={14} weight="bold" class="flex-shrink-0 mt-0.5" />
+            <span>{errors.email}</span>
+          </div>
+        {/if}
+      </div>
+    {/if}
+    {#if !$isUserRemembered}
+      {#if !hasForgotPassword}
+        <div class="relative">
+          <input
+            type="password"
+            bind:value={password}
+            on:focus={() => (focusStates.password = true)}
+            id="password"
+            name="password"
+            class={`ms-reveal ${errors.password && focusStates.password ? "border-red/50 focus:border-red" : isRegisterForm ? "border-white/10 focus:border-primary" : "border-white/10 focus:border-secondary"} w-full bg-white/5 h-12 rounded-lg text-md px-4 border-2 placeholder-muted-foreground/50 focus:outline-none focus:bg-white/10 transition-all duration-200`}
+            placeholder="Password"
+            required
+          />
+          {#if errors.password && focusStates.password}
+            <div class="flex items-start gap-2 mt-1.5 text-red text-xs">
+              <WarningDiamond size={14} weight="bold" class="flex-shrink-0 mt-0.5" />
+              <span>{errors.password}</span>
+            </div>
+          {/if}
+        </div>
+      {/if}
+    {/if}
+    
+    {#if isRegisterForm}
+      {#if !$isUserRemembered}
+        <div class="relative">
+          <input
+            type="password"
+            bind:value={confirmPassword}
+            on:focus={() => (focusStates.confirmPassword = true)}
+            id="confirm-password"
+            name="confirm-password"
+            class={`ms-reveal ${errors.confirmPassword && focusStates.confirmPassword ? "border-red/50 focus:border-red" : "border-white/10 focus:border-primary"} w-full bg-white/5 h-12 rounded-lg text-md px-4 border-2 placeholder-muted-foreground/50 focus:outline-none focus:bg-white/10 transition-all duration-200`}
+            placeholder="Confirm Password"
+            required
+          />
+          {#if errors.confirmPassword && focusStates.confirmPassword}
+            <div class="flex items-start gap-2 mt-1.5 text-red text-xs">
+              <WarningDiamond size={14} weight="bold" class="flex-shrink-0 mt-0.5" />
+              <span>{errors.confirmPassword}</span>
+            </div>
+          {/if}
+        </div>
+      {/if}
+    {/if}
+  </div>
+
+  <!-- Settings Section -->
+  {#if !isRegisterForm && !hasForgotPassword}
+    <div class="mt-6 pt-6 border-t border-white/10">
+      <p class="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide">Game Settings</p>
+      <div class="flex flex-col gap-3">
+        {#if !$isUserRemembered}
+          <Select.Root
+            items={languages}
+            selected={{ value: language, label: language }}
+            onSelectedChange={(e) => {
+              language = e.label;
+            }}
+          >
+            <Select.Trigger
+              class="w-full flex items-center justify-between bg-white/5 border-2 border-white/10 h-11 text-left rounded-lg px-4 focus:outline-none focus:border-secondary hover:bg-white/10 transition-all duration-200"
+              aria-label="Language"
+            >
+              <div class="flex items-center gap-3">
+                <Translate size={20} weight="bold" class="text-secondary" />
+                <Select.Value
+                  class="text-sm text-foreground"
+                  placeholder={language}
+                />
+              </div>
+              <CaretUpDown size={16} weight="bold" class="text-muted-foreground" />
+            </Select.Trigger>
+            <Select.Content
+              class="w-full rounded-xl border border-white/20 bg-background/95 backdrop-blur-xl px-1 py-3 shadow-2xl"
+              transition={flyAndScale}
+              sideOffset={8}
+            >
+              {#each languages as lang}
+                <Select.Item
+                  class="data-[highlighted]:bg-secondary/20 flex h-10 w-full select-none items-center rounded-lg py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-150 cursor-pointer"
+                  value={lang.value}
+                  label={lang}
+                >
+                  {lang}
+                  <Select.ItemIndicator class="ml-auto" asChild={false}
+                  ></Select.ItemIndicator>
+                </Select.Item>
+              {/each}
+            </Select.Content>
+          </Select.Root>
+        {/if}
+        
         <Select.Root
-          items={languages}
-          selected={{ value: language, label: language }}
+          items={builds}
           onSelectedChange={(e) => {
-            language = e.label;
+            selectedBuild = e.value;
           }}
         >
           <Select.Trigger
-            class="focus:outline-secondary w-full flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white"
-            aria-label="Language"
+            class="w-full flex items-center justify-between bg-white/5 border-2 border-white/10 h-11 text-left rounded-lg px-4 focus:outline-none focus:border-secondary hover:bg-white/10 transition-all duration-200"
+            aria-label="Build"
           >
-            <div class="flex items-center">
-              <Translate size={20} weight="bold" class="text-primary mr-3" />
+            <div class="flex items-center gap-3">
+              <Package size={20} weight="bold" class="text-secondary" />
               <Select.Value
-                class="text-md placeholder-unselected text-unselected"
-                placeholder={language}
+                class="text-sm text-foreground"
+                placeholder="Build"
               />
             </div>
-            <CaretUpDown size={16} weight="bold" class="text-unselected" />
+            <CaretUpDown size={16} weight="bold" class="text-muted-foreground" />
           </Select.Trigger>
           <Select.Content
-            class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none"
+            class="w-full rounded-xl border border-white/20 bg-background/95 backdrop-blur-xl px-1 py-3 shadow-2xl"
             transition={flyAndScale}
             sideOffset={8}
           >
-            {#each languages as lang}
+            {#each builds as build}
               <Select.Item
-                class="data-[highlighted]:bg-secondary flex h-10 w-full select-none items-center rounded-button py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-75"
-                value={lang.value}
-                label={lang}
+                class="data-[highlighted]:bg-secondary/20 flex h-10 w-full select-none items-center rounded-lg py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-150 cursor-pointer"
+                value={build.value}
+                label={build.label}
               >
-                {lang}
-                <Select.ItemIndicator class="ml-auto" asChild={false}
+              {build.label}
+              <Select.ItemIndicator class="ml-auto" asChild={false}
                 ></Select.ItemIndicator>
               </Select.Item>
             {/each}
           </Select.Content>
         </Select.Root>
-      {/if}
-      <Select.Root
-        items={builds}
-        onSelectedChange={(e) => {
-          selectedBuild = e.value;
-        }}
-      >
-        <Select.Trigger
-          class="focus:outline-secondary w-full flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white"
-          aria-label="Build"
-        >
-          <div class="flex items-center">
-            <Package size={20} weight="bold" class="text-primary mr-3" />
-            <Select.Value
-              class="text-md text-unselected placeholder-unselected"
-              placeholder="Build"
-            />
-          </div>
-          <CaretUpDown size={16} weight="bold" class="text-unselected" />
-        </Select.Trigger>
-        <Select.Content
-          class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none"
-          transition={flyAndScale}
-          sideOffset={8}
-        >
-          {#each builds as build}
-            <Select.Item
-              class="data-[highlighted]:bg-secondary flex h-10 w-full select-none items-center rounded-button py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-75"
-              value={build.value}
-              label={build.label}
+      </div>
+
+      {#if !$isUserRemembered}
+        <div class="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+          <div class="flex items-center gap-3">
+            <Checkbox.Root
+              id="remember-me-checkbox"
+              aria-labelledby="remember-checkbox"
+              class="peer inline-flex size-5 items-center justify-center rounded border-2 border-white/20 bg-white/5 transition-all duration-150 ease-in-out hover:bg-white/10 active:scale-95 data-[state=checked]:bg-secondary data-[state=checked]:border-secondary"
+              bind:checked={isChecked}
             >
-            {build.label}
-            <Select.ItemIndicator class="ml-auto" asChild={false}
-              ></Select.ItemIndicator>
-            </Select.Item>
-          {/each}
-        </Select.Content>
-      </Select.Root>
-      <div class="flex items-center space-x-3 mt-4">
-        {#if !$isUserRemembered}
-          <Checkbox.Root
-            id="remember-me-checkbox"
-            aria-labelledby="remember-checkbox"
-            class="bg-secondary peer inline-flex size-[25px] items-center justify-center rounded-sm border border-white/10 transition-all duration-150 ease-in-out active:scale-98 data-[state=unchecked]:border-border-input data-[state=unchecked]:bg-background"
-            bind:checked={isChecked}
-          >
-            <Checkbox.Indicator let:isChecked>
-              {#if isChecked}
-                <Check size={15} weight="bold" />
-              {/if}
-            </Checkbox.Indicator>
-          </Checkbox.Root>
-          <div class="flex w-full justify-between items-center">
+              <Checkbox.Indicator let:isChecked>
+                {#if isChecked}
+                  <Check size={14} weight="bold" class="text-white" />
+                {/if}
+              </Checkbox.Indicator>
+            </Checkbox.Root>
             <Label.Root
               id="remember-me-label"
               for="remember"
-              class="text-md leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              class="text-sm cursor-pointer select-none"
             >
               Remember Me
             </Label.Root>
-            <button
-              type="button"
-              class="text-md leading-none cursor-pointer hover:text-secondary"
-              on:click={showForgotPassword}
-            >
-              <p class="cursor:pointer">Forgot password?</p>
-            </button>
           </div>
-        {/if}
-      </div>
-    {/if}
-  {/if}
-  <PrimaryButton
-    on:click={handleButtonClick}
-    buttonText={buttonText.toUpperCase()}
-    color={isRegisterForm ? "bg-primary" : "bg-secondary"}
-    disabled={isButtonDisabled}
-  />
-  {#if $isUserRemembered}
-    <PrimaryButton
-      on:click={() => {
-        removeUserFromLocalStorage();
-      }}
-      buttonText={`Logout`.toUpperCase()}
-      color="bg-btnDark"
-    />
-  {/if}
-  {#if !$isUserRemembered}
-    {#if !hasForgotPassword}
-      <Label.Root
-        id="register-label"
-        for="register"
-        class="text-md text-center pt-2 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-      >
-        <div
-          on:click={showRegisterForm}
-          on:keydown={showRegisterForm}
-          role="button"
-          tabindex="0"
-        >
-          {#if isRegisterForm}
-            Already have an account? <span class="text-primary">Login here</span
-            >
-          {:else}
-            Don't have an account? <span class="text-secondary"
-              >Register here</span
-            >
-          {/if}
+          <button
+            type="button"
+            class="text-sm text-muted-foreground hover:text-secondary transition-colors underline underline-offset-2"
+            on:click={showForgotPassword}
+          >
+            Forgot password?
+          </button>
         </div>
-      </Label.Root>
+      {/if}
+    </div>
+  {/if}
+  <!-- Action Buttons -->
+  <div class="flex flex-col gap-3 mt-6">
+    <PrimaryButton
+      on:click={handleButtonClick}
+      buttonText={buttonText.toUpperCase()}
+      color={isRegisterForm ? "bg-primary" : "bg-secondary"}
+      disabled={isButtonDisabled}
+    />
+    
+    {#if $isUserRemembered}
+      <button
+        type="button"
+        on:click={() => {
+          removeUserFromLocalStorage();
+        }}
+        class="w-full h-12 rounded-lg bg-white/5 border-2 border-white/10 font-display uppercase text-sm font-semibold text-muted-foreground hover:bg-white/10 hover:text-foreground hover:border-white/20 transition-all duration-200 active:scale-98"
+      >
+        Logout
+      </button>
     {/if}
+  </div>
+
+  <!-- Toggle Login/Register -->
+  {#if !$isUserRemembered && !hasForgotPassword}
+    <div class="mt-6 pt-6 border-t border-white/10 text-center">
+      <button
+        type="button"
+        on:click={showRegisterForm}
+        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        {#if isRegisterForm}
+          Already have an account? <span class="text-primary font-semibold underline underline-offset-2">Login here</span>
+        {:else}
+          Don't have an account? <span class="text-secondary font-semibold underline underline-offset-2">Register here</span>
+        {/if}
+      </button>
+    </div>
   {/if}
 </form>
 

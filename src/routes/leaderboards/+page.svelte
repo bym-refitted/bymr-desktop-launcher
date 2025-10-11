@@ -4,6 +4,7 @@
   import { invokeApiRequest } from "$lib/utils/invokeApiRequest";
   import { Method } from "$lib/enums/Method";
   import { onMount } from "svelte";
+  import { fly } from "svelte/transition";
   import {
     CaretDown,
     Hexagon,
@@ -118,7 +119,10 @@
 <div class="mb-16 flex justify-start items-start lg:py-16 lg:mt-[6%] lg:py-0">
   <div class="w-full lg:w-3/5 mx-4 lg:ml-[12%] lg:mr-0">
     <!-- Header Section -->
-    <div class="flex flex-col items-center text-muted-foreground">
+    <div 
+      class="flex flex-col items-center text-muted-foreground"
+      in:fly={{ y: 30, duration: 600, delay: 100 }}
+    >
       <h1
         class="text-white font-title leading-snug pt-12 text-5xl lg:text-7xl lg:pt-0"
       >
@@ -130,7 +134,11 @@
       </p>
     </div>
 
-    <div id="leaderboard" class="mt-16">
+    <div 
+      id="leaderboard" 
+      class="mt-16"
+      in:fly={{ y: 30, duration: 600, delay: 200 }}
+    >
       <div class="flex flex-col gap-4 lg:gap-2 lg:flex-row">
         <!-- Map Room version select -->
         <Select.Root
