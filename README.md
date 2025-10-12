@@ -42,35 +42,41 @@ sudo pacman -Sy --noconfirm nss atk libxss gtk3 alsa-lib gtk2 dbus-glib
 
 <br />
 
-# Devlopment ⚙️
+# Development ⚙️
 
 ## Prerequisites
-You will need the following components corrrectly installed and configured:
-> [Rust](https://www.rust-lang.org/tools/install)
 
-> [Cargo](https://crates.io/)
+Before getting started, ensure you have the following components installed and properly configured:
 
-> [MSVC Toolchain](https://visualstudio.microsoft.com/vs/features/cplusplus/)
+| Component | Description | Installation Link |
+|-----------|-------------|-------------------|
+| **Rust** | The Rust programming language | [Install Rust](https://www.rust-lang.org/tools/install) |
+| **Cargo** | Rust's package manager | [Cargo Registry](https://crates.io/) |
+| **MSVC Toolchain** | Microsoft Visual C++ build tools | [Download MSVC](https://visualstudio.microsoft.com/vs/features/cplusplus/) |
+| **Node.js & NPM** | JavaScript runtime and package manager | [Install Node.js](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) |
 
-> [Node.js & NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
+<br />
 
-We need to ensure that we are compiling our application with the MSVC toolchain, as the GNU toolchain alternative does not seem to embed the WebView2 runtime into the binary and instead uses a DLL script called `WebView2Loader.dll` which would need to be distributed alongside your executable. You can find out more about this [here](https://crates.io/crates/tauri-webview2#runtime).
+### MSVC Toolchain Configuration
 
-It is recommended to locate your `.cargo` directory and modify the `config.toml` file to point to the correct linker and target. Example:
-```toml
-[target.x86_64-pc-windows-msvc]
-linker = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\link.exe"
-ar = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\lib.exe"
-```
+This project requires compilation with the **MSVC toolchain** rather than the GNU alternative. The MSVC toolchain properly embeds the WebView2 runtime into the binary, while GNU requires distributing an additional `WebView2Loader.dll` file alongside your executable. For more details, see the [tauri-webview2 documentation](https://crates.io/crates/tauri-webview2#runtime).
 
-Please refer to the following docs for getting started with Tauri: https://v1.tauri.app/v1/guides/getting-started/prerequisites/
+For comprehensive setup instructions, please refer to the [Tauri Prerequisites Guide](https://v1.tauri.app/v1/guides/getting-started/prerequisites/).
 
 <br />
 
 ## Live Development
-To run this application in development mode, use `npm run tauri dev` or if you prefer the cargo command, use `cargo tauri dev`. This will run a Vite development server that will provide very fast hot reload of your frontend changes.  There is also a dev server that runs on http://localhost:5173 if you want to develop in a browser.
 
-<br />
+Start the development server using either of the following commands:
 
-## Production Build
-To build a redistributable, production mode package, use `npm run tauri build --release` or `cargo tauri build --release`.
+```bash
+npm run tauri dev
+```
+
+or
+
+```bash
+cargo tauri dev
+```
+
+This launches a Vite development server with fast hot-reload capabilities for your frontend changes. The development server is also accessible at **http://localhost:5173** if you prefer to develop directly in your browser.
