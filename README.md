@@ -14,6 +14,31 @@ A desktop launcher for Windows, Mac & Linux which utilises the efficiency of Rus
 
 <br />
 
+# Linux 🐧
+Install required libraries and run the launcher:
+```bash
+# Install dependencies (Ubuntu/Debian example; see README for other distros)
+# NOTE: version 0.3.5 is just a hardcoded example, use the actual version you have
+sudo apt update
+
+sudo apt install -y libnss3 libatk1.0-0t64 libxss1 libgtk-3-0t64 \
+libasound2t64 libgtk2.0-0t64 libdbus-glib-1-2
+
+# Make AppImage executable
+chmod +x bymr-launcher_0.3.5_amd64.AppImage
+
+# Run the launcher
+./bymr-launcher_0.3.5_amd64.AppImage
+```
+For Fedora/RHEL/CentOS or Arch/Manjaro, install equivalent packages:
+> Fedora/RHEL: `nss atk libXScrnSaver gtk3 alsa-lib gtk2 dbus-glib`
+
+> Arch/Manjaro: `nss atk libxss gtk3 alsa-lib gtk2 dbus-glib`
+
+<br />
+
+# Devlopment ⚙️
+
 ## Prerequisites
 You will need the following components corrrectly installed and configured:
 > [Rust](https://www.rust-lang.org/tools/install)
