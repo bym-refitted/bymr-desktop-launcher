@@ -5,9 +5,13 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"tauri": "tauri",
 		"dev": "vite dev",
 		"build": "vite build",
+		"tauri": "tauri",
+		"desktop:dev": "npm run tauri dev",
+		"desktop:build": "npm run tauri build",
+		"android:dev": "npx @tauri-apps/cli android dev",
+		"android:build": "npm run tauri android build && powershell -ExecutionPolicy Bypass -File ./scripts/sign-android-apk.ps1",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"

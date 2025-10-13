@@ -25,10 +25,9 @@
   import { Platform } from "$lib/enums";
 
   let launcherVersion = "0.0.0";
+  const currentPlatform = platform();
 
   onMount(async () => {
-    const currentPlatform = platform();
-
     if (currentPlatform !== Platform.Android) {
       try {
         const update = await check();
@@ -68,6 +67,21 @@
   };
 </script>
 
+<style>
+  @media (max-width: 1024px) {
+    main::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    main {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      scrollbar-color: transparent transparent;
+    }
+  }
+</style>
+
 <!-- Custom Titlebar -->
 <Titlebar />
 <!-- Content -->
@@ -81,7 +95,9 @@
       </div>
     {:else}
       <TabView>
-        <Navbar />
+        {#if currentPlatform !== Platform.Android}
+          <Navbar />
+        {/if}
         <slot />
       </TabView>
     {/if}

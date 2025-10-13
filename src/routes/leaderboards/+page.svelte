@@ -12,6 +12,10 @@
     MapTrifold,
     ChartBar,
   } from "phosphor-svelte";
+  import { platform } from "@tauri-apps/plugin-os";
+  import { Platform } from "$lib/enums";
+  
+  const isMobile = platform() === Platform.Android;
 
   interface WorldDetails {
     uuid: string;
@@ -116,8 +120,8 @@
 </svelte:head>
 
 <!-- Main Container -->
-<div class="mb-16 flex justify-start items-start lg:py-16 lg:mt-[6%] lg:py-0">
-  <div class="w-full lg:w-3/5 mx-4 lg:ml-[12%] lg:mr-0">
+<div class="flex justify-start items-start lg:py-16 lg:mt-[6%] lg:py-0 {isMobile ? 'px-6 pt-8 pb-32' : 'mb-16'}">
+  <div class="w-full lg:w-3/5 {isMobile ? '' : 'mx-4 lg:ml-[12%] lg:mr-0'}">
     <!-- Header Section -->
     <div 
       class="flex flex-col items-center text-muted-foreground"

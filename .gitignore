@@ -8,10 +8,16 @@ frontend/dist
 bymr-downloads
 flashplayer.*
 
+# Android signing keys
+*.jks
+*.keystore
+android-release-key.*
+key.properties
+
 # Others
 .env*
 .idea
 .svelte-kit
 .tauri
-build_script.sh
+scripts/build_script.sh
 vite.config.ts*
