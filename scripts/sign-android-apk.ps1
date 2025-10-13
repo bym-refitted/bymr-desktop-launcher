@@ -92,7 +92,7 @@ if ($env:ANDROID_HOME) {
 }
 
 $AlignedApk = Join-Path (Split-Path $ApkPath) "app-aligned.apk"
-$FinalApk = Join-Path (Split-Path $ApkPath) "BYM Refitted.apk"
+$FinalApk = Join-Path (Split-Path $ApkPath) "bymr-launcher.apk"
 
 if ($apksigner -and (Test-Path $apksigner)) {
     Write-Host "`nUsing modern apksigner (V1 + V2 signatures)..." -ForegroundColor Cyan
@@ -131,7 +131,7 @@ if ($apksigner -and (Test-Path $apksigner)) {
             
             $apkSize = (Get-Item $FinalApk).Length / 1MB
             Write-Host "`nAPK signed successfully with V1 + V2 signatures!" -ForegroundColor Green
-            Write-Host "Final APK: BYM Refitted.apk" -ForegroundColor Green
+            Write-Host "Final APK: bymr-launcher.apk" -ForegroundColor Green
             Write-Host "Location: $FinalApk" -ForegroundColor Gray
             Write-Host "Size: $([math]::Round($apkSize, 2)) MB" -ForegroundColor Gray
             Write-Host "`nThis APK should install on all Android devices!`n" -ForegroundColor Green
@@ -159,7 +159,7 @@ else {
     
     $apkSize = (Get-Item $FinalApk).Length / 1MB
     Write-Host "`nAPK copied (unsigned)" -ForegroundColor Yellow
-    Write-Host "Final APK: BYM Refitted.apk" -ForegroundColor Yellow
+    Write-Host "Final APK: bymr-launcher.apk" -ForegroundColor Yellow
     Write-Host "Location: $FinalApk" -ForegroundColor Gray
     Write-Host "Size: $([math]::Round($apkSize, 2)) MB" -ForegroundColor Gray
     Write-Host "`nWARNING: This APK is NOT signed properly! Install Android SDK build-tools to use apksigner!`n" -ForegroundColor Red
