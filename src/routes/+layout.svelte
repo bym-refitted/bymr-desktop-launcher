@@ -4,6 +4,7 @@
   import { getVersion } from "@tauri-apps/api/app";
   import { check } from "@tauri-apps/plugin-updater";
   import { relaunch } from "@tauri-apps/plugin-process";
+  import { platform } from "@tauri-apps/plugin-os";
   import {
     addErrorLog,
     addSuccessLog,
@@ -21,15 +22,26 @@
   import TabView from "$lib/components/ui/tabs/TabView.svelte";
   import Navbar from "$lib/components/Navbar.svelte";
   import Loader from "$lib/components/Loader.svelte";
+  import { Platform } from "$lib/enums";
 
   let launcherVersion = "0.0.0";
 
   onMount(async () => {
-    const update = await check();
+    const currentPlatform = platform();
 
-    if (update) {
-      await update.downloadAndInstall();
-      await relaunch();
+    if (currentPlatform !== Platform.Android) {
+      try {
+        const update = await check();
+
+        if (update) {
+          await update.downloadAndInstall();
+          await relaunch();
+        }
+      } catch (error) {
+        addErrorLog(
+          `Error during update check on ${currentPlatform}: ${error}`
+        );
+      }
     }
     setupLogListeners();
     initializeLauncher();
