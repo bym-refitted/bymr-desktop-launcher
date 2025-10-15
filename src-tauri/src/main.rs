@@ -48,11 +48,17 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
         }
     };
 
+    // Download Flash runtime if it doesn't exist (non-blocking)
     let file_info = get_platform_flash_runtime(&app, &env::consts::OS)?;
     if !file_info.0.exists() {
         let log = "Downloading flash player for your platform...";
         emit_event(&app, "infoLog", log.to_string());
-        download_runtime(&app, file_info, use_https).await?;
+        
+        // Try to download, but don't fail the entire initialization if it fails
+        match download_runtime(&app, file_info, use_https).await {
+            Ok(_) => emit_event(&app, "infoLog", "Flash Player downloaded successfully".to_string()),
+            Err(err) => emit_event(&app, "errorLog", format!("Flash Player download failed: {}", err)),
+        }
     }
 
     Ok(())
@@ -90,15 +96,35 @@ fn launch_game(app: AppHandle, build_name: &str, language: &str, token: Option<&
     println!("Opening: {:?}, {:?}", flash_runtime_path, swf_url);
 
     // Open the game in Flash Player
-    Command::new(&flash_runtime_path)
-        .arg(&swf_url)
-        .spawn()
-        .map_err(|err| {
-            format!(
-                "[BYMR LAUNCHER] Failed to start BYMR build with error {:?}",
-                err
-            )
-        })?;
+    #[cfg(target_os = "macos")]
+    {
+        // On macOS, use the `open` command to launch .app bundles
+        Command::new("open")
+            .arg(&flash_runtime_path)
+            .arg("--args")
+            .arg(&swf_url)
+            .spawn()
+            .map_err(|err| {
+                format!(
+                    "[BYMR LAUNCHER] Failed to start BYMR build with error {:?}",
+                    err
+                )
+            })?;
+    }
+    
+    #[cfg(not(target_os = "macos"))]
+    {
+        // On other platforms, execute the runtime directly
+        Command::new(&flash_runtime_path)
+            .arg(&swf_url)
+            .spawn()
+            .map_err(|err| {
+                format!(
+                    "[BYMR LAUNCHER] Failed to start BYMR build with error {:?}",
+                    err
+                )
+            })?;
+    }
 
     Ok(())
 }
