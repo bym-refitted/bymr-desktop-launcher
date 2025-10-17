@@ -49,24 +49,18 @@ pub async fn download_runtime(
 
     ensure_folder_exists(&runtimes_dir).expect("Could not create runtimes folder");
 
-    let final_runtime_path = if env::consts::OS == "linux" || env::consts::OS == "macos" {
-        runtimes_dir.join(&runtime_path)
-    } else {
-        runtime_path.clone()
-    };
-
     // Download Flash runtime; Special handling for macOS Flash Player DMG
     if cfg!(target_os = "macos") && file_extension == "flashplayer.dmg" {
         download_and_extract_macos_flashplayer(&runtimes_dir, &file_extension, use_https).await?;
     } else {
-        download_file(&final_runtime_path, &file_extension, use_https)
+        download_file(&runtime_path, &file_extension, use_https)
             .await
             .map_err(|err| err.to_string())?;
     }
 
     // Unix-like systems (Linux and macOS) chmod to make the file executable
     if cfg!(target_os = "linux") || cfg!(target_os = "macos") {
-        let path_str = final_runtime_path.to_string_lossy();
+        let path_str = runtime_path.to_string_lossy();
         let output = Command::new("chmod")
             .arg("+x")
             .arg(path_str.as_ref())
