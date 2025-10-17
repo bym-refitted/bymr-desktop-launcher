@@ -121,10 +121,13 @@ async fn download_and_extract_macos_flashplayer(
         .await
         .map_err(|err| err.to_string())?;
 
-    // Mount the DMG
+    // Mount the DMG to a specific mount point
+    let mount_point = "/tmp/flashplayer_mount";
     let mount_output = Command::new("hdiutil")
         .arg("attach")
         .arg(&dmg_path)
+        .arg("-mountpoint")
+        .arg(mount_point)
         .arg("-nobrowse")
         .output()
         .map_err(|err| format!("Failed to mount DMG: {}", err))?;
@@ -135,19 +138,6 @@ async fn download_and_extract_macos_flashplayer(
             String::from_utf8_lossy(&mount_output.stderr)
         ));
     }
-
-    // Parse mount output to find the mount point
-    let mount_info = String::from_utf8_lossy(&mount_output.stdout);
-    let mount_point = mount_info
-        .lines()
-        .find_map(|line| {
-            if line.contains("/Volumes/") {
-                line.find("/Volumes/").map(|start| line[start..].trim())
-            } else {
-                None
-            }
-        })
-        .ok_or("Could not find mount point")?;
 
     // Copy Flash Player.app from the mounted DMG
     let source_app = format!("{}/Flash Player.app", mount_point);
