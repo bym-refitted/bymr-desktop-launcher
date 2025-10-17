@@ -96,35 +96,15 @@ fn launch_game(app: AppHandle, build_name: &str, language: &str, token: Option<&
     println!("Opening: {:?}, {:?}", flash_runtime_path, swf_url);
 
     // Open the game in Flash Player
-    #[cfg(target_os = "macos")]
-    {
-        // On macOS, use the `open` command to launch .app bundles
-        Command::new("open")
-            .arg(&flash_runtime_path)
-            .arg("--args")
-            .arg(&swf_url)
-            .spawn()
-            .map_err(|err| {
-                format!(
-                    "[BYMR LAUNCHER] Failed to start BYMR build with error {:?}",
-                    err
-                )
-            })?;
-    }
-    
-    #[cfg(not(target_os = "macos"))]
-    {
-        // On other platforms, execute the runtime directly
-        Command::new(&flash_runtime_path)
-            .arg(&swf_url)
-            .spawn()
-            .map_err(|err| {
-                format!(
-                    "[BYMR LAUNCHER] Failed to start BYMR build with error {:?}",
-                    err
-                )
-            })?;
-    }
+    Command::new(&flash_runtime_path)
+        .arg(&swf_url)
+        .spawn()
+        .map_err(|err| {
+            format!(
+                "[BYMR LAUNCHER] Failed to start BYMR build with error {:?}",
+                err
+            )
+        })?;
 
     Ok(())
 }
