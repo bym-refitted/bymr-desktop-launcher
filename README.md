@@ -14,6 +14,25 @@ A desktop launcher for Windows, Mac & Linux which utilises the efficiency of Rus
 
 <br />
 
+# macOS 🍎
+
+1. **Open the DMG file** `bymr-launcher_x.x.x_universal.dmg`
+2. **Drag and drop** `bymr-launcher.app` into the **Applications** folder
+3. **Navigate to Applications** and locate `bymr-launcher`
+4. **Right-click** on `bymr-launcher` and select **Open**
+5. A warning will appear about the app being from an unidentified developer
+6. Click **Done** on the warning dialog
+7. Open **System Settings**
+8. Go to **Privacy & Security**
+9. Scroll down to the bottom **Security** section
+10. You should see a message: *"bymr-launcher" was blocked to protect your Mac.* Click **Open Anyway**
+11. Click **Open Anyway** again when prompted to confirm
+12. The launcher should now open successfully
+
+**Note:** This is required because the app is not signed with an Apple Developer certificate. You only need to do this once.
+
+<br />
+
 # Linux 🐧
 Ubuntu/Debian:
 ```bash
