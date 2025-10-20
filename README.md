@@ -40,6 +40,20 @@ Arch/Manjaro:
 sudo pacman -Sy --noconfirm nss at-spi2-atk libxscrnsaver gtk3 alsa-lib gtk2 dbus-glib
 ```
 
+SteamOS/Steam Deck:
+```bash
+# Make filesystem writable
+sudo steamos-readonly disable
+
+# Initialize pacman keys (if not already done)
+sudo pacman-key --init
+sudo pacman-key --populate archlinux
+sudo pacman-key --populate holo
+
+# Install dependencies
+sudo pacman -Sy --noconfirm nss at-spi2-atk libxscrnsaver gtk3 alsa-lib gtk2 dbus-glib
+```
+
 <br />
 
 # Development ⚙️
