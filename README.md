@@ -56,7 +56,7 @@ sudo dnf install -y nss atk libXScrnSaver gtk3 alsa-lib gtk2 dbus-glib
 
 Arch/Manjaro:
 ```bash
-sudo pacman -Sy --noconfirm nss at-spi2-atk libxscrnsaver gtk3 alsa-lib gtk2 dbus-glib
+sudo pacman -Sy --noconfirm nss at-spi2-atk libxss gtk3 alsa-lib gtk2 dbus-glib
 ```
 
 SteamOS/Steam Deck:
@@ -70,8 +70,9 @@ sudo pacman-key --populate archlinux
 sudo pacman-key --populate holo
 
 # Install dependencies
-sudo pacman -Sy --noconfirm nss at-spi2-atk libxscrnsaver gtk3 alsa-lib gtk2 dbus-glib
+sudo pacman -Sy --noconfirm nss at-spi2-atk libxss gtk3 alsa-lib gtk2 dbus-glib
 ```
+For additional troubleshooting steps on Linux visit our [troubleshooting page](https://github.com/bym-refitted/bymr-desktop-launcher/wiki/Linux-Troubleshooting)
 
 <br />
 
