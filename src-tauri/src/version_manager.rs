@@ -155,23 +155,32 @@ async fn download_and_extract_macos_flashplayer(
         ));
     }
 
-    // Unmount the DMG
-    let _unmount_dmg = Command::new("hdiutil")
+    // Unmount the DMG - check for errors to prevent orphaned mounts
+    let unmount_output = Command::new("hdiutil")
         .arg("detach")
         .arg(mount_point)
         .arg("-quiet")
-        .output();
+        .output()
+        .map_err(|err| format!("Failed to execute hdiutil detach: {}", err))?;
 
-    // Remove quarantine attribute to prevent macOS from blocking execution
-    let app_path = runtimes_dir.join("Flash Player.app");
-    let _xattr_fix = Command::new("xattr")
-        .arg("-dr")
-        .arg("com.apple.quarantine")
-        .arg(&app_path)
-        .output();
+    if !unmount_output.status.success() {
+        return Err(format!(
+            "Failed to unmount DMG at {}: {}",
+            mount_point,
+            String::from_utf8_lossy(&unmount_output.stderr)
+        ));
+    }
 
     // Clean up the DMG file
-    let _cleanup_dmg = fs::remove_file(&dmg_path);
+    let cleanup_dmg = fs::remove_file(&dmg_path);
+    
+    if let Err(err) = cleanup_dmg {
+        return Err(format!(
+            "Failed to clean up DMG file at {}: {}",
+            dmg_path.display(),
+            err
+        ));
+    }
 
     Ok(())
 }
