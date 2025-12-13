@@ -20,8 +20,24 @@ fn main() {
             launch_game,
             get_current_game_version
         ])
+        .on_window_event(|_window, event| {
+            if let tauri::WindowEvent::CloseRequested { .. } = event {
+                kill_all_flash_instances();
+            }
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+fn kill_all_flash_instances() {
+    #[cfg(target_os = "macos")]
+    let _ = Command::new("killall").arg("Flash Player").output();
+    
+    // #[cfg(target_os = "windows")]
+    // let _ = Command::new("taskkill").args(&["/F", "/IM", "flashplayer*.exe"]).output();
+    
+    // #[cfg(target_os = "linux")]
+    // let _ = Command::new("killall").arg("flashplayer").output();
 }
 
 #[command]
@@ -48,11 +64,17 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
         }
     };
 
+    // Download Flash runtime if it doesn't exist (non-blocking)
     let file_info = get_platform_flash_runtime(&app, &env::consts::OS)?;
     if !file_info.0.exists() {
         let log = "Downloading flash player for your platform...";
         emit_event(&app, "infoLog", log.to_string());
-        download_runtime(&app, file_info, use_https).await?;
+        
+        // Try to download, but don't fail the entire initialization if it fails
+        match download_runtime(&app, file_info, use_https).await {
+            Ok(_) => emit_event(&app, "infoLog", "Flash Player downloaded successfully".to_string()),
+            Err(err) => emit_event(&app, "errorLog", format!("Flash Player download failed: {}", err)),
+        }
     }
 
     Ok(())
@@ -88,6 +110,9 @@ fn launch_game(app: AppHandle, build_name: &str, language: &str, token: Option<&
     }
 
     println!("Opening: {:?}, {:?}", flash_runtime_path, swf_url);
+
+    // Kill any existing Flash instances before launching
+    kill_all_flash_instances();
 
     // Open the game in Flash Player
     Command::new(&flash_runtime_path)

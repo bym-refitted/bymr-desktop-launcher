@@ -39,8 +39,8 @@ pub async fn download_runtime(
     (runtime_path, file_extension): (PathBuf, String),
     use_https: bool,
 ) -> Result<(), String> {
-    // Resolve the correct directory for Linux (app data dir) or use default for others
-    let runtimes_dir = if env::consts::OS == "linux" {
+    // Resolve the correct directory for Linux/macOS (app data dir) or use default for others
+    let runtimes_dir = if env::consts::OS == "linux" || env::consts::OS == "macos" {
         let app_data_dir = app_handle.path().app_data_dir().unwrap();
         app_data_dir.join(RUNTIMES_DIR)
     } else {
@@ -49,19 +49,18 @@ pub async fn download_runtime(
 
     ensure_folder_exists(&runtimes_dir).expect("Could not create runtimes folder");
 
-    let final_runtime_path = if env::consts::OS == "linux" {
-        runtimes_dir.join(&runtime_path)
+    // Download Flash runtime; Special handling for macOS Flash Player DMG
+    if cfg!(target_os = "macos") && file_extension == "flashplayer.dmg" {
+        download_and_extract_macos_flashplayer(&runtimes_dir, &file_extension, use_https).await?;
     } else {
-        runtime_path.clone()
-    };
+        download_file(&runtime_path, &file_extension, use_https)
+            .await
+            .map_err(|err| err.to_string())?;
+    }
 
-    download_file(&final_runtime_path, &file_extension, use_https)
-        .await
-        .map_err(|err| err.to_string())?;
-
-    // Linux-specific chmod to make the file executable
-    if cfg!(target_os = "linux") {
-        let path_str = final_runtime_path.to_string_lossy();
+    // Unix-like systems (Linux and macOS) chmod to make the file executable
+    if cfg!(target_os = "linux") || cfg!(target_os = "macos") {
+        let path_str = runtime_path.to_string_lossy();
         let output = Command::new("chmod")
             .arg("+x")
             .arg(path_str.as_ref())
@@ -83,30 +82,105 @@ pub fn get_platform_flash_runtime(
     app_handle: &AppHandle,
     platform: &str,
 ) -> Result<(PathBuf, String), String> {
-    let flash_runtimes = match platform {
-        "windows" => Ok("flashplayer.exe".to_string()),
-        "darwin" => Ok("flashplayer.dmg".to_string()),
-        "linux" => Ok("flashplayer".to_string()),
-        _ => Err(format!("unsupported platform: {}", platform)),
+    let (runtime_name, download_file) = match platform {
+        "windows" => ("flashplayer.exe", "flashplayer.exe"),
+        "macos" => ("Flash Player.app/Contents/MacOS/Flash Player", "flashplayer.dmg"),
+        "linux" => ("flashplayer", "flashplayer"),
+        _ => return Err(format!("unsupported platform: {}", platform)),
     };
 
-    flash_runtimes.map(|runtime| {
-        let runtimes_dir = if platform == "linux" {
-            app_handle
-                .path()
-                .app_data_dir()
-                .unwrap()
-                .join(RUNTIMES_DIR)
-        } else {
-            PathBuf::from(RUNTIMES_DIR)
-        };
-        (runtimes_dir.join(&runtime), runtime)
-    })
+    let runtimes_dir = if platform == "linux" || platform == "macos" {
+        app_handle
+            .path()
+            .app_data_dir()
+            .unwrap()
+            .join(RUNTIMES_DIR)
+    } else {
+        PathBuf::from(RUNTIMES_DIR)
+    };
+    
+    Ok((runtimes_dir.join(runtime_name), download_file.to_string()))
 }
 
 fn ensure_folder_exists(runtime_path: &Path) -> std::io::Result<()> {
     if !runtime_path.exists() {
         fs::create_dir_all(runtime_path)?;
     }
+    Ok(())
+}
+
+async fn download_and_extract_macos_flashplayer(
+    runtimes_dir: &PathBuf,
+    file_extension: &str,
+    use_https: bool,
+) -> Result<(), String> {
+    let dmg_path = runtimes_dir.join("flashplayer.dmg");
+
+    // Download the DMG file
+    download_file(&dmg_path, file_extension, use_https)
+        .await
+        .map_err(|err| err.to_string())?;
+
+    // Mount the DMG to a specific mount point
+    let mount_point = "/tmp/flashplayer_mount";
+    let mount_output = Command::new("hdiutil")
+        .arg("attach")
+        .arg(&dmg_path)
+        .arg("-mountpoint")
+        .arg(mount_point)
+        .arg("-nobrowse")
+        .output()
+        .map_err(|err| format!("Failed to mount DMG: {}", err))?;
+
+    if !mount_output.status.success() {
+        return Err(format!(
+            "Failed to mount DMG: {}",
+            String::from_utf8_lossy(&mount_output.stderr)
+        ));
+    }
+
+    // Copy Flash Player.app from the mounted DMG
+    let source_app = format!("{}/Flash Player.app", mount_point);
+    let copy_output = Command::new("cp")
+        .arg("-R")
+        .arg(&source_app)
+        .arg(&runtimes_dir)
+        .output()
+        .map_err(|err| format!("Failed to copy Flash Player.app: {}", err))?;
+
+    if !copy_output.status.success() {
+        return Err(format!(
+            "Failed to copy Flash Player.app: {}",
+            String::from_utf8_lossy(&copy_output.stderr)
+        ));
+    }
+
+    // Unmount the DMG - check for errors to prevent orphaned mounts
+    let unmount_output = Command::new("hdiutil")
+        .arg("detach")
+        .arg(mount_point)
+        .arg("-quiet")
+        .output()
+        .map_err(|err| format!("Failed to execute hdiutil detach: {}", err))?;
+
+    if !unmount_output.status.success() {
+        return Err(format!(
+            "Failed to unmount DMG at {}: {}",
+            mount_point,
+            String::from_utf8_lossy(&unmount_output.stderr)
+        ));
+    }
+
+    // Clean up the DMG file
+    let cleanup_dmg = fs::remove_file(&dmg_path);
+    
+    if let Err(err) = cleanup_dmg {
+        return Err(format!(
+            "Failed to clean up DMG file at {}: {}",
+            dmg_path.display(),
+            err
+        ));
+    }
+
     Ok(())
 }
