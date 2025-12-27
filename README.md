@@ -14,6 +14,13 @@ A desktop launcher for Windows, Mac & Linux which utilises the efficiency of Rus
 
 <br />
 
+# MacOS 🍎
+1. Manually download and install Flash from our website on [macOS](https://cdn.bymrefitted.com/runtimes/flashplayer.dmg).
+2. Move the installed app to your Applications folder.
+3. When running the launcher for the first time, you may need to click Open Anyway in **Settings ⟶ Privacy & Security.**
+
+<br />
+
 # Linux 🐧
 Ubuntu/Debian:
 ```bash
