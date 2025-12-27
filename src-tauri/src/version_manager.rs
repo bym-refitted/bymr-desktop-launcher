@@ -85,7 +85,7 @@ pub fn get_platform_flash_runtime(
 ) -> Result<(PathBuf, String), String> {
     let flash_runtimes = match platform {
         "windows" => Ok("flashplayer.exe".to_string()),
-        "darwin" => Ok("flashplayer.dmg".to_string()),
+        "macos" => Ok("/Applications/Flash Player.app/Contents/MacOS/Flash Player".to_string()),
         "linux" => Ok("flashplayer".to_string()),
         _ => Err(format!("unsupported platform: {}", platform)),
     };
@@ -97,6 +97,8 @@ pub fn get_platform_flash_runtime(
                 .app_data_dir()
                 .unwrap()
                 .join(RUNTIMES_DIR)
+        } else if platform == "macos" {
+            PathBuf::from("")
         } else {
             PathBuf::from(RUNTIMES_DIR)
         };
