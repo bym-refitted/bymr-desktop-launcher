@@ -5,16 +5,20 @@
   import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
   import { WarningDiamond } from "phosphor-svelte";
   import { fly } from "svelte/transition";
+  import { platform } from "@tauri-apps/plugin-os";
+  import { Platform } from "$lib/enums";
+  
+  const isMobile = platform() === Platform.Android;
 </script>
 
-<div class="grid grid-cols-1 gap-x-8 lg:grid-cols-2 lg:grid-rows-[800px]">
+<div class="grid grid-cols-1 gap-x-8 lg:grid-cols-2 lg:grid-rows-[800px] {isMobile ? 'px-6 pt-8 pb-32' : ''}">
   <div 
     class="grid-item flex flex-col lg:p-16 lg:justify-center"
     in:fly={{ y: 30, duration: 600, delay: 100 }}
   >
     <img src={TownHall} alt="townhall" width="200" />
     <div class="py-6">
-      <h1 class="font-title leading-snug text-6xl">Attack of the Pokies:</h1>
+      <h1 class="font-title leading-snug {isMobile ? 'text-4xl' : 'text-6xl'}">Attack of the Pokies:</h1>
       <p class="text-md font-medium text-muted-foreground pt-4">
         The original minigame for Backyard Monsters, which could only be seen
         when the game was under maintenance.

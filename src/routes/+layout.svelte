@@ -4,6 +4,7 @@
   import { getVersion } from "@tauri-apps/api/app";
   import { check } from "@tauri-apps/plugin-updater";
   import { relaunch } from "@tauri-apps/plugin-process";
+  import { platform } from "@tauri-apps/plugin-os";
   import {
     addErrorLog,
     addSuccessLog,
@@ -21,15 +22,25 @@
   import TabView from "$lib/components/ui/tabs/TabView.svelte";
   import Navbar from "$lib/components/Navbar.svelte";
   import Loader from "$lib/components/Loader.svelte";
+  import { Platform } from "$lib/enums";
 
   let launcherVersion = "0.0.0";
+  const currentPlatform = platform();
 
   onMount(async () => {
-    const update = await check();
+    if (currentPlatform !== Platform.Android) {
+      try {
+        const update = await check();
 
-    if (update) {
-      await update.downloadAndInstall();
-      await relaunch();
+        if (update) {
+          await update.downloadAndInstall();
+          await relaunch();
+        }
+      } catch (error) {
+        addErrorLog(
+          `Error during update check on ${currentPlatform}: ${error}`
+        );
+      }
     }
     setupLogListeners();
     initializeLauncher();
@@ -56,6 +67,21 @@
   };
 </script>
 
+<style>
+  @media (max-width: 1024px) {
+    main::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    main {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      scrollbar-color: transparent transparent;
+    }
+  }
+</style>
+
 <!-- Custom Titlebar -->
 <Titlebar />
 <!-- Content -->
@@ -69,7 +95,9 @@
       </div>
     {:else}
       <TabView>
-        <Navbar />
+        {#if currentPlatform !== Platform.Android}
+          <Navbar />
+        {/if}
         <slot />
       </TabView>
     {/if}

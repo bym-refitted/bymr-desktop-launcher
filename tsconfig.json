@@ -20,20 +20,11 @@
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"baseUrl": ".",
 		/**
 		 * Typecheck JS in `.svelte` and `.js` files by default.
 		 * Disable this if you'd like to use dynamic types.
 		 */
-		"checkJs": true,
-		"paths": {
-			"$lib": [
-				"./src/lib"
-			],
-			"$lib/*": [
-				"./src/lib/*"
-			]
-		}
+		"checkJs": true
 	},
 	/**
 	   * Use global.d.ts instead of compilerOptions.types
