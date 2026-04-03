@@ -34,7 +34,7 @@
     <div class="mb-8">
       <p class="text-lg leading-relaxed text-muted-foreground">
         The official Backyard Monsters Refitted server. A 1:1 preservation of
-        the original Adobe Flash game, with the adoption of Map Room 2. All
+        the original Adobe Flash game, with the adoption of Map Room 2 and Map Room 3. All
         buildings, monsters and gameplay mechanics on this server are from the
         classic vanilla version of the game.
       </p>

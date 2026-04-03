@@ -13,12 +13,17 @@
     ChartBar,
   } from "phosphor-svelte";
 
+  import outpostIcon from '../../assets/images/icons/outpost_cell.png';
+  import resourceIcon from '../../assets/images/icons/resource_cell.png';
+  import strongholdIcon from '../../assets/images/icons/stronghold_cell.png';
+
   interface WorldDetails {
     uuid: string;
     name: string;
     playerCount: number;
     createdAt: Date;
     lastupdateAt: Date;
+    map_version: number;
   }
 
   interface Worlds {
@@ -30,6 +35,7 @@
     username: string;
     discord_tag: string;
     outpost_count: number;
+    stronghold_count?: number;
   }
 
   interface Leaderboard {
@@ -43,52 +49,45 @@
     playerCount?: number;
   }
 
-  $: mapVersion = "Map Version";
-  $: worldName = "World";
-  $: worldUuid = "";
+  let selectedMapVersion = '2';
+  let worldName = 'World';
+  let worldUuid = '';
 
   const mapVersions: SelectItem[] = [
-    { value: "Map Room 2", label: "Map Room 2" },
+    { value: '2', label: 'Map Room 2' },
+    { value: '3', label: 'Map Room 3' },
   ];
-  const worldNames: SelectItem[] = [];
+
+  let allWorlds: WorldDetails[] = [];
+  $: worldNames = allWorlds
+    .filter((w) => w.map_version === Number(selectedMapVersion))
+    .map((w) => ({ value: w.uuid, label: w.name, playerCount: w.playerCount }));
 
   let leaderboardUser: UserLeaderboardEntry[] = [];
   let imageError = false;
 
+  const loadFirstWorld = (mapVersion: string) => {
+    const first = allWorlds.find((w) => w.map_version === Number(mapVersion));
+    if (first) {
+      worldName = first.name;
+      worldUuid = first.uuid;
+      fetchLeaderboards(first.uuid);
+    } else {
+      worldName = 'World';
+      worldUuid = '';
+      leaderboardUser = [];
+    }
+  };
+
   onMount(async () => {
     try {
-      // Fetch available worlds
       const { data } = await invokeApiRequest<Worlds>(
         "/worlds",
         null,
         Method.GET
       );
-
-      if (data.worlds && data.worlds.length > 0) {
-        // Sort worlds by createdAt timestamp (oldest first)
-        const sortedWorlds = [...data.worlds].sort((a, b) => {
-          return (
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        });
-
-        // Populate world names array with sorted worlds
-        sortedWorlds.forEach((world: WorldDetails) => {
-          worldNames.push({
-            value: world.uuid,
-            label: world.name,
-            playerCount: world.playerCount,
-          });
-        });
-
-        // Select the first (oldest) world
-        const oldestWorld = sortedWorlds[0];
-        worldName = oldestWorld.name;
-        worldUuid = oldestWorld.uuid;
-
-        // Fetch leaderboards for the first world
-        fetchLeaderboards(oldestWorld.uuid);
-      }
+      allWorlds = data.worlds ?? [];
+      loadFirstWorld(selectedMapVersion);
     } catch (err) {
       console.error("Error fetching available worlds");
     }
@@ -99,7 +98,7 @@
 
     try {
       const { data } = await invokeApiRequest<Leaderboard>(
-        `/leaderboards?worldid=${worldId}`,
+        `/leaderboards?worldid=${worldId}&mapversion=${selectedMapVersion}`,
         null,
         Method.GET
       );
@@ -119,7 +118,7 @@
 <div class="mb-16 flex justify-start items-start lg:py-16 lg:mt-[6%] lg:py-0">
   <div class="w-full lg:w-3/5 mx-4 lg:ml-[12%] lg:mr-0">
     <!-- Header Section -->
-    <div 
+    <div
       class="flex flex-col items-center text-muted-foreground"
       in:fly={{ y: 30, duration: 600, delay: 100 }}
     >
@@ -134,18 +133,19 @@
       </p>
     </div>
 
-    <div 
-      id="leaderboard" 
+    <div
+      id="leaderboard"
       class="mt-16"
       in:fly={{ y: 30, duration: 600, delay: 200 }}
     >
-      <div class="flex flex-col gap-4 lg:gap-2 lg:flex-row">
+      <div class="flex flex-col sm:flex-row gap-4 lg:gap-2">
         <!-- Map Room version select -->
         <Select.Root
           items={mapVersions}
-          selected={{ value: mapVersion, label: mapVersion }}
+          selected={mapVersions.find((v) => v.value === selectedMapVersion)}
           onSelectedChange={(e) => {
-            mapVersion = e.label;
+            selectedMapVersion = e.value;
+            loadFirstWorld(e.value);
           }}
         >
           <Select.Trigger
@@ -156,9 +156,10 @@
               <MapTrifold size={20} weight="bold" class="text-primary mr-3 flex-shrink-0" />
               <Select.Value
                 class="text-md placeholder-unselected text-unselected truncate"
+                placeholder={mapVersions.find((v) => v.value === selectedMapVersion)?.label}
               />
             </div>
-            <CaretDown size={16} weight="bold" class="text-unselected ml-2 flex-shrink-0" />
+            <CaretDown size={16} weight="bold" class="text-unselected ml-8 flex-shrink-0" />
           </Select.Trigger>
           <Select.Content
             class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none"
@@ -186,10 +187,7 @@
           onSelectedChange={(e) => {
             worldName = e.label;
             worldUuid = e.value;
-
-            if (worldUuid) {
-              fetchLeaderboards(worldUuid);
-            }
+            if (worldUuid) fetchLeaderboards(worldUuid);
           }}
         >
           <Select.Trigger
@@ -203,7 +201,7 @@
                 placeholder={worldName}
               />
             </div>
-            <CaretDown size={16} weight="bold" class="text-unselected ml-2 flex-shrink-0" />
+            <CaretDown size={16} weight="bold" class="text-unselected ml-8 flex-shrink-0" />
           </Select.Trigger>
           <Select.Content
             class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none"
@@ -225,7 +223,7 @@
         </Select.Root>
 
         <!-- Tooltip -->
-        <div class="hidden lg:block ml-auto">
+        <div class="hidden sm:block ml-auto">
           <Tooltip.Root openDelay={0}>
             <Tooltip.Trigger>
               <div
@@ -249,78 +247,72 @@
       </div>
 
       <!-- Leaderboard -->
-      <div class="grid grid-cols-1 mt-4">
-        <div
-          class="h-full bg-gray-800 p-5 relative flex flex-col overflow-hidden rounded-lg"
-        >
-          <h2 class="font-title text-center text-white text-2xl">
+      <div class="mt-4 bg-gray-800 rounded-lg overflow-hidden">
+        <!-- Population -->
+        <div class="px-6 py-4 border-b border-gray-700">
+          <p class="font-title text-center text-white text-2xl">
             Population: <span class="text-primary font-bold">
-              {#if worldUuid && worldNames.length > 0}
-                {worldNames.find((world) => world.value === worldUuid)
-                  ?.playerCount || 0}
-              {:else}
-                0
-              {/if}
+              {worldNames.find((w) => w.value === worldUuid)?.playerCount ?? 0}
             </span>
-          </h2>
-          <!-- Header -->
-          <div
-            class="flex flex-row items-center justify-between bg-white/5 rounded-full px-8 py-2 my-4"
-          >
-            <div class="flex flex-row items-center">
-              <h3 class="font-title text-muted-foreground text-2xl">User</h3>
-            </div>
-            <div class="flex flex-row items-center">
-              <h3 class="font-title text-muted-foreground text-2xl">
-                Outposts
-              </h3>
-            </div>
-          </div>
-          {#if leaderboardUser.length === 0}
-            <div class="flex justify-center items-center py-8">
-              <p class="text-muted-foreground">
-                No leaderboard data found for this world
-              </p>
-            </div>
-          {:else}
-            {#each leaderboardUser as user}
-              <!-- User Card -->
-              <div
-                class="flex flex-row items-center justify-between border-b-2 border-gray-700 pb-4 my-4"
-              >
-                <div class="flex flex-row items-center">
-                  {#if !imageError}
-                    <img
-                      src={`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${user.username}&size=50`}
-                      alt={`${user.username}'s avatar`}
-                      class="w-50 h-50 rounded-[4px] mr-3 bg-gray-700"
-                      on:error={() => (imageError = true)}
-                    />
-                  {:else}
-                    <div
-                      class="w-50 h-50 rounded-full mr-3 flex items-center justify-center bg-gray-700"
-                    >
-                      <ImageBroken size={50} class="text-white/60" />
-                    </div>
-                  {/if}
-                  <div class="flex flex-col">
-                    <h2
-                      class="font-display text-1xl text-white tracking-wide lg:text-2xl"
-                    >
-                      {user.username}
-                    </h2>
-                    <p class="text-sm text-primary">@{user.discord_tag}</p>
-                  </div>
-                </div>
-                <h1
-                  class="font-display text-white text-1xl font-bold pr-4 tracking-widest lg:pr-12 lg:text-2xl"
-                >
-                  {user.outpost_count}
-                </h1>
-              </div>
-            {/each}
-          {/if}
+          </p>
         </div>
+
+        {#if leaderboardUser.length === 0}
+          <div class="flex justify-center items-center py-12">
+            <p class="text-muted-foreground">No leaderboard data found for this world</p>
+          </div>
+        {:else}
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[580px]">
+              <thead class="bg-white/5 border-b border-gray-700">
+                <tr>
+                  <th class="text-left px-6 py-3">
+                    <span class="font-title text-muted-foreground text-xl pl-[3.25rem]">Player</span>
+                  </th>
+                  {#if selectedMapVersion === '3'}
+                    <th class="px-6 py-3 w-28 min-w-[7rem] align-middle"><img src={strongholdIcon} alt="Strongholds" class="w-16 h-16 mx-auto flex-shrink-0" /></th>
+                    <th class="px-6 py-3 w-28 min-w-[7rem] align-middle"><img src={resourceIcon} alt="Resource Outposts" class="w-16 h-16 mx-auto flex-shrink-0" /></th>
+                  {:else}
+                    <th class="px-6 py-3 w-28 min-w-[7rem] align-middle"><img src={outpostIcon} alt="Outposts" class="w-16 h-16 mx-auto flex-shrink-0" /></th>
+                  {/if}
+                </tr>
+              </thead>
+              <tbody>
+                {#each leaderboardUser as user, i}
+                  <tr class="border-b border-gray-700/50 last:border-0 {i < 3 ? 'border-l-2 border-l-primary' : ''}">
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-5">
+                        <span class="font-title text-2xl w-8 text-right text-muted-foreground flex-shrink-0">{i + 1}</span>
+                        {#if !imageError}
+                          <img
+                            src={`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${user.username}&size=50`}
+                            alt={`${user.username}'s avatar`}
+                            class="w-14 h-14 rounded-md bg-gray-700 flex-shrink-0"
+                            on:error={() => (imageError = true)}
+                          />
+                        {:else}
+                          <div class="w-14 h-14 rounded-md bg-gray-700 flex items-center justify-center flex-shrink-0">
+                            <ImageBroken size={24} class="text-white/60" />
+                          </div>
+                        {/if}
+                        <div>
+                          <p class="font-display text-white text-lg lg:text-xl leading-tight">{user.username}</p>
+                          <p class="text-sm text-primary">@{user.discord_tag}</p>
+                        </div>
+                      </div>
+                    </td>
+                    {#if selectedMapVersion === '3'}
+                      <td class="px-6 py-4 text-center font-display text-white font-bold text-xl lg:text-2xl">{user.stronghold_count}</td>
+                      <td class="px-6 py-4 text-center font-display text-white font-bold text-xl lg:text-2xl">{user.outpost_count}</td>
+                    {:else}
+                      <td class="px-6 py-4 text-center font-display text-white font-bold text-xl lg:text-2xl">{user.outpost_count}</td>
+                    {/if}
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </div>
+        {/if}
       </div>
     </div>
   </div>
