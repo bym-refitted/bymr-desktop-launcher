@@ -173,7 +173,7 @@
       if (status === Status.OK && data.token) {
         // Save user details to local storage
         const userSaveData = { language, token: data.token, userId: data.userId };
-        if (isChecked) saveUserToLocalStorage(userSaveData);
+        if (isChecked || $isUserRemembered) saveUserToLocalStorage(userSaveData);
         else user.set(userSaveData);
 
         // Launch the SWF file
