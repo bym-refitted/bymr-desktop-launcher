@@ -3,12 +3,10 @@
   import { user } from '$lib/stores/userStore';
   import { invokeApiRequest } from '$lib/utils/invokeApiRequest';
   import { Label, RadioGroup, Tooltip } from 'bits-ui';
+  import { Notepad, ArrowClockwise, ImageBroken } from 'phosphor-svelte';
   import { fly } from 'svelte/transition';
 
   import AlertDialog from '$lib/components/AlertDialog.svelte';
-  import Notepad from 'phosphor-svelte/lib/Notepad.svelte';
-  import ArrowClockwise from 'phosphor-svelte/lib/ArrowClockwise.svelte';
-  import ImageBroken from 'phosphor-svelte/lib/ImageBroken.svelte';
 
   interface AttackLogs {
     attackLogs: AttackLogDetails[];
