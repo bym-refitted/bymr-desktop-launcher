@@ -37,7 +37,7 @@
     "shortDescription": "",
     "linux": {
       "deb": {
-        "depends": []
+        "depends": ["libgtk2.0-0"]
       },
       "appimage": {
         "files": {}
