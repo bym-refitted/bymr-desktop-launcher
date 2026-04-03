@@ -7,13 +7,16 @@
 </script>
 
 <Button.Root
-  class="{color} {width} inline-flex h-12 items-center justify-center rounded-md
-    px-[21px] text-[15px] font-display text-white shadow-mini
-    hover:bg-dark/95 active:scale-98 active:transition-all {disabled
-    ? 'opacity-50 cursor-not-allowed'
-    : ''}"
+  class="{color} {width} relative inline-flex h-12 items-center justify-center rounded-lg
+    px-6 text-[15px] font-display text-white shadow-lg overflow-hidden
+    hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] 
+    transition-all duration-200 ease-out
+    {disabled
+    ? 'opacity-50 cursor-not-allowed hover:scale-100'
+    : 'cursor-pointer'}
+    before:absolute before:inset-0 before:bg-white/10 before:opacity-0 hover:before:opacity-100 before:transition-opacity"
   on:click
   {disabled}
 >
-  {buttonText}
+  <span class="relative z-10">{buttonText}</span>
 </Button.Root>

@@ -9,7 +9,9 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager};
 
 pub const VERSION_MANIFEST_URL: &str = "cdn.bymrefitted.com/versionManifest.json";
-pub const SWFS_URL: &str = "cdn.bymrefitted.com/launcher/swfs/";
+pub const SWFS_URL: &str = "cdn.bymrefitted.com/swfs/";
+pub const RUNTIMES_URL: &str = "cdn.bymrefitted.com/runtimes/";
+
 pub const RUNTIMES_DIR: &str = "bymr-downloads/runtimes";
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]

@@ -4,19 +4,23 @@
   import TownHall from "../../assets/images/pokey.png";
   import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
   import { WarningDiamond } from "phosphor-svelte";
+  import { fly } from "svelte/transition";
 </script>
 
 <div class="grid grid-cols-1 gap-x-8 lg:grid-cols-2 lg:grid-rows-[800px]">
-  <div class="grid-item flex flex-col lg:p-16 lg:justify-center">
+  <div 
+    class="grid-item flex flex-col lg:p-16 lg:justify-center"
+    in:fly={{ y: 30, duration: 600, delay: 100 }}
+  >
     <img src={TownHall} alt="townhall" width="200" />
     <div class="py-6">
-      <h1 class="text-4xl font-display">Attack of the Pokies:</h1>
+      <h1 class="font-title leading-snug text-6xl">Attack of the Pokies:</h1>
       <p class="text-md font-medium text-muted-foreground pt-4">
         The original minigame for Backyard Monsters, which could only be seen
         when the game was under maintenance.
         <br />
         <br />
-        <b class="text-primary">How to Play: </b>Guide the worker to the
+        <b class="text-primary">How to Play: </b> Guide the worker to the
         mushrooms while avoiding Pokies! For every 20 mushrooms you collect, a
         golden mushroom power-up will appear. Eat it to become invincible and
         kill Pokies by smashing them with your body for a short amount of time.
