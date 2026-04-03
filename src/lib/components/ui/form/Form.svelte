@@ -42,6 +42,8 @@
     email?: string;
     password?: string;
     token?: string;
+    userId?: number;
+    sessionType?: string;
   }
 
   // User details
@@ -146,7 +148,7 @@
   };
 
   const authenticateUser = async () => {
-    const formData: FormData = { username, password };
+    const formData: FormData = { username, password, sessionType: "launcher" };
 
     // User can be validated on the server by either email OR token
     if (!$isUserRemembered) {
@@ -170,8 +172,9 @@
 
       if (status === Status.OK && data.token) {
         // Save user details to local storage
-        const userSaveData = { language, token: data.token };
+        const userSaveData = { language, token: data.token, userId: data.userId };
         if (isChecked) saveUserToLocalStorage(userSaveData);
+        else user.set(userSaveData);
 
         // Launch the SWF file
         const launchLanguage = $user.language || language;

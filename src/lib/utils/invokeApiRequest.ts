@@ -1,6 +1,7 @@
 import { Method } from "$lib/enums/Method";
 import { BASE_URL } from "$lib/globals";
 import { currentGameVersion } from "$lib/stores/loadState";
+import { user } from "$lib/stores/userStore";
 import { get } from "svelte/store";
 import { fetch } from "@tauri-apps/plugin-http";
 import {
@@ -42,11 +43,14 @@ export const invokeApiRequest = async <T>(
 ): Promise<ApiResponse<T>> => {
   try {
     const version = get(currentGameVersion);
+    const currentUser = get(user);
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+
+    if (currentUser.token) headers["Authorization"] = `Bearer ${currentUser.token}`;
+    
     const options = {
       method,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: method !== Method.GET ? JSON.stringify(formData) : undefined,
     };
 
