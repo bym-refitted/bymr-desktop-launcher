@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { Play, Ranking, Sword } from "phosphor-svelte";
+  import { Play, Ranking, Sword, Shield } from "phosphor-svelte";
   import { Menubar } from "bits-ui";
   import TabItem from "./TabItem.svelte";
+  import { user } from "$lib/stores/userStore";
 </script>
 
 <div class="flex">
@@ -22,6 +23,9 @@
           text="Attack of the Pokies"
         />
         <TabItem path="/leaderboards" Icon={Ranking} text="Leaderboards" />
+        {#if $user.token}
+          <TabItem path="/attacklogs" Icon={Shield} text="Attack Logs" />
+        {/if}
       </div>
     </div></Menubar.Root
   >
