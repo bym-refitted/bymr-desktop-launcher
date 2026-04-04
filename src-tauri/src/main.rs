@@ -12,6 +12,7 @@ use tauri::{command, AppHandle, Emitter};
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_http::init())
@@ -48,18 +49,25 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
         }
     };
 
-    let file_info = get_platform_flash_runtime(&app, &env::consts::OS)?;
-    if !file_info.0.exists() {
-        let log = "Downloading flash player for your platform...";
-        emit_event(&app, "infoLog", log.to_string());
-        download_runtime(&app, file_info, use_https).await?;
+    if env::consts::OS != "macos" {
+        let file_info = get_platform_flash_runtime(&app, &env::consts::OS)?;
+        if !file_info.0.exists() {
+            let log = "Downloading flash player for your platform...";
+            emit_event(&app, "infoLog", log.to_string());
+            download_runtime(&app, file_info, use_https).await?;
+        }
     }
 
     Ok(())
 }
 
 #[command]
-fn launch_game(app: AppHandle, build_name: &str, language: &str, token: Option<&str>) -> Result<(), String> {
+fn launch_game(
+    app: AppHandle,
+    build_name: &str,
+    language: &str,
+    token: Option<&str>,
+) -> Result<(), String> {
     let (flash_runtime_path, _) = get_platform_flash_runtime(&app, &env::consts::OS)?;
 
     if !flash_runtime_path.exists() {
