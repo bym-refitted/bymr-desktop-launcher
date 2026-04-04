@@ -24,18 +24,18 @@ A desktop launcher for Windows, Mac & Linux which utilises the efficiency of Rus
 # Linux 🐧
 Ubuntu/Debian:
 ```bash
-# Install dependencies
-# NOTE: version 0.3.5 is just a hardcoded example, use the actual version you have
+# Install runtime dependencies
+# Note: package names with the t64 suffix are Ubuntu 24.04+ only
+# On Ubuntu 22.04 or older, remove the t64 suffix (e.g. libatk1.0-0, libgtk-3-0)
 sudo apt update
-
 sudo apt install -y libnss3 libatk1.0-0t64 libxss1 libgtk-3-0t64 \
-libasound2t64 libgtk2.0-0t64 libdbus-glib-1-2
+  libasound2t64 libgtk2.0-0t64 libdbus-glib-1-2
 
-# Make AppImage executable
-chmod +x bymr-launcher_0.3.5_amd64.AppImage
+# Make AppImage executable (replace the version number with the one you downloaded)
+chmod +x bymr-launcher_0.3.8_amd64.AppImage
 
 # Run the launcher
-./bymr-launcher_0.3.5_amd64.AppImage
+./bymr-launcher_0.3.8_amd64.AppImage
 ```
 Fedora/RHEL/CentOS:
 ```bash
@@ -102,3 +102,74 @@ cargo tauri dev
 ```
 
 This launches a Vite development server with fast hot-reload capabilities for your frontend changes. The development server is also accessible at **http://localhost:5173** if you prefer to develop directly in your browser.
+
+<br />
+
+## Building
+
+### Windows
+
+```bash
+npm run tauri build -- --bundles nsis,msi
+```
+
+<br />
+
+### macOS Universal Build
+
+Add both Rust targets before building:
+
+```bash
+rustup target add x86_64-apple-darwin
+rustup target add aarch64-apple-darwin
+```
+
+Then run the build:
+
+```bash
+sudo CI=true npm run tauri build -- --target universal-apple-darwin
+```
+
+#### Troubleshooting
+
+1. In **Mac Settings > Privacy & Security > Full Disk Access**, ensure your terminal is toggled on
+2. In **Mac Settings > Privacy & Security > Automation**, ensure Finder is switched on under Terminal
+3. Run with `sudo`
+4. Ensure `CI=true` is set in your environment variables
+
+<br />
+
+### Linux
+
+Install the required system dependencies for your distro, then build:
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file \
+  libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+
+# Fedora/RHEL
+sudo dnf install -y webkit2gtk4.1-devel openssl-devel curl wget file \
+  libxdo-devel libayatana-appindicator-gtk3-devel librsvg2-devel
+
+npm run tauri build -- --bundles deb,rpm,appimage
+```
+
+<br />
+
+# Deployment 🚀
+
+`release.sh` in the repo root handles versioning and triggering CI builds. Run it from the repo root with Git Bash (or any bash shell on macOS/Linux):
+
+```bash
+./release.sh          # bump patch (e.g. 0.3.7 → 0.3.8)
+./release.sh minor    # bump minor (e.g. 0.3.7 → 0.4.0)
+./release.sh major    # bump major (e.g. 0.3.7 → 1.0.0)
+```
+
+The script will:
+1. Bump the version in `Cargo.toml` and `tauri.conf.json`
+2. Commit and tag the release (e.g. `v0.3.8`)
+3. Push the commit and tag to trigger GitHub Actions, which builds installers for Windows, macOS, and Linux
+
+> Your working tree must be clean before running the script.

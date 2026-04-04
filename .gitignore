@@ -16,5 +16,4 @@ flashplayer.*
 .idea
 .svelte-kit
 .tauri
-build_script.sh
 vite.config.ts*
