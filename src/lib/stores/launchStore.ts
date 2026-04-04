@@ -19,8 +19,9 @@ export const launchSwf = async (
     launchError.update(() => ({ code: "", show: false }));
   } catch (err) {
     console.log(err);
-    const error =
-      err?.code || `Error during launch process: ${err || "unknown"}`;
+    const e = err as { code?: string } | null;
+    const error = e?.code || `Error during launch process: ${err || "unknown"}`;
+    
     launchError.update(() => ({ code: error, show: true }));
   } finally {
     isLaunching.set(false);

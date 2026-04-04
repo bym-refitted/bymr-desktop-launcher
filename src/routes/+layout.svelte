@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "../app.pcss";
+  import "../app.css";
 
   import { getVersion } from "@tauri-apps/api/app";
   import { check } from "@tauri-apps/plugin-updater";
