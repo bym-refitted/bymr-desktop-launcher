@@ -102,3 +102,23 @@ cargo tauri dev
 ```
 
 This launches a Vite development server with fast hot-reload capabilities for your frontend changes. The development server is also accessible at **http://localhost:5173** if you prefer to develop directly in your browser.
+
+
+## MAC OS Universal Build Instructions
+
+You will need to add both of these Rust packages  
+```
+  rustup target add x86_64-apple-darwin
+  rustup target add aarch64-apple-darwin
+```
+
+Then you can run the build  
+```
+  sudo CI=true npm run tauri build -- --target universal-apple-darwin
+```
+
+#### Additional MAC OS Universal Build Troubleshooting  
+1. Make sure in your Mac Settings > Privacy & Security > Full Disk Access you have toggled your terminal
+2. Make sure in Mac Settings > Privacy & Security > Automation that Finder is switched on under Terminal
+3. Run with sudo
+4. Set `CI=true` in environment variables
