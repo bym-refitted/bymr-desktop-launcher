@@ -43,7 +43,7 @@
         "files": {}
       }
     },
-    "createUpdaterArtifacts": "v1Compatible"
+    "createUpdaterArtifacts": true
   },
   "mainBinaryName": "bymr-launcher",
   "identifier": "com.bymr.launcher",
