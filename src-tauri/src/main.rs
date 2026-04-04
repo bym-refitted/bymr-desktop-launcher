@@ -26,7 +26,7 @@ fn main() {
 
 #[command]
 async fn initialize_app(app: AppHandle) -> Result<(), String> {
-    let message = format!("Platform: {} {}", env::consts::OS, env::consts::ARCH); // Get OS info
+    let message = format!("Platform: {} {}", env::consts::OS, env::consts::ARCH);
     emit_event(&app, "infoLog", message);
 
     let manifest_result: Result<VersionManifest, _> = get_server_manifest().await;
@@ -92,7 +92,7 @@ fn launch_game(app: AppHandle, build_name: &str, language: &str, token: Option<&
     // Open the game in Flash Player
     Command::new(&flash_runtime_path)
         .arg(&swf_url)
-        .env_remove("LD_LIBRARY_PATH")
+        .env_remove("LD_LIBRARY_PATH") // On Linux, clear LD_LIBRARY_PATH so the AppImage's bundled GLib doesn't shadow the system GLib that flashplayer's GTK2 dependency requires
         .spawn()
         .map_err(|err| {
             format!(
