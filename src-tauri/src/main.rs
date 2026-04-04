@@ -92,6 +92,7 @@ fn launch_game(app: AppHandle, build_name: &str, language: &str, token: Option<&
     // Open the game in Flash Player
     Command::new(&flash_runtime_path)
         .arg(&swf_url)
+        .env_remove("LD_LIBRARY_PATH")
         .spawn()
         .map_err(|err| {
             format!(
