@@ -77,14 +77,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Prepare Arch container (installs xvfb, quick-sharun, base-devel)
+        uses: pkgforge-dev/anylinux-setup-action@v1
+
+      - name: Install Tauri dependencies
         run: |
-          pacman -Syu --noconfirm
           pacman -S --noconfirm \
             webkit2gtk-4.1 \
-            base-devel \
             curl \
-            wget \
             file \
             xdotool \
             openssl \
