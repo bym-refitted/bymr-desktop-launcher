@@ -19,7 +19,10 @@
       "identifier": "http:default",
       "allow": [
         {
-          "url": "http://localhost:3001/*"
+          "url": "http://localhost:*/**"
+        },
+        {
+          "url": "http://127.0.0.1:*/**"
         },
         {
           "url": "https://server.bymrefitted.com/*"

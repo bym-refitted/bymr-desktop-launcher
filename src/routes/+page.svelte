@@ -89,7 +89,7 @@
     class="flex flex-col items-start justify-center [@media(min-width:1500px)]:pl-8"
     in:fly={{ x: 50, duration: 600, delay: 200 }}
   >
-    <div class="w-full [@media(min-width:1500px)]:max-w-md">
+    <div class="w-[420px]">
       <Form />
     </div>
   </div>
