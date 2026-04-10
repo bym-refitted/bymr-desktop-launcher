@@ -18,9 +18,16 @@ export const handleErrorMessage = (error: unknown): string => {
   // object errors
   if (error instanceof Error) {
     const message = error.message.trim();
-    const networkError = message.includes("Failed to fetch");
 
-    if (networkError) return connectErrorMessage;
+    if (message.includes("Failed to fetch")) return connectErrorMessage;
+    
+    if (message.includes("error sending request for url")) {
+      const isLocal = message.includes("localhost") || message.includes("127.0.0.1");
+      return isLocal
+        ? "Could not reach the local server. Make sure it is running on the specified host and port."
+        : connectErrorMessage;
+    }
+
     return message || defaultErrorMessage;
   }
 

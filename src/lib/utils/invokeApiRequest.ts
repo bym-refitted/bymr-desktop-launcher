@@ -1,7 +1,7 @@
 import { Method } from "$lib/enums/Method";
-import { BASE_URL } from "$lib/globals";
 import { currentGameVersion } from "$lib/stores/loadState";
 import { user } from "$lib/stores/userStore";
+import { apiBaseUrl } from "$lib/stores/buildStore";
 import { get } from "svelte/store";
 import { fetch } from "@tauri-apps/plugin-http";
 import {
@@ -54,7 +54,7 @@ export const invokeApiRequest = async <T>(
       body: method !== Method.GET ? JSON.stringify(formData) : undefined,
     };
 
-    const url = `${BASE_URL}/api/v${version}-beta${route}`;
+    const url = `${get(apiBaseUrl)}/api/v${version}-beta${route}`;
     const response = await fetch(url, options);
 
     if (!response.ok) await handleApiError(response);

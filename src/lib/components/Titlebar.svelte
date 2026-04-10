@@ -17,7 +17,7 @@
 <!-- Titlebar -->
 <div
   data-tauri-drag-region
-  class="fixed top-0 left-0 right-2 flex h-8 justify-end bg-[var(--background)] select-none gap-2"
+  class="fixed top-0 left-0 right-2 flex h-8 justify-end bg-[var(--background)] select-none gap-2 z-50"
 >
   <div
     on:click={() => appWindow.minimize()}

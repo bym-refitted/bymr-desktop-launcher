@@ -1,13 +1,13 @@
 <script lang="ts">
   import { Select, Checkbox, Label } from "bits-ui";
   import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
-  import Tooltip from "../tooltip/Tooltip.svelte";
   import AlertDialog from "$lib/components/AlertDialog.svelte";
 
   import { flyAndScale } from "$lib/utils";
   import { Status } from "$lib/enums/StatusCodes";
   import { launchSwf } from "$lib/stores/launchStore";
   import { Builds } from "$lib/enums/Builds";
+  import { selectedBuild, localHost, localPort } from "$lib/stores/buildStore";
   import { invokeApiRequest } from "../../../utils/invokeApiRequest";
   import { onMount } from "svelte";
   import { getAvailableLanguages } from "$lib/utils/getAvailableLanguages";
@@ -28,13 +28,14 @@
     validateConfirmPassword,
   } from "./validation";
   import {
-    Package,
     PaperPlaneTilt,
     ArrowCircleLeft,
     Translate,
     WarningDiamond,
     Check,
     CaretUpDown,
+    UsersThree,
+    User,
   } from "phosphor-svelte";
 
   interface FormData {
@@ -90,10 +91,9 @@
   let languages = [];
 
   // Builds
-  $: selectedBuild = Builds.STABLE;
-  const builds = Object.values(Builds).map((build) => ({
-    value: build,
-    label: build.charAt(0).toUpperCase() + build.slice(1).toLowerCase(),
+  const builds = (Object.keys(Builds) as Array<keyof typeof Builds>).map((key) => ({
+    value: Builds[key],
+    label: key.charAt(0).toUpperCase() + key.slice(1).toLowerCase(),
   }));
 
   // Page init load
@@ -178,7 +178,7 @@
 
         // Launch the SWF file
         const launchLanguage = $user.language || language;
-        launchSwf(selectedBuild, launchLanguage, data.token);
+        launchSwf($selectedBuild, launchLanguage, data.token);
       }
     } catch (error) {
       // If user is remembered and there's an error, reset the user state
@@ -264,6 +264,29 @@
   on:submit={handleFormSubmit}
   class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 shadow-lg w-full transition-all duration-300 hover:border-white/20"
 >
+  <div class="flex gap-1 p-1 bg-black/20 rounded-xl mb-6 border border-white/10">
+    {#each builds as build}
+      <button
+        type="button"
+        class={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+          $selectedBuild === build.value
+            ? isRegisterForm
+              ? "bg-primary text-white shadow-md"
+              : "bg-secondary text-white shadow-md"
+            : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+        }`}
+        on:click={() => selectedBuild.set(build.value)}
+      >
+        {#if build.value === Builds.LOCAL}
+          <User size={16} weight="bold" />
+        {:else}
+          <UsersThree size={20} weight="bold" />
+        {/if}
+        {build.label}
+      </button>
+    {/each}
+  </div>
+
   <div class="mb-6 text-center">
     <h2 class="text-2xl font-title text-foreground mb-2">
       {#if $isUserRemembered}
@@ -280,11 +303,11 @@
       {#if $isUserRemembered}
         Click below to jump back into the action
       {:else if isRegisterForm}
-        Join the Backyard Monsters community
+        {$selectedBuild === Builds.LOCAL ? "Registering on your local server" : "Join the Backyard Monsters community"}
       {:else if hasForgotPassword}
         Enter your email to receive a reset link
       {:else}
-        Enter your credentials to continue
+        {$selectedBuild === Builds.LOCAL ? "Connecting to local server" : "Enter your credentials to continue"}
       {/if}
     </p>
   </div>
@@ -391,6 +414,31 @@
     {/if}
   </div>
 
+  {#if $selectedBuild === Builds.LOCAL && (isRegisterForm || hasForgotPassword)}
+    <div class="flex gap-3 mt-4">
+      <div class="flex flex-col gap-1.5 flex-1">
+        <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Host</span>
+        <input
+          type="text"
+          on:input={(e) => localHost.set(e.currentTarget.value || "localhost")}
+          class="w-full bg-white/5 h-10 rounded-lg text-sm px-3 border-2 border-white/10 focus:border-primary focus:outline-none focus:bg-white/10 transition-all duration-200"
+          placeholder="localhost"
+        />
+      </div>
+      <div class="flex flex-col gap-1.5 w-24">
+        <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Port</span>
+        <input
+          type="number"
+          min="1"
+          max="65535"
+          on:input={(e) => localPort.set(Number(e.currentTarget.value) || 3001)}
+          class="w-full bg-white/5 h-10 rounded-lg text-sm px-3 border-2 border-white/10 focus:border-primary focus:outline-none focus:bg-white/10 transition-all duration-200"
+          placeholder="3001"
+        />
+      </div>
+    </div>
+  {/if}
+
   <!-- Settings Section -->
   {#if !isRegisterForm && !hasForgotPassword}
     <div class="mt-6 pt-6 border-t border-white/10">
@@ -436,44 +484,31 @@
             </Select.Content>
           </Select.Root>
         {/if}
-        
-        <Select.Root
-          items={builds}
-          onSelectedChange={(e) => {
-            selectedBuild = e.value;
-          }}
-        >
-          <Select.Trigger
-            class="w-full flex items-center justify-between bg-white/5 border-2 border-white/10 h-11 text-left rounded-lg px-4 focus:outline-none focus:border-secondary hover:bg-white/10 transition-all duration-200"
-            aria-label="Build"
-          >
-            <div class="flex items-center gap-3">
-              <Package size={20} weight="bold" class="text-secondary" />
-              <Select.Value
-                class="text-sm text-foreground"
-                placeholder="Build"
+
+        {#if $selectedBuild === Builds.LOCAL}
+          <div class="flex gap-3">
+            <div class="flex flex-col gap-1.5 flex-1">
+              <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Host</span>
+              <input
+                type="text"
+                on:input={(e) => localHost.set(e.currentTarget.value || "localhost")}
+                class="w-full bg-white/5 h-10 rounded-lg text-sm px-3 border-2 border-white/10 focus:border-secondary focus:outline-none focus:bg-white/10 transition-all duration-200"
+                placeholder="localhost"
               />
             </div>
-            <CaretUpDown size={16} weight="bold" class="text-muted-foreground" />
-          </Select.Trigger>
-          <Select.Content
-            class="w-full rounded-xl border border-white/20 bg-background/95 backdrop-blur-xl px-1 py-3 shadow-2xl"
-            transition={flyAndScale}
-            sideOffset={8}
-          >
-            {#each builds as build}
-              <Select.Item
-                class="data-[highlighted]:bg-secondary/20 flex h-10 w-full select-none items-center rounded-lg py-3 pl-5 pr-1.5 text-sm outline-none transition-all duration-150 cursor-pointer"
-                value={build.value}
-                label={build.label}
-              >
-              {build.label}
-              <Select.ItemIndicator class="ml-auto" asChild={false}
-                ></Select.ItemIndicator>
-              </Select.Item>
-            {/each}
-          </Select.Content>
-        </Select.Root>
+            <div class="flex flex-col gap-1.5 w-24">
+              <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Port</span>
+              <input
+                type="number"
+                min="1"
+                max="65535"
+                on:input={(e) => localPort.set(Number(e.currentTarget.value) || 3001)}
+                class="w-full bg-white/5 h-10 rounded-lg text-sm px-3 border-2 border-white/10 focus:border-secondary focus:outline-none focus:bg-white/10 transition-all duration-200"
+                placeholder="3001"
+              />
+            </div>
+          </div>
+        {/if}
       </div>
 
       {#if !$isUserRemembered}

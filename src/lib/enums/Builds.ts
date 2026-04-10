@@ -1,4 +1,4 @@
 export enum Builds {
-  STABLE = "stable",
+  MULTIPLAYER = "stable",
   LOCAL = "local",
 }
