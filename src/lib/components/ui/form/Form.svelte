@@ -178,7 +178,13 @@
 
         // Launch the SWF file
         const launchLanguage = $user.language || language;
-        launchSwf($selectedBuild, launchLanguage, data.token);
+        
+        const isLocal = $selectedBuild === Builds.LOCAL;
+
+        const host = isLocal ? $localHost : undefined;
+        const port = isLocal ? $localPort : undefined;
+
+        launchSwf($selectedBuild, launchLanguage, data.token, host, port);
       }
     } catch (error) {
       // If user is remembered and there's an error, reset the user state

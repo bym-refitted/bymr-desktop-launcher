@@ -8,9 +8,11 @@ export let launchError = writable({ code: "", show: false });
 export const launchSwf = async (
   buildName: string,
   language: string | unknown = "english",
-  token?: string
+  token?: string,
+  host?: string,
+  port?: number
 ) => {
-  const launchOptions = { buildName, language, token };
+  const launchOptions = { buildName, language, token, host, port };
   //localStorage.setItem("lastLaunch", JSON.stringify(launchOptions));
   isLaunching.set(true);
 

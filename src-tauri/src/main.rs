@@ -67,6 +67,8 @@ fn launch_game(
     build_name: &str,
     language: &str,
     token: Option<&str>,
+    host: Option<&str>,
+    port: Option<u16>,
 ) -> Result<(), String> {
     let (flash_runtime_path, _) = get_platform_flash_runtime(&app, &env::consts::OS)?;
 
@@ -93,6 +95,11 @@ fn launch_game(
     // Append token to the URL if it exists
     if let Some(token) = token {
         swf_url = format!("{}&token={}", swf_url, token);
+    }
+
+    // For local builds, pass the server URL as a FlashVar so the SWF knows where to connect
+    if build_name == "local" {
+        swf_url = format!("{}&serverUrl=http://{}:{}/", swf_url, host.unwrap_or("localhost"), port.unwrap_or(3001));
     }
 
     println!("Opening: {:?}, {:?}", flash_runtime_path, swf_url);
