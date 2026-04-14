@@ -9,10 +9,11 @@ export const launchSwf = async (
   buildName: string,
   language: string | unknown = "english",
   token?: string,
+  gameVersion?: string,
   host?: string,
   port?: number
 ) => {
-  const launchOptions = { buildName, language, token, host, port };
+  const launchOptions = { buildName, language, token, gameVersion, host, port };
   //localStorage.setItem("lastLaunch", JSON.stringify(launchOptions));
   isLaunching.set(true);
 

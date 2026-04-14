@@ -6,6 +6,8 @@
   import { flyAndScale } from "$lib/utils";
   import { Status } from "$lib/enums/StatusCodes";
   import { launchSwf } from "$lib/stores/launchStore";
+  import { currentGameVersion } from "$lib/stores/loadState";
+  import { get } from "svelte/store";
   import { Builds } from "$lib/enums/Builds";
   import { selectedBuild, localHost, localPort } from "$lib/stores/buildStore";
   import { invokeApiRequest } from "../../../utils/invokeApiRequest";
@@ -184,7 +186,7 @@
         const host = isLocal ? $localHost : undefined;
         const port = isLocal ? $localPort : undefined;
 
-        launchSwf($selectedBuild, launchLanguage, data.token, host, port);
+        launchSwf($selectedBuild, launchLanguage, data.token, get(currentGameVersion), host, port);
       }
     } catch (error) {
       // If user is remembered and there's an error, reset the user state

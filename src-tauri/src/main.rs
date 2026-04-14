@@ -67,6 +67,7 @@ fn launch_game(
     build_name: &str,
     language: &str,
     token: Option<&str>,
+    game_version: Option<&str>,
     host: Option<&str>,
     port: Option<u16>,
 ) -> Result<(), String> {
@@ -95,6 +96,11 @@ fn launch_game(
     // Append token to the URL if it exists
     if let Some(token) = token {
         swf_url = format!("{}&token={}", swf_url, token);
+    }
+
+    // Append version for cache-busting
+    if let Some(version) = game_version {
+        swf_url = format!("{}&v={}", swf_url, version);
     }
 
     // For local builds, pass the server URL as a FlashVar so the SWF knows where to connect

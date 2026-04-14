@@ -5,6 +5,8 @@
   import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
   import { WarningDiamond } from "phosphor-svelte";
   import { fly } from "svelte/transition";
+  import { currentGameVersion } from "$lib/stores/loadState";
+  import { get } from "svelte/store";
 </script>
 
 <div class="grid grid-cols-1 gap-x-8 lg:grid-cols-2 lg:grid-rows-[800px]">
@@ -28,7 +30,7 @@
       </p>
       <div class="mt-6">
         <PrimaryButton
-          on:click={() => { launchSwf("pokies") }}
+          on:click={() => { launchSwf("pokies", "english", undefined, get(currentGameVersion)) }}
           buttonText="Play Now"
           width="w-40"
           color="bg-secondary"
