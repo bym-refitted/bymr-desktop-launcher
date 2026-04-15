@@ -82,8 +82,8 @@ fn launch_game(
     }
 
     let swf_filename = match build_name {
-        "stable" => "gameloader".to_string(),
-        _ => format!("bymr-{}", build_name),
+        "stable" => format!("gameloader-{}", game_version.unwrap_or("latest")),
+        name     => format!("bymr-{}", name),
     };
 
     let mut swf_url = format!(
@@ -96,11 +96,6 @@ fn launch_game(
     // Append token to the URL if it exists
     if let Some(token) = token {
         swf_url = format!("{}&token={}", swf_url, token);
-    }
-
-    // Append version for cache-busting
-    if let Some(version) = game_version {
-        swf_url = format!("{}&v={}", swf_url, version);
     }
 
     // For local builds, pass the server URL as a FlashVar so the SWF knows where to connect
