@@ -24,7 +24,7 @@
     on:keydown={() => appWindow.minimize()}
     role="button"
     tabindex="0"
-    class="group inline-flex items-center justify-center w-7 h-7 relative"
+    class="group inline-flex items-center justify-center w-7 h-7 relative cursor-pointer"
     id="titlebar-minimize"
   >
     <div
@@ -37,7 +37,7 @@
     on:keydown={toggleMaximize}
     role="button"
     tabindex="0"
-    class="group inline-flex items-center justify-center w-7 h-7 relative"
+    class="group inline-flex items-center justify-center w-7 h-7 relative cursor-pointer"
     id="titlebar-maximize"
   >
     <div
@@ -51,7 +51,7 @@
     on:keydown={() => appWindow.close()}
     role="button"
     tabindex="0"
-    class="group inline-flex items-center justify-center w-7 h-7 relative"
+    class="group inline-flex items-center justify-center w-7 h-7 relative cursor-pointer"
     id="titlebar-close"
   >
     <div class="absolute inset-0 bg-transparent group-hover:bg-red" ></div>

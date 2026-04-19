@@ -108,25 +108,25 @@
               <RadioGroup.Item
                 id="both"
                 value="both"
-                class="size-5 rounded-[4px] border border-gray-600 bg-gray-800 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                class="size-5 rounded-[4px] border border-gray-600 bg-gray-800 data-[state=checked]:bg-primary data-[state=checked]:border-primary cursor-pointer"
               />
-              <Label.Root for="both" class="pl-3">Both</Label.Root>
+              <Label.Root for="both" class="pl-3 cursor-pointer">Both</Label.Root>
             </div>
             <div class="text-foreground group flex select-none items-center transition-all">
               <RadioGroup.Item
                 id="myattacks"
                 value="myattacks"
-                class="size-5 rounded-[4px] border border-gray-600 bg-gray-800 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                class="size-5 rounded-[4px] border border-gray-600 bg-gray-800 data-[state=checked]:bg-primary data-[state=checked]:border-primary cursor-pointer"
               />
-              <Label.Root for="myattacks" class="pl-3">My Attacks</Label.Root>
+              <Label.Root for="myattacks" class="pl-3 cursor-pointer">My Attacks</Label.Root>
             </div>
             <div class="text-foreground group flex select-none items-center transition-all">
               <RadioGroup.Item
                 id="peopleattackingme"
                 value="peopleattackingme"
-                class="size-5 rounded-[4px] border border-gray-600 bg-gray-800 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                class="size-5 rounded-[4px] border border-gray-600 bg-gray-800 data-[state=checked]:bg-primary data-[state=checked]:border-primary cursor-pointer"
               />
-              <Label.Root for="peopleattackingme" class="pl-3">People Attacking Me</Label.Root>
+              <Label.Root for="peopleattackingme" class="pl-3 cursor-pointer">People Attacking Me</Label.Root>
             </div>
           </RadioGroup.Root>
 

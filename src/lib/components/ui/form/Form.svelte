@@ -250,7 +250,7 @@
 <AlertDialog
   bind:open={isRegistered}
   title="Registered successfully."
-  description="You have successfully registered an account. Please login to continue."
+  description="You have successfully registered an account. Please visit our Discord server to verify your account with us to finish setting up!"
 />
 
 <AlertDialog
@@ -276,7 +276,7 @@
     {#each builds as build}
       <button
         type="button"
-        class={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+        class={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-all duration-200 cursor-pointer ${
           $selectedBuild === build.value
             ? isRegisterForm
               ? "bg-primary text-white shadow-md"
@@ -348,7 +348,7 @@
       <button 
         type="button"
         on:click={() => (hasForgotPassword = false)}
-        class="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-2"
+        class="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-2 cursor-pointer"
       >
         <ArrowCircleLeft size={20} weight="bold" />
         Back to login
@@ -450,7 +450,9 @@
   <!-- Settings Section -->
   {#if !isRegisterForm && !hasForgotPassword}
     <div class="mt-6 pt-6 border-t border-white/10">
-      <p class="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide">Game Settings</p>
+      {#if !$isUserRemembered || $selectedBuild === Builds.LOCAL}
+        <p class="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide">Game Settings</p>
+      {/if}
       <div class="flex flex-col gap-3">
         {#if !$isUserRemembered}
           <Select.Root
@@ -461,7 +463,7 @@
             }}
           >
             <Select.Trigger
-              class="w-full flex items-center justify-between bg-white/5 border-2 border-white/10 h-11 text-left rounded-lg px-4 focus:outline-none focus:border-secondary hover:bg-white/10 transition-all duration-200"
+              class="w-full flex items-center justify-between bg-white/5 border-2 border-white/10 h-11 text-left rounded-lg px-4 focus:outline-none focus:border-secondary hover:bg-white/10 transition-all duration-200 cursor-pointer"
               aria-label="Language"
             >
               <div class="flex items-center gap-3">
@@ -525,7 +527,7 @@
             <Checkbox.Root
               id="remember-me-checkbox"
               aria-labelledby="remember-checkbox"
-              class="peer inline-flex size-5 items-center justify-center rounded border-2 border-white/20 bg-white/5 transition-all duration-150 ease-in-out hover:bg-white/10 active:scale-95 data-[state=checked]:bg-secondary data-[state=checked]:border-secondary"
+              class="peer inline-flex size-5 items-center justify-center rounded border-2 border-white/20 bg-white/5 transition-all duration-150 ease-in-out hover:bg-white/10 active:scale-95 data-[state=checked]:bg-secondary data-[state=checked]:border-secondary cursor-pointer"
               bind:checked={isChecked}
             >
               <Checkbox.Indicator let:isChecked>
@@ -537,14 +539,14 @@
             <Label.Root
               id="remember-me-label"
               for="remember"
-              class="text-sm cursor-pointer select-none"
+              class="text-sm select-none"
             >
               Remember Me
             </Label.Root>
           </div>
           <button
             type="button"
-            class="text-sm text-muted-foreground hover:text-secondary transition-colors underline underline-offset-2"
+            class="text-sm text-muted-foreground hover:text-secondary transition-colors underline underline-offset-2 cursor-pointer"
             on:click={showForgotPassword}
           >
             Forgot password?
@@ -568,7 +570,7 @@
         on:click={() => {
           removeUserFromLocalStorage();
         }}
-        class="w-full h-12 rounded-lg bg-white/5 border-2 border-white/10 font-display uppercase text-sm font-semibold text-muted-foreground hover:bg-white/10 hover:text-foreground hover:border-white/20 transition-all duration-200 active:scale-98"
+        class="w-full h-12 rounded-lg bg-white/5 border-2 border-white/10 font-display uppercase text-sm font-semibold text-muted-foreground hover:bg-white/10 hover:text-foreground hover:border-white/20 transition-all duration-200 active:scale-98 cursor-pointer"
       >
         Logout
       </button>
@@ -584,9 +586,9 @@
         class="text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         {#if isRegisterForm}
-          Already have an account? <span class="text-primary font-semibold underline underline-offset-2">Login here</span>
+          Already have an account? <span class="text-primary font-semibold underline underline-offset-2 cursor-pointer">Login here</span>
         {:else}
-          Don't have an account? <span class="text-secondary font-semibold underline underline-offset-2">Register here</span>
+          Don't have an account? <span class="text-secondary font-semibold underline underline-offset-2 cursor-pointer">Register here</span>
         {/if}
       </button>
     </div>

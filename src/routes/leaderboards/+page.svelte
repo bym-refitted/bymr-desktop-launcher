@@ -34,6 +34,7 @@
   interface UserLeaderboardEntry {
     username: string;
     discord_tag: string;
+    pic_square: string;
     outpost_count: number;
     stronghold_count?: number;
   }
@@ -64,7 +65,7 @@
     .map((w) => ({ value: w.uuid, label: w.name, playerCount: w.playerCount }));
 
   let leaderboardUser: UserLeaderboardEntry[] = [];
-  let imageError = false;
+  let imageErrors = new Set<number>();
 
   const loadFirstWorld = (mapVersion: string) => {
     const first = allWorlds.find((w) => w.map_version === Number(mapVersion));
@@ -149,7 +150,7 @@
           }}
         >
           <Select.Trigger
-            class="focus:outline-secondary flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white min-w-0"
+            class="flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none min-w-0 cursor-pointer"
             aria-label="Map Version"
           >
             <div class="flex items-center min-w-0">
@@ -162,7 +163,7 @@
             <CaretDown size={16} weight="bold" class="text-unselected ml-8 flex-shrink-0" />
           </Select.Trigger>
           <Select.Content
-            class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none"
+            class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none cursor-pointer"
             transition={flyAndScale}
             sideOffset={8}
           >
@@ -191,7 +192,7 @@
           }}
         >
           <Select.Trigger
-            class="focus:outline-secondary flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none focus:bg-transparent focus:text-white min-w-0"
+            class="flex items-center justify-between bg-white/10 h-10 text-left rounded-md px-6 focus:outline-none min-w-0 cursor-pointer"
             aria-label="Worlds"
           >
             <div class="flex items-center min-w-0">
@@ -204,7 +205,7 @@
             <CaretDown size={16} weight="bold" class="text-unselected ml-8 flex-shrink-0" />
           </Select.Trigger>
           <Select.Content
-            class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none"
+            class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none cursor-pointer"
             transition={flyAndScale}
             sideOffset={8}
           >
@@ -283,12 +284,15 @@
                     <td class="px-6 py-4">
                       <div class="flex items-center gap-5">
                         <span class="font-title text-2xl w-8 text-right text-muted-foreground flex-shrink-0">{i + 1}</span>
-                        {#if !imageError}
+                        {#if !imageErrors.has(i)}
                           <img
-                            src={`https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${user.username}&size=50`}
+                            src={user.pic_square}
                             alt={`${user.username}'s avatar`}
                             class="w-14 h-14 rounded-md bg-gray-700 flex-shrink-0"
-                            on:error={() => (imageError = true)}
+                            on:error={() => { 
+                              imageErrors.add(i); 
+                              imageErrors = imageErrors; 
+                              }}
                           />
                         {:else}
                           <div class="w-14 h-14 rounded-md bg-gray-700 flex items-center justify-center flex-shrink-0">
