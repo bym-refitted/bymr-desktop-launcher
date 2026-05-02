@@ -67,7 +67,6 @@ fn launch_game(
     build_name: &str,
     language: &str,
     token: Option<&str>,
-    game_version: Option<&str>,
     host: Option<&str>,
     port: Option<u16>,
 ) -> Result<(), String> {
@@ -82,7 +81,7 @@ fn launch_game(
     }
 
     let swf_filename = match build_name {
-        "stable" => format!("gameloader-{}", game_version.unwrap_or("latest")),
+        "stable" => "gameloader".to_string(),
         name     => format!("bymr-{}", name),
     };
 
