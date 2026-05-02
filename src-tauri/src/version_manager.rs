@@ -18,20 +18,12 @@ pub const RUNTIMES_DIR: &str = "bymr-downloads/runtimes";
 pub struct VersionManifest {
     #[serde(rename = "currentGameVersion")]
     pub current_game_version: String,
-    #[serde(rename = "currentLauncherVersion")]
-    pub current_launcher_version: String,
-    #[serde(rename = "httpsWorked")]
-    pub https_worked: bool,
+    #[serde(rename = "currentAndroidVersion")]
+    pub current_android_version: String,
 }
 
-pub async fn get_server_manifest() -> Result<VersionManifest, networking::FetchError> {
-    fetch_json_with_http_retry(VERSION_MANIFEST_URL)
-        .await
-        .map(|value: (VersionManifest, bool)| {
-            let (mut manifest, https_worked) = value;
-            manifest.https_worked = https_worked;
-            manifest
-        })
+pub async fn get_server_manifest() -> Result<(VersionManifest, bool), networking::FetchError> {
+    fetch_json_with_http_retry(VERSION_MANIFEST_URL).await
 }
 
 pub async fn download_runtime(

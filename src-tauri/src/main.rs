@@ -30,18 +30,17 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
     let message = format!("Platform: {} {}", env::consts::OS, env::consts::ARCH);
     emit_event(&app, "infoLog", message);
 
-    let manifest_result: Result<VersionManifest, _> = get_server_manifest().await;
-    let use_https = match manifest_result {
-        Ok(manifest) => {
+    let use_https = match get_server_manifest().await {
+        Ok((manifest, used_https)) => {
             emit_event(
                 &app,
                 "infoLog",
                 format!(
                     "Connected successfully to the server. \n Current SWF version: {}\n Launcher connected via http{}",
-                    manifest.current_game_version, if manifest.https_worked {"s"} else {""}
+                    manifest.current_game_version, if used_https {"s"} else {""}
                 ),
             );
-            manifest.https_worked
+            used_https
         }
         Err(err) => {
             emit_event(&app, "infoLog", err.to_string());
@@ -122,7 +121,7 @@ fn launch_game(
 #[command]
 async fn get_current_game_version() -> Result<String, String> {
     match get_server_manifest().await {
-        Ok(manifest) => Ok(manifest.current_game_version),
+        Ok((manifest, _)) => Ok(manifest.current_game_version),
         Err(err) => Err(err.to_string()),
     }
 }
