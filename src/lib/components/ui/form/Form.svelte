@@ -172,7 +172,12 @@
 
       if (status === Status.OK && data.token) {
         // Save user details to local storage
-        const userSaveData = { language, token: data.token, userId: data.userId };
+        const userSaveData = {
+          language,
+          token: data.token,
+          userId: data.userId,
+          username: data.username,
+        };
         if (isChecked || $isUserRemembered) saveUserToLocalStorage(userSaveData);
         else user.set(userSaveData);
 

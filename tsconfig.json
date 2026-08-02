@@ -9,10 +9,5 @@
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
 		"checkJs": true
-	},
-	"include": [
-		"src/**/*.d.ts",
-		"src/**/*.ts",
-		"src/**/*.svelte"
-	]
+	}
 }

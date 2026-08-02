@@ -4,9 +4,10 @@ interface User {
   language?: string | unknown;
   token?: string;
   userId?: number;
+  username?: string;
 }
 
-const initialUser: User = { language: "", token: "", userId: 0 };
+const initialUser: User = { language: "", token: "", userId: 0, username: "" };
 
 export const user = writable<User>(initialUser);
 export const isUserRemembered = writable<boolean>(false);
