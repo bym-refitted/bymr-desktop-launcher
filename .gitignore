@@ -17,3 +17,6 @@ flashplayer.*
 .svelte-kit
 .tauri
 vite.config.ts*
+
+# AI Configs
+CLAUDE.md
