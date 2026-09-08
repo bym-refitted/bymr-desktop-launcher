@@ -68,7 +68,7 @@
 <!-- Content -->
 <div class="flex flex-col h-screen">
   <main
-    class="flex-1 overflow-auto bg-background text-foreground flex flex-col antialiased select-none font-sans"
+    class="flex-1 overflow-hidden bg-background text-foreground flex flex-col antialiased select-none font-sans"
   >
     {#if !$hasLoaded}
       <div class="w-full h-full flex justify-center items-center" role="status">
