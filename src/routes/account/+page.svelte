@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { fly } from "svelte/transition";
   import { goto } from "$app/navigation";
-  import { UserCircle, WarningDiamond, SignOut } from "phosphor-svelte";
+  import { UserCircle, WarningDiamond, SignOut, Sparkle } from "phosphor-svelte";
 
   import { Method } from "$lib/enums/Method";
   import { Status } from "$lib/enums/StatusCodes";
@@ -12,6 +12,7 @@
   import AlertDialog from "$lib/components/AlertDialog.svelte";
   import Loader from "$lib/components/Loader.svelte";
   import PrimaryButton from "$lib/components/ui/button/PrimaryButton.svelte";
+  import Switch from "$lib/components/ui/switch/Switch.svelte";
   import { validateUsername } from "$lib/components/ui/form/validation";
   import {
     isUserRemembered,
@@ -20,16 +21,25 @@
     user,
   } from "$lib/stores/userStore";
 
+  interface AccountSettings {
+    shinyLocked: boolean;
+  }
+
   interface Account {
     username: string;
     email: string;
     canChangeUsername: boolean;
     nextChangeAt: string | null;
+    settings: AccountSettings;
   }
 
   interface ChangeUsernameResponse {
     username: string;
     nextChangeAt: string | null;
+  }
+
+  interface UpdateSettingsResponse {
+    settings: AccountSettings;
   }
 
   let account: Account | null = null;
@@ -41,6 +51,10 @@
 
   let errorMessage = "";
   let usernameChanged = false;
+
+  let shinyLocked = false;
+  let isSavingShiny = false;
+  let shinyErrorMessage = "";
 
   $: validationError = validateUsername(username);
   $: isUnchanged = !!account && username === account.username;
@@ -57,6 +71,7 @@
 
       account = data;
       username = data.username;
+      shinyLocked = data.settings?.shinyLocked ?? false;
       user.update((current) => ({ ...current, username: data.username }));
     } catch (error) {
       errorMessage = handleErrorMessage(error);
@@ -102,6 +117,40 @@
       addErrorLog(`Could not change username: ${errorMessage}`);
     } finally {
       isSubmitting = false;
+    }
+  };
+
+  /**
+   * Applies the shiny toggle optimistically, reverting it if the server refuses.
+   *
+   * The switch already shows the new state by the time this runs, so a failure has to put
+   * it back rather than leave the UI claiming something the server did not do.
+   *
+   * account.settings holds the last state the server confirmed, so comparing against it
+   * makes this a no-op for the changes we make ourselves - the initial load and the revert
+   * below both move the switch programmatically and would otherwise call straight back in.
+   */
+  const handleToggleShiny = async (locked: boolean) => {
+    if (!account || isSavingShiny || locked === account.settings.shinyLocked) return;
+
+    isSavingShiny = true;
+    shinyErrorMessage = "";
+
+    try {
+      const { data } = await invokeApiRequest<UpdateSettingsResponse>(
+        "/player/settings",
+        { shinyLocked: locked },
+        Method.POST,
+      );
+
+      shinyLocked = data.settings.shinyLocked;
+      account = { ...account!, settings: data.settings };
+    } catch (error) {
+      shinyLocked = !locked;
+      shinyErrorMessage = handleErrorMessage(error);
+      addErrorLog(`Could not update shiny setting: ${shinyErrorMessage}`);
+    } finally {
+      isSavingShiny = false;
     }
   };
 
@@ -212,6 +261,47 @@
               on:click={handleChangeUsername}
             />
           </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-6 mt-6">
+          <div class="flex items-center gap-3 mb-6">
+            <Sparkle size={26} weight="bold" class="text-primary" />
+            <h2 class="font-display text-xl text-white">Shiny</h2>
+          </div>
+
+          <p class="text-muted-foreground mb-6 leading-relaxed">
+            Turning shiny off hides it completely: the game reads 0 shiny, and nothing can
+            be bought, rushed or unlocked with it. You still earn it as normal - mushrooms
+            and quest rewards keep paying out, you just will not see them land. Your
+            balance comes back in full when you turn shiny back on.
+          </p>
+
+          <div class="flex items-center justify-between gap-6">
+            <span class="text-sm font-medium text-muted-foreground">Turn shiny off</span>
+            <Switch
+              label="Turn shiny off"
+              disabled={isSavingShiny}
+              bind:checked={shinyLocked}
+              onCheckedChange={handleToggleShiny}
+            />
+          </div>
+
+          {#if shinyErrorMessage}
+            <p class="text-red-400 text-sm mt-4">{shinyErrorMessage}</p>
+          {:else if shinyLocked}
+            <div class="flex items-start gap-3 mt-4 text-sm text-muted-foreground">
+              <WarningDiamond
+                size={18}
+                weight="bold"
+                class="text-primary shrink-0 mt-0.5"
+              />
+              <span>
+                Shiny is off, so nothing can be spent. Anything you earn is still saved for
+                when you turn it back on. If the game is already running, it catches up
+                within about 30 seconds.
+              </span>
+            </div>
+          {/if}
         </div>
 
         <div class="bg-gray-800 rounded-lg p-6 mt-6">

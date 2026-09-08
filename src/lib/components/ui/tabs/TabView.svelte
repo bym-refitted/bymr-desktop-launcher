@@ -5,8 +5,8 @@
   import { user } from "$lib/stores/userStore";
 </script>
 
-<div class="flex">
-  <Menubar.Root class="flex flex-col h-screen py-12 pl-3 pr-16 w-[380px]">
+<div class="flex flex-1 min-h-0">
+  <Menubar.Root class="flex flex-col h-full shrink-0 py-12 pl-3 pr-16 w-[380px]">
     <div class="flex-1">
       <a href="/">
         <h1
@@ -41,7 +41,7 @@
       </div>
     {/if}</Menubar.Root
   >
-  <div class="w-full flex flex-col">
+  <div class="w-full flex flex-col overflow-y-auto">
     <slot />
   </div>
 </div>
