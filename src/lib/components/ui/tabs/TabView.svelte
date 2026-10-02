@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Play, Ranking, Sword, Shield, UserCircle } from "phosphor-svelte";
+  import { Play, Ranking, Sword, Shield, UserCircle, UsersThree } from "phosphor-svelte";
   import { Menubar } from "bits-ui";
   import TabItem from "./TabItem.svelte";
   import { user } from "$lib/stores/userStore";
@@ -25,6 +25,7 @@
         <TabItem path="/leaderboards" Icon={Ranking} text="Leaderboards" />
         {#if $user.token}
           <TabItem path="/attacklogs" Icon={Shield} text="Attack Logs" />
+          <TabItem path="/friends" Icon={UsersThree} text="Friends" />
         {/if}
       </div>
     </div>
