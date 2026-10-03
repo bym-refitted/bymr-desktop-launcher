@@ -1,6 +1,6 @@
 {
   "productName": "bymr-launcher",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "build": {
     "beforeBuildCommand": "npm run build",
     "beforeDevCommand": "npm run dev",
