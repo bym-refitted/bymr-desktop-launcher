@@ -27,6 +27,7 @@
         }
       ]
     },
+    "opener:default",
     "process:allow-exit",
     "http:default",
     "process:default"

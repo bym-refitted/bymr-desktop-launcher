@@ -7,6 +7,7 @@
   import { fly } from "svelte/transition";
 
   import AlertDialog from "$lib/components/AlertDialog.svelte";
+  import Loader from "$lib/components/Loader.svelte";
 
   interface AttackLogs {
     attackLogs: AttackLogDetails[];
@@ -29,12 +30,18 @@
 
   let attackLogs: AttackLogDetails[] = [];
   let filterType = "both";
+  let isLoading = true;
 
   let imageError = false;
   let viewAttackLogs = false;
 
   const fetchAttackLogs = async () => {
-    if (!$user.token) return;
+    if (!$user.token) {
+      isLoading = false;
+      return;
+    }
+
+    isLoading = true;
 
     try {
       const { data } = await invokeApiRequest<AttackLogs>(
@@ -43,11 +50,11 @@
         Method.GET,
       );
 
-      if (data.attackLogs && data.attackLogs.length > 0) {
-        attackLogs = data.attackLogs;
-      }
+      attackLogs = data.attackLogs ?? [];
     } catch (err) {
       console.error("Error fetching attack logs:", err);
+    } finally {
+      isLoading = false;
     }
   };
 
@@ -179,7 +186,11 @@
         <div
           class="h-full mt-6 bg-gray-800 p-5 relative flex flex-col overflow-hidden rounded-lg"
         >
-          {#if attackLogs.length > 0}
+          {#if isLoading}
+            <div class="flex justify-center py-12" role="status">
+              <Loader size={2} />
+            </div>
+          {:else if attackLogs.length > 0}
             <div class="overflow-x-auto">
               <table class="w-full text-sm text-left text-gray-300">
                 <thead class="text-xs uppercase bg-gray-700 text-gray-300">

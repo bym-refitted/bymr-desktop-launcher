@@ -13,6 +13,8 @@
     ChartBar,
   } from "phosphor-svelte";
 
+  import Loader from "$lib/components/Loader.svelte";
+
   import outpostIcon from "../../assets/images/icons/outpost_cell.png";
   import resourceIcon from "../../assets/images/icons/resource_cell.png";
   import strongholdIcon from "../../assets/images/icons/stronghold_cell.png";
@@ -65,6 +67,7 @@
     .map((w) => ({ value: w.uuid, label: w.name, playerCount: w.playerCount }));
 
   let leaderboardUser: UserLeaderboardEntry[] = [];
+  let isLoading = true;
   let imageErrors = new Set<number>();
 
   const loadFirstWorld = (mapVersion: string) => {
@@ -77,6 +80,7 @@
       worldName = "World";
       worldUuid = "";
       leaderboardUser = [];
+      isLoading = false;
     }
   };
 
@@ -91,11 +95,14 @@
       loadFirstWorld(selectedMapVersion);
     } catch (err) {
       console.error("Error fetching available worlds");
+      isLoading = false;
     }
   });
 
   const fetchLeaderboards = async (worldId: string) => {
     if (!worldId) return;
+
+    isLoading = true;
 
     try {
       const { data } = await invokeApiRequest<Leaderboard>(
@@ -104,9 +111,11 @@
         Method.GET,
       );
 
-      leaderboardUser = data.leaderboard;
+      leaderboardUser = data.leaderboard ?? [];
     } catch (err) {
       console.error("Error fetching leaderboard data:", err);
+    } finally {
+      isLoading = false;
     }
   };
 </script>
@@ -276,7 +285,11 @@
           </p>
         </div>
 
-        {#if leaderboardUser.length === 0}
+        {#if isLoading}
+          <div class="flex justify-center items-center py-12" role="status">
+            <Loader size={2} />
+          </div>
+        {:else if leaderboardUser.length === 0}
           <div class="flex justify-center items-center py-12">
             <p class="text-muted-foreground">
               No leaderboard data found for this world

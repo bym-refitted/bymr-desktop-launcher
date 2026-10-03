@@ -2,6 +2,7 @@
   import { SketchLogo } from "phosphor-svelte";
 
   import { Tooltip } from "bits-ui";
+  import { openUrl } from "@tauri-apps/plugin-opener";
   import type { Component } from "svelte";
   import type { IconComponentProps } from "phosphor-svelte/lib/shared";
 
@@ -16,7 +17,7 @@
 
 <Tooltip.Root openDelay={0}>
   <Tooltip.Trigger>
-    <a href={url} target="_tauri">
+    <a href={url} on:click|preventDefault={() => openUrl(url)}>
       <svelte:component this={Icon} weight="bold" size="30" class={style} />
     </a>
   </Tooltip.Trigger>

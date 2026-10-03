@@ -15,8 +15,9 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@tauri-apps/api": "2.10.1",
+    "@tauri-apps/api": "2.12.1",
     "@tauri-apps/plugin-http": "2.5.7",
+    "@tauri-apps/plugin-opener": "2.7.0",
     "@tauri-apps/plugin-os": "^2.3.2",
     "@tauri-apps/plugin-process": "2.3.1",
     "@tauri-apps/plugin-updater": "2.10.0",
@@ -31,7 +32,7 @@
     "@sveltejs/kit": "2.56.1",
     "@sveltejs/vite-plugin-svelte": "7.0.0",
     "@tailwindcss/vite": "^4.2.2",
-    "@tauri-apps/cli": "2.10.1",
+    "@tauri-apps/cli": "2.12.1",
     "@types/node": "^25.5.2",
     "phosphor-svelte": "3.1.0",
     "prettier": "^3.9.9",

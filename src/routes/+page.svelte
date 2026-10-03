@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { openUrl } from "@tauri-apps/plugin-opener";
+
   import { launchError } from "$lib/stores/launchStore";
   import AlertDialog from "$lib/components/AlertDialog.svelte";
   import Form from "$lib/components/ui/form/Form.svelte";
@@ -10,6 +12,8 @@
     GameController,
   } from "phosphor-svelte";
   import { fade, fly } from "svelte/transition";
+
+  const DISCORD_URL = "https://discord.gg/bymrefitted";
 </script>
 
 <div
@@ -76,8 +80,8 @@
             </h3>
             <p class="text-lg text-muted-foreground leading-relaxed mb-2">
               Visit our <a
-                href="https://discord.gg/bymrefitted"
-                target="_blank"
+                href={DISCORD_URL}
+                on:click|preventDefault={() => openUrl(DISCORD_URL)}
                 class="text-secondary hover:underline">Discord server</a
               > to verify your account and play on the server. This is to help us
               reduce ban evasion, bot accounts and maintain a healthy community.
