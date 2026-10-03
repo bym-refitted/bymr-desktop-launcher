@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { fly } from "svelte/transition";
   import {
+    Gift,
     UsersThree,
     MagnifyingGlass,
     UserPlus,
@@ -23,7 +24,6 @@
   import Loader from "$lib/components/Loader.svelte";
   import PlayerRow from "$lib/components/friends/PlayerRow.svelte";
 
-
   interface FriendPlayer {
     user_id: number;
     username: string;
@@ -34,6 +34,7 @@
 
   interface FriendEntry extends FriendPlayer {
     since: string | null;
+    gift_ready_at: number | null;
   }
 
   interface RequestEntry extends FriendPlayer {
@@ -58,6 +59,7 @@
 
   const SEARCH_DEBOUNCE_MS = 300;
   const SEARCH_MIN_LENGTH = 2;
+  const GIFT_COOLDOWN_SECONDS = 24 * 60 * 60;
 
   let activeTab: FriendsTab = FriendsTab.FRIENDS;
 
@@ -205,6 +207,42 @@
     }
   };
 
+  /**
+   * Sends a mystery sack, then starts the friend's cooldown locally so the button
+   * settles without waiting for a refetch.
+   */
+  const sendGift = async (friend: FriendEntry) => {
+    setBusy(friend.user_id, true);
+
+    try {
+      await invokeApiRequest("/gifts/send", { userid: friend.user_id }, Method.POST);
+
+      const readyAt = Math.floor(Date.now() / 1000) + GIFT_COOLDOWN_SECONDS;
+
+      friends = friends.map((entry) =>
+        entry.user_id === friend.user_id ? { ...entry, gift_ready_at: readyAt } : entry
+      );
+    } catch (error) {
+      fail(error, `Could not send ${friend.username} a gift`);
+    } finally {
+      setBusy(friend.user_id, false);
+    }
+  };
+
+  /**
+   * How long until a gift can be sent again, for the button's label.
+   */
+  const giftReadyIn = (readyAt: number | null) => {
+    if (!readyAt) return "";
+
+    const minutes = Math.ceil((readyAt - Date.now() / 1000) / 60);
+
+    if (minutes <= 0) return "";
+    if (minutes < 60) return `${minutes}m`;
+
+    return `${Math.ceil(minutes / 60)}h`;
+  };
+
   const askToRemove = (player: FriendPlayer) => {
     pendingRemoval = player;
     confirmOpen = true;
@@ -240,9 +278,9 @@
           </p>
         </div>
       {:else}
-        <div class="flex flex-row gap-2 text-sm font-display">
+        <div class="flex flex-row gap-2 text-sm font-display overflow-x-auto">
           <button
-            class="px-4 py-2 rounded-md transition-colors cursor-pointer {activeTab === FriendsTab.FRIENDS
+            class="shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 rounded-md transition-colors cursor-pointer {activeTab === FriendsTab.FRIENDS
               ? 'bg-white/10 text-primary'
               : 'text-unselected hover:bg-white/5'}"
             on:click={() => (activeTab = FriendsTab.FRIENDS)}
@@ -250,7 +288,7 @@
             Friends ({friends.length})
           </button>
           <button
-            class="px-4 py-2 rounded-md transition-colors cursor-pointer {activeTab === FriendsTab.REQUESTS
+            class="shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 rounded-md transition-colors cursor-pointer {activeTab === FriendsTab.REQUESTS
               ? 'bg-white/10 text-primary'
               : 'text-unselected hover:bg-white/5'}"
             on:click={() => (activeTab = FriendsTab.REQUESTS)}
@@ -260,7 +298,7 @@
             {/if}
           </button>
           <button
-            class="px-4 py-2 rounded-md transition-colors cursor-pointer {activeTab === FriendsTab.FIND
+            class="shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 rounded-md transition-colors cursor-pointer {activeTab === FriendsTab.FIND
               ? 'bg-white/10 text-primary'
               : 'text-unselected hover:bg-white/5'}"
             on:click={() => (activeTab = FriendsTab.FIND)}
@@ -291,6 +329,25 @@
                   online={friend.online}
                   note={friend.online ? "Online now" : ""}
                 >
+                  {#if giftReadyIn(friend.gift_ready_at)}
+                    <span
+                      class="flex items-center gap-2 px-3 py-2 text-xs text-white/40"
+                      title="One gift per friend each day"
+                    >
+                      <Gift size={16} weight="bold" />
+                      {giftReadyIn(friend.gift_ready_at)}
+                    </span>
+                  {:else}
+                    <button
+                      class="flex items-center gap-2 px-3 py-2 rounded-md text-xs bg-white/10 text-white hover:bg-white/20 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      disabled={isBusy(friend.user_id)}
+                      on:click={() => sendGift(friend)}
+                    >
+                      <Gift size={16} weight="bold" />
+                      Gift
+                    </button>
+                  {/if}
+
                   <button
                     class="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-white/70 hover:text-red hover:bg-white/5 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                     disabled={isBusy(friend.user_id)}
@@ -302,7 +359,7 @@
                 </PlayerRow>
               {/each}
             {:else}
-              <div class="flex flex-col items-center justify-center py-12 text-center lg:px-20">
+              <div class="flex flex-col items-center justify-center px-6 py-12 text-center lg:px-20">
                 <p class="font-display text-white text-xl mb-2">No friends yet</p>
                 <p class="text-white/60 max-w-md mx-auto">
                   Head to Find Players to search for someone by name and send them a request.
@@ -311,7 +368,7 @@
             {/if}
           {:else if activeTab === FriendsTab.REQUESTS}
             {#if incoming.length === 0 && outgoing.length === 0}
-              <div class="flex flex-col items-center justify-center py-12 text-center lg:px-20">
+              <div class="flex flex-col items-center justify-center px-6 py-12 text-center lg:px-20">
                 <p class="font-display text-white text-xl mb-2">Nothing waiting</p>
                 <p class="text-white/60 max-w-md mx-auto">
                   Friend requests you send or receive will show up here.
@@ -437,14 +494,14 @@
                 </PlayerRow>
               {/each}
             {:else if hasSearched}
-              <div class="flex flex-col items-center justify-center py-12 text-center lg:px-20">
+              <div class="flex flex-col items-center justify-center px-6 py-12 text-center lg:px-20">
                 <p class="font-display text-white text-xl mb-2">No players found</p>
                 <p class="text-white/60 max-w-md mx-auto">
                   Nobody matched "{searchTerm}". Check the spelling, or try part of the name.
                 </p>
               </div>
             {:else}
-              <div class="flex flex-col items-center justify-center py-12 text-center lg:px-20">
+              <div class="flex flex-col items-center justify-center px-6 py-12 text-center lg:px-20">
                 <p class="font-display text-white text-xl mb-2">Find your friends</p>
                 <p class="text-white/60 max-w-md mx-auto">
                   Search for a player by name to send them a friend request.
