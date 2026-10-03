@@ -16,10 +16,10 @@
   import { validateUsername } from "$lib/components/ui/form/validation";
   import {
     isUserRemembered,
-    removeUserFromLocalStorage,
     saveUserToLocalStorage,
     user,
   } from "$lib/stores/userStore";
+  import { signOut } from "$lib/utils/session";
 
   interface AccountSettings {
     shinyLocked: boolean;
@@ -160,8 +160,8 @@
     return new Date(nextChangeAt).toLocaleDateString(undefined, options);
   }
 
-  const handleLogout = () => {
-    removeUserFromLocalStorage();
+  const handleLogout = async () => {
+    await signOut();
     goto("/");
   };
 

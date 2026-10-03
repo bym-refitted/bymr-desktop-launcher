@@ -23,6 +23,10 @@
   import Navbar from "$lib/components/Navbar.svelte";
   import Loader from "$lib/components/Loader.svelte";
   import { Platform } from "$lib/enums/Platform";
+  import AlertDialog from "$lib/components/AlertDialog.svelte";
+  import { WarningDiamond } from "phosphor-svelte";
+  import { sessionExpired } from "$lib/stores/sessionStore";
+  import { validateSession } from "$lib/utils/session";
 
   let launcherVersion = "0.0.0";
 
@@ -54,6 +58,8 @@
       launcherVersion = launcherVersionManifest;
       currentGameVersion.set(currentGameVersionManifest);
 
+      await validateSession();
+
       addSuccessLog(`Launcher initialized! 🚀`);
     } catch (error) {
       addErrorLog(`Error during launcher initialization: ${error}`);
@@ -62,6 +68,13 @@
     }
   };
 </script>
+
+<AlertDialog
+  bind:open={$sessionExpired}
+  title="Session Expired"
+  error="Your saved session has expired. Please login again to continue."
+  Icon={WarningDiamond}
+/>
 
 <!-- Custom Titlebar -->
 <Titlebar />

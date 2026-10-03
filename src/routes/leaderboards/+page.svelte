@@ -205,7 +205,7 @@
             <CaretDown size={16} weight="bold" class="text-unselected ml-8 flex-shrink-0" />
           </Select.Trigger>
           <Select.Content
-            class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none cursor-pointer"
+            class="w-full max-h-72 overflow-y-auto rounded-xl border border-white/10 bg-background px-1 py-3 outline-none cursor-pointer"
             transition={flyAndScale}
             sideOffset={8}
           >

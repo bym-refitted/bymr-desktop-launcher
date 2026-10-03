@@ -17,10 +17,11 @@
   import {
     isUserRemembered,
     loadUserFromLocalStorage,
-    removeUserFromLocalStorage,
     saveUserToLocalStorage,
     user,
   } from "$lib/stores/userStore";
+  import { beginSession, sessionExpired } from "$lib/stores/sessionStore";
+  import { signOut } from "$lib/utils/session";
   import {
     validateUsername,
     validateEmail,
@@ -60,7 +61,6 @@
   let hasForgotPassword = false;
   let isButtonDisabled = false;
   let emailSent = false;
-  let sessionExpired = false;
 
   // Form focus
   let focusStates = {
@@ -181,6 +181,8 @@
         if (isChecked || $isUserRemembered) saveUserToLocalStorage(userSaveData);
         else user.set(userSaveData);
 
+        beginSession();
+
         // Launch the SWF file
         const launchLanguage = $user.language || language;
         
@@ -192,12 +194,8 @@
         launchSwf($selectedBuild, launchLanguage, data.token, host, port);
       }
     } catch (error) {
-      // If user is remembered and there's an error, reset the user state
-      if ($isUserRemembered) {
-        removeUserFromLocalStorage();
-        sessionExpired = true;
-        return;
-      }
+      // A rejected session has already been cleared, and the layout says so on its own.
+      if ($sessionExpired) return;
       
       errorMessage = handleErrorMessage(error);
       addErrorLog(`Error during authentication: ${error.message}`);
@@ -242,13 +240,6 @@
     }
   })();
 </script>
-
-<AlertDialog
-  bind:open={sessionExpired}
-  title="Session Expired"
-  error="Your saved session has expired. Please login again to continue."
-  Icon={WarningDiamond}
-/>
 
 <AlertDialog
   bind:open={isRegistered}
@@ -570,9 +561,7 @@
     {#if $isUserRemembered}
       <button
         type="button"
-        on:click={() => {
-          removeUserFromLocalStorage();
-        }}
+        on:click={signOut}
         class="w-full h-12 rounded-lg bg-white/5 border-2 border-white/10 font-display uppercase text-sm font-semibold text-muted-foreground hover:bg-white/10 hover:text-foreground hover:border-white/20 transition-all duration-200 active:scale-98 cursor-pointer"
       >
         Logout

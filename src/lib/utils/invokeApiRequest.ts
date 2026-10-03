@@ -8,6 +8,8 @@ import {
   connectErrorMessage,
   handleErrorMessage,
 } from "$lib/errors/errorMessages";
+import { ApiError, isSessionError } from "$lib/errors/ApiError";
+import { endSession } from "$lib/stores/sessionStore";
 
 /**
  * Represents a generic API response.
@@ -27,19 +29,28 @@ interface ErrorResponse {
 }
 
 /**
+ * Options for a single request.
+ */
+interface RequestOptions {
+  timeoutMs?: number;
+}
+
+/**
  * Makes an API request to the specified route with the given form data and method.
  *
  * @template T - The type of the data expected in the response.
  * @param {string} route - The API route to request.
  * @param {object} [formData={}] - The form data to send with the request.
  * @param {string} [method=Method.POST] - The HTTP method to use for the request.
+ * @param {RequestOptions} [options={}] - Per request options.
  * @returns {Promise<ApiResponse<T>>} - A promise that resolves to the API response.
  * @throws {Error} - Throws an error if the request fails or the response is not ok.
  */
 export const invokeApiRequest = async <T>(
   route: string,
   formData = {},
-  method: Method = Method.POST
+  method: Method = Method.POST,
+  { timeoutMs }: RequestOptions = {}
 ): Promise<ApiResponse<T>> => {
   try {
     const version = get(currentGameVersion);
@@ -52,6 +63,7 @@ export const invokeApiRequest = async <T>(
       method,
       headers,
       body: method !== Method.GET ? JSON.stringify(formData) : undefined,
+      signal: timeoutMs ? AbortSignal.timeout(timeoutMs) : undefined,
     };
 
     const url = `${get(apiBaseUrl)}/api/v${version}-beta${route}`;
@@ -62,6 +74,10 @@ export const invokeApiRequest = async <T>(
     const data = await response.json();
     return { status: response.status, data };
   } catch (error) {
+    if (isSessionError(error)) endSession(true);
+
+    if (error instanceof ApiError) throw error;
+
     throw new Error(handleErrorMessage(error));
   }
 };
@@ -71,15 +87,17 @@ export const invokeApiRequest = async <T>(
  *
  * @param {Response} response - The fetch Response object to process
  * @returns {Promise<never>} always throws an error
- * @throws Error with an appropriate error message
+ * @throws {ApiError} Carries the status, so callers can tell a dead session from a dead network.
  */
 const handleApiError = async (response: Response): Promise<never> => {
   let errorMessage = connectErrorMessage;
+  let errorCode: string | undefined;
 
   try {
     const errorResponse: ErrorResponse = await response.json();
     errorMessage = handleErrorMessage(errorResponse.error);
+    errorCode = errorResponse.code;
   } catch {}
 
-  throw new Error(errorMessage);
+  throw new ApiError(errorMessage, response.status, errorCode);
 };
