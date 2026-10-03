@@ -29,9 +29,10 @@ const REQUEST_TIMEOUT_MS = 5000;
  */
 const hasExpired = (token: string): boolean => {
   try {
-    const [, payload] = token.split(".");
+    const [_, payload] = token.split(".");
+    const text = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
 
-    return JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/"))).exp * 1000 <= Date.now();
+    return JSON.parse(text).exp * 1000 <= Date.now();
   } catch {
     return false;
   }
