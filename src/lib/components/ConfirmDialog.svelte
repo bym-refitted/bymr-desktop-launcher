@@ -34,7 +34,12 @@
     <DialogHeader class="text-left">
       <DialogTitle class="font-display text-2xl select-none">
         <div class="flex flex-row">
-          <svelte:component this={Icon} weight="bold" size="30" class="mr-3 text-primary" />
+          <svelte:component
+            this={Icon}
+            weight="bold"
+            size="30"
+            class="mr-3 text-primary"
+          />
           {title}
         </div>
       </DialogTitle>
@@ -44,7 +49,11 @@
     </DialogHeader>
     <DialogFooter>
       <div class="flex justify-end gap-2">
-        <PrimaryButton buttonText={cancelText} color="bg-btn-dark" on:click={() => (open = false)} />
+        <PrimaryButton
+          buttonText={cancelText}
+          color="bg-btn-dark"
+          on:click={() => (open = false)}
+        />
         <PrimaryButton buttonText={confirmText} on:click={confirm} />
       </div>
     </DialogFooter>

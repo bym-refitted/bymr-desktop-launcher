@@ -13,9 +13,9 @@
     ChartBar,
   } from "phosphor-svelte";
 
-  import outpostIcon from '../../assets/images/icons/outpost_cell.png';
-  import resourceIcon from '../../assets/images/icons/resource_cell.png';
-  import strongholdIcon from '../../assets/images/icons/stronghold_cell.png';
+  import outpostIcon from "../../assets/images/icons/outpost_cell.png";
+  import resourceIcon from "../../assets/images/icons/resource_cell.png";
+  import strongholdIcon from "../../assets/images/icons/stronghold_cell.png";
 
   interface WorldDetails {
     uuid: string;
@@ -50,13 +50,13 @@
     playerCount?: number;
   }
 
-  let selectedMapVersion = '2';
-  let worldName = 'World';
-  let worldUuid = '';
+  let selectedMapVersion = "2";
+  let worldName = "World";
+  let worldUuid = "";
 
   const mapVersions: SelectItem[] = [
-    { value: '2', label: 'Map Room 2' },
-    { value: '3', label: 'Map Room 3' },
+    { value: "2", label: "Map Room 2" },
+    { value: "3", label: "Map Room 3" },
   ];
 
   let allWorlds: WorldDetails[] = [];
@@ -74,8 +74,8 @@
       worldUuid = first.uuid;
       fetchLeaderboards(first.uuid);
     } else {
-      worldName = 'World';
-      worldUuid = '';
+      worldName = "World";
+      worldUuid = "";
       leaderboardUser = [];
     }
   };
@@ -85,7 +85,7 @@
       const { data } = await invokeApiRequest<Worlds>(
         "/worlds",
         null,
-        Method.GET
+        Method.GET,
       );
       allWorlds = data.worlds ?? [];
       loadFirstWorld(selectedMapVersion);
@@ -101,7 +101,7 @@
       const { data } = await invokeApiRequest<Leaderboard>(
         `/leaderboards?worldid=${worldId}&mapversion=${selectedMapVersion}`,
         null,
-        Method.GET
+        Method.GET,
       );
 
       leaderboardUser = data.leaderboard;
@@ -154,13 +154,23 @@
             aria-label="Map Version"
           >
             <div class="flex items-center min-w-0">
-              <MapTrifold size={20} weight="bold" class="text-primary mr-3 flex-shrink-0" />
+              <MapTrifold
+                size={20}
+                weight="bold"
+                class="text-primary mr-3 flex-shrink-0"
+              />
               <Select.Value
                 class="text-md placeholder-unselected text-unselected truncate"
-                placeholder={mapVersions.find((v) => v.value === selectedMapVersion)?.label}
+                placeholder={mapVersions.find(
+                  (v) => v.value === selectedMapVersion,
+                )?.label}
               />
             </div>
-            <CaretDown size={16} weight="bold" class="text-unselected ml-8 flex-shrink-0" />
+            <CaretDown
+              size={16}
+              weight="bold"
+              class="text-unselected ml-8 flex-shrink-0"
+            />
           </Select.Trigger>
           <Select.Content
             class="w-full rounded-xl border border-white/10 bg-background px-1 py-3 outline-none cursor-pointer"
@@ -196,13 +206,21 @@
             aria-label="Worlds"
           >
             <div class="flex items-center min-w-0">
-              <Hexagon size={20} weight="bold" class="text-primary mr-3 flex-shrink-0" />
+              <Hexagon
+                size={20}
+                weight="bold"
+                class="text-primary mr-3 flex-shrink-0"
+              />
               <Select.Value
                 class="text-md placeholder-unselected text-unselected truncate"
                 placeholder={worldName}
               />
             </div>
-            <CaretDown size={16} weight="bold" class="text-unselected ml-8 flex-shrink-0" />
+            <CaretDown
+              size={16}
+              weight="bold"
+              class="text-unselected ml-8 flex-shrink-0"
+            />
           </Select.Trigger>
           <Select.Content
             class="w-full max-h-72 overflow-y-auto rounded-xl border border-white/10 bg-background px-1 py-3 outline-none cursor-pointer"
@@ -260,7 +278,9 @@
 
         {#if leaderboardUser.length === 0}
           <div class="flex justify-center items-center py-12">
-            <p class="text-muted-foreground">No leaderboard data found for this world</p>
+            <p class="text-muted-foreground">
+              No leaderboard data found for this world
+            </p>
           </div>
         {:else}
           <div class="overflow-x-auto">
@@ -268,48 +288,93 @@
               <thead class="bg-white/5 border-b border-gray-700">
                 <tr>
                   <th class="text-left px-6 py-3">
-                    <span class="font-title text-muted-foreground text-xl pl-[3.25rem]">Player</span>
+                    <span
+                      class="font-title text-muted-foreground text-xl pl-[3.25rem]"
+                      >Player</span
+                    >
                   </th>
-                  {#if selectedMapVersion === '3'}
-                    <th class="px-6 py-3 w-28 min-w-[7rem] align-middle"><img src={strongholdIcon} alt="Strongholds" class="w-16 h-16 mx-auto flex-shrink-0" /></th>
-                    <th class="px-6 py-3 w-28 min-w-[7rem] align-middle"><img src={resourceIcon} alt="Resource Outposts" class="w-16 h-16 mx-auto flex-shrink-0" /></th>
+                  {#if selectedMapVersion === "3"}
+                    <th class="px-6 py-3 w-28 min-w-[7rem] align-middle"
+                      ><img
+                        src={strongholdIcon}
+                        alt="Strongholds"
+                        class="w-16 h-16 mx-auto flex-shrink-0"
+                      /></th
+                    >
+                    <th class="px-6 py-3 w-28 min-w-[7rem] align-middle"
+                      ><img
+                        src={resourceIcon}
+                        alt="Resource Outposts"
+                        class="w-16 h-16 mx-auto flex-shrink-0"
+                      /></th
+                    >
                   {:else}
-                    <th class="px-6 py-3 w-28 min-w-[7rem] align-middle"><img src={outpostIcon} alt="Outposts" class="w-16 h-16 mx-auto flex-shrink-0" /></th>
+                    <th class="px-6 py-3 w-28 min-w-[7rem] align-middle"
+                      ><img
+                        src={outpostIcon}
+                        alt="Outposts"
+                        class="w-16 h-16 mx-auto flex-shrink-0"
+                      /></th
+                    >
                   {/if}
                 </tr>
               </thead>
               <tbody>
                 {#each leaderboardUser as user, i}
-                  <tr class="border-b border-gray-700/50 last:border-0 {i < 3 ? 'border-l-2 border-l-primary' : ''}">
+                  <tr
+                    class="border-b border-gray-700/50 last:border-0 {i < 3
+                      ? 'border-l-2 border-l-primary'
+                      : ''}"
+                  >
                     <td class="px-6 py-4">
                       <div class="flex items-center gap-5">
-                        <span class="font-title text-2xl w-8 text-right text-muted-foreground flex-shrink-0">{i + 1}</span>
+                        <span
+                          class="font-title text-2xl w-8 text-right text-muted-foreground flex-shrink-0"
+                          >{i + 1}</span
+                        >
                         {#if !imageErrors.has(i)}
                           <img
                             src={user.pic_square}
                             alt={`${user.username}'s avatar`}
                             class="w-14 h-14 rounded-md bg-gray-700 flex-shrink-0"
-                            on:error={() => { 
-                              imageErrors.add(i); 
-                              imageErrors = imageErrors; 
-                              }}
+                            on:error={() => {
+                              imageErrors.add(i);
+                              imageErrors = imageErrors;
+                            }}
                           />
                         {:else}
-                          <div class="w-14 h-14 rounded-md bg-gray-700 flex items-center justify-center flex-shrink-0">
+                          <div
+                            class="w-14 h-14 rounded-md bg-gray-700 flex items-center justify-center flex-shrink-0"
+                          >
                             <ImageBroken size={24} class="text-white/60" />
                           </div>
                         {/if}
                         <div>
-                          <p class="font-display text-white text-lg lg:text-xl leading-tight">{user.username}</p>
-                          <p class="text-sm text-primary">@{user.discord_tag}</p>
+                          <p
+                            class="font-display text-white text-lg lg:text-xl leading-tight"
+                          >
+                            {user.username}
+                          </p>
+                          <p class="text-sm text-primary">
+                            @{user.discord_tag}
+                          </p>
                         </div>
                       </div>
                     </td>
-                    {#if selectedMapVersion === '3'}
-                      <td class="px-6 py-4 text-center font-display text-white font-bold text-xl lg:text-2xl">{user.stronghold_count}</td>
-                      <td class="px-6 py-4 text-center font-display text-white font-bold text-xl lg:text-2xl">{user.outpost_count}</td>
+                    {#if selectedMapVersion === "3"}
+                      <td
+                        class="px-6 py-4 text-center font-display text-white font-bold text-xl lg:text-2xl"
+                        >{user.stronghold_count}</td
+                      >
+                      <td
+                        class="px-6 py-4 text-center font-display text-white font-bold text-xl lg:text-2xl"
+                        >{user.outpost_count}</td
+                      >
                     {:else}
-                      <td class="px-6 py-4 text-center font-display text-white font-bold text-xl lg:text-2xl">{user.outpost_count}</td>
+                      <td
+                        class="px-6 py-4 text-center font-display text-white font-bold text-xl lg:text-2xl"
+                        >{user.outpost_count}</td
+                      >
                     {/if}
                   </tr>
                 {/each}

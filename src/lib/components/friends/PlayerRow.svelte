@@ -24,7 +24,9 @@
         on:error={() => (imageFailed = true)}
       />
     {:else}
-      <div class="w-11 h-11 rounded-[4px] bg-gray-600 flex items-center justify-center">
+      <div
+        class="w-11 h-11 rounded-[4px] bg-gray-600 flex items-center justify-center"
+      >
         <ImageBroken size={18} />
       </div>
     {/if}

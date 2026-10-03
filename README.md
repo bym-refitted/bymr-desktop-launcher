@@ -15,6 +15,7 @@ A desktop launcher for Windows, Mac & Linux which utilises the efficiency of Rus
 <br />
 
 # MacOS 🍎
+
 1. Manually download and install Flash from our website on [macOS](https://cdn.bymrefitted.com/runtimes/flashplayer.dmg).
 2. Move the installed app to your Applications folder.
 3. When running the launcher for the first time, you may need to click Open Anyway in **Settings ⟶ Privacy & Security.**
@@ -22,7 +23,9 @@ A desktop launcher for Windows, Mac & Linux which utilises the efficiency of Rus
 <br />
 
 # Linux 🐧
+
 Ubuntu/Debian:
+
 ```bash
 # Install runtime dependencies
 # Note: package names with the t64 suffix are Ubuntu 24.04+ only
@@ -37,17 +40,21 @@ chmod +x bymr-launcher_0.3.8_amd64.AppImage
 # Run the launcher
 ./bymr-launcher_0.3.8_amd64.AppImage
 ```
+
 Fedora/RHEL/CentOS:
+
 ```bash
 sudo dnf install -y nss atk libXScrnSaver gtk3 alsa-lib gtk2 dbus-glib
 ```
 
 Arch/Manjaro:
+
 ```bash
 sudo pacman -Sy --noconfirm nss at-spi2-atk libxss gtk3 alsa-lib gtk2 dbus-glib
 ```
 
 SteamOS/Steam Deck:
+
 ```bash
 # Make filesystem writable
 sudo steamos-readonly disable
@@ -60,6 +67,7 @@ sudo pacman-key --populate holo
 # Install dependencies
 sudo pacman -Sy --noconfirm nss at-spi2-atk libxss gtk3 alsa-lib gtk2 dbus-glib
 ```
+
 For additional troubleshooting steps on Linux visit our [troubleshooting page](https://github.com/bym-refitted/bymr-desktop-launcher/wiki/Linux-Troubleshooting)
 
 <br />
@@ -70,12 +78,12 @@ For additional troubleshooting steps on Linux visit our [troubleshooting page](h
 
 Before getting started, ensure you have the following components installed and properly configured:
 
-| Component | Description | Installation Link |
-|-----------|-------------|-------------------|
-| **Rust** | The Rust programming language | [Install Rust](https://www.rust-lang.org/tools/install) |
-| **Cargo** | Rust's package manager | [Cargo Registry](https://crates.io/) |
-| **MSVC Toolchain** | Microsoft Visual C++ build tools | [Download MSVC](https://visualstudio.microsoft.com/vs/features/cplusplus/) |
-| **Node.js & NPM** | JavaScript runtime and package manager | [Install Node.js](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) |
+| Component          | Description                            | Installation Link                                                                    |
+| ------------------ | -------------------------------------- | ------------------------------------------------------------------------------------ |
+| **Rust**           | The Rust programming language          | [Install Rust](https://www.rust-lang.org/tools/install)                              |
+| **Cargo**          | Rust's package manager                 | [Cargo Registry](https://crates.io/)                                                 |
+| **MSVC Toolchain** | Microsoft Visual C++ build tools       | [Download MSVC](https://visualstudio.microsoft.com/vs/features/cplusplus/)           |
+| **Node.js & NPM**  | JavaScript runtime and package manager | [Install Node.js](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) |
 
 <br />
 
@@ -168,6 +176,7 @@ npm run tauri build -- --bundles deb,rpm,appimage
 ```
 
 The script will:
+
 1. Bump the version in `Cargo.toml` and `tauri.conf.json`
 2. Commit and tag the release (e.g. `v0.3.8`)
 3. Push the commit and tag to trigger GitHub Actions, which builds installers for Windows, macOS, and Linux

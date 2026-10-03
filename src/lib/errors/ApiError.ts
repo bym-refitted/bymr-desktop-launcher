@@ -22,4 +22,5 @@ export class ApiError extends Error {
  * @param {unknown} error - The error thrown by invokeApiRequest.
  * @returns {boolean} True only when the stored session is the thing being rejected.
  */
-export const isSessionError = (error: unknown) => error instanceof ApiError && error.code === ErrorCode.SESSION_INVALID;
+export const isSessionError = (error: unknown) =>
+  error instanceof ApiError && error.code === ErrorCode.SESSION_INVALID;

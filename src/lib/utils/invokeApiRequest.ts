@@ -50,15 +50,18 @@ export const invokeApiRequest = async <T>(
   route: string,
   formData = {},
   method: Method = Method.POST,
-  { timeoutMs }: RequestOptions = {}
+  { timeoutMs }: RequestOptions = {},
 ): Promise<ApiResponse<T>> => {
   try {
     const version = get(currentGameVersion);
     const currentUser = get(user);
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
 
-    if (currentUser.token) headers["Authorization"] = `Bearer ${currentUser.token}`;
-    
+    if (currentUser.token)
+      headers["Authorization"] = `Bearer ${currentUser.token}`;
+
     const options = {
       method,
       headers,

@@ -78,7 +78,7 @@
     confirmPassword: validateConfirmPassword(
       password,
       confirmPassword,
-      isRegisterForm
+      isRegisterForm,
     ),
   };
 
@@ -91,10 +91,12 @@
   let languages = [];
 
   // Builds
-  const builds = (Object.keys(Builds) as Array<keyof typeof Builds>).map((key) => ({
-    value: Builds[key],
-    label: key.charAt(0).toUpperCase() + key.slice(1).toLowerCase(),
-  }));
+  const builds = (Object.keys(Builds) as Array<keyof typeof Builds>).map(
+    (key) => ({
+      value: Builds[key],
+      label: key.charAt(0).toUpperCase() + key.slice(1).toLowerCase(),
+    }),
+  );
 
   // Page init load
   onMount(() => {
@@ -161,7 +163,7 @@
     try {
       const { status, data } = await invokeApiRequest<FormData>(
         route,
-        formData
+        formData,
       );
 
       if (isRegisterForm && status === Status.OK && data) {
@@ -178,14 +180,15 @@
           userId: data.userId,
           username: data.username,
         };
-        if (isChecked || $isUserRemembered) saveUserToLocalStorage(userSaveData);
+        if (isChecked || $isUserRemembered)
+          saveUserToLocalStorage(userSaveData);
         else user.set(userSaveData);
 
         beginSession();
 
         // Launch the SWF file
         const launchLanguage = $user.language || language;
-        
+
         const isLocal = $selectedBuild === Builds.LOCAL;
 
         const host = isLocal ? $localHost : undefined;
@@ -196,7 +199,7 @@
     } catch (error) {
       // A rejected session has already been cleared, and the layout says so on its own.
       if ($sessionExpired) return;
-      
+
       errorMessage = handleErrorMessage(error);
       addErrorLog(`Error during authentication: ${error.message}`);
     }
@@ -266,7 +269,9 @@
   on:submit={handleFormSubmit}
   class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 shadow-lg w-full transition-all duration-300 hover:border-white/20"
 >
-  <div class="flex gap-1 p-1 bg-black/20 rounded-xl mb-6 border border-white/10">
+  <div
+    class="flex gap-1 p-1 bg-black/20 rounded-xl mb-6 border border-white/10"
+  >
     {#each builds as build}
       <button
         type="button"
@@ -305,11 +310,15 @@
       {#if $isUserRemembered}
         Click below to jump back into the action
       {:else if isRegisterForm}
-        {$selectedBuild === Builds.LOCAL ? "Registering on your local server" : "Join the Backyard Monsters community"}
+        {$selectedBuild === Builds.LOCAL
+          ? "Registering on your local server"
+          : "Join the Backyard Monsters community"}
       {:else if hasForgotPassword}
         Enter your email to receive a reset link
       {:else}
-        {$selectedBuild === Builds.LOCAL ? "Connecting to local server" : "Enter your credentials to continue"}
+        {$selectedBuild === Builds.LOCAL
+          ? "Connecting to local server"
+          : "Enter your credentials to continue"}
       {/if}
     </p>
   </div>
@@ -331,7 +340,11 @@
           />
           {#if errors.username && focusStates.username}
             <div class="flex items-start gap-2 mt-1.5 text-red text-xs">
-              <WarningDiamond size={14} weight="bold" class="flex-shrink-0 mt-0.5" />
+              <WarningDiamond
+                size={14}
+                weight="bold"
+                class="flex-shrink-0 mt-0.5"
+              />
               <span>{errors.username}</span>
             </div>
           {/if}
@@ -339,7 +352,7 @@
       {/if}
     {/if}
     {#if hasForgotPassword}
-      <button 
+      <button
         type="button"
         on:click={() => (hasForgotPassword = false)}
         class="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-2 cursor-pointer"
@@ -348,7 +361,7 @@
         Back to login
       </button>
     {/if}
-    
+
     {#if !$isUserRemembered}
       <div class="relative">
         <input
@@ -363,7 +376,11 @@
         />
         {#if errors.email && focusStates.email}
           <div class="flex items-start gap-2 mt-1.5 text-red text-xs">
-            <WarningDiamond size={14} weight="bold" class="flex-shrink-0 mt-0.5" />
+            <WarningDiamond
+              size={14}
+              weight="bold"
+              class="flex-shrink-0 mt-0.5"
+            />
             <span>{errors.email}</span>
           </div>
         {/if}
@@ -384,14 +401,18 @@
           />
           {#if errors.password && focusStates.password}
             <div class="flex items-start gap-2 mt-1.5 text-red text-xs">
-              <WarningDiamond size={14} weight="bold" class="flex-shrink-0 mt-0.5" />
+              <WarningDiamond
+                size={14}
+                weight="bold"
+                class="flex-shrink-0 mt-0.5"
+              />
               <span>{errors.password}</span>
             </div>
           {/if}
         </div>
       {/if}
     {/if}
-    
+
     {#if isRegisterForm}
       {#if !$isUserRemembered}
         <div class="relative">
@@ -407,7 +428,11 @@
           />
           {#if errors.confirmPassword && focusStates.confirmPassword}
             <div class="flex items-start gap-2 mt-1.5 text-red text-xs">
-              <WarningDiamond size={14} weight="bold" class="flex-shrink-0 mt-0.5" />
+              <WarningDiamond
+                size={14}
+                weight="bold"
+                class="flex-shrink-0 mt-0.5"
+              />
               <span>{errors.confirmPassword}</span>
             </div>
           {/if}
@@ -419,7 +444,10 @@
   {#if $selectedBuild === Builds.LOCAL && (isRegisterForm || hasForgotPassword)}
     <div class="flex gap-3 mt-4">
       <div class="flex flex-col gap-1.5 flex-1">
-        <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Host</span>
+        <span
+          class="text-xs font-semibold text-muted-foreground uppercase tracking-wide"
+          >Host</span
+        >
         <input
           type="text"
           on:input={(e) => localHost.set(e.currentTarget.value || "localhost")}
@@ -428,7 +456,10 @@
         />
       </div>
       <div class="flex flex-col gap-1.5 w-24">
-        <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Port</span>
+        <span
+          class="text-xs font-semibold text-muted-foreground uppercase tracking-wide"
+          >Port</span
+        >
         <input
           type="number"
           min="1"
@@ -445,7 +476,11 @@
   {#if !isRegisterForm && !hasForgotPassword}
     <div class="mt-6 pt-6 border-t border-white/10">
       {#if !$isUserRemembered || $selectedBuild === Builds.LOCAL}
-        <p class="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide">Game Settings</p>
+        <p
+          class="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide"
+        >
+          Game Settings
+        </p>
       {/if}
       <div class="flex flex-col gap-3">
         {#if !$isUserRemembered}
@@ -467,7 +502,11 @@
                   placeholder={language}
                 />
               </div>
-              <CaretUpDown size={16} weight="bold" class="text-muted-foreground" />
+              <CaretUpDown
+                size={16}
+                weight="bold"
+                class="text-muted-foreground"
+              />
             </Select.Trigger>
             <Select.Content
               class="w-full rounded-xl border border-white/20 bg-background/95 backdrop-blur-xl px-1 py-3 shadow-2xl"
@@ -492,21 +531,29 @@
         {#if $selectedBuild === Builds.LOCAL}
           <div class="flex gap-3">
             <div class="flex flex-col gap-1.5 flex-1">
-              <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Host</span>
+              <span
+                class="text-xs font-semibold text-muted-foreground uppercase tracking-wide"
+                >Host</span
+              >
               <input
                 type="text"
-                on:input={(e) => localHost.set(e.currentTarget.value || "localhost")}
+                on:input={(e) =>
+                  localHost.set(e.currentTarget.value || "localhost")}
                 class="w-full bg-white/5 h-10 rounded-lg text-sm px-3 border-2 border-white/10 focus:border-secondary focus:outline-none focus:bg-white/10 transition-all duration-200"
                 placeholder="localhost"
               />
             </div>
             <div class="flex flex-col gap-1.5 w-24">
-              <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Port</span>
+              <span
+                class="text-xs font-semibold text-muted-foreground uppercase tracking-wide"
+                >Port</span
+              >
               <input
                 type="number"
                 min="1"
                 max="65535"
-                on:input={(e) => localPort.set(Number(e.currentTarget.value) || 3001)}
+                on:input={(e) =>
+                  localPort.set(Number(e.currentTarget.value) || 3001)}
                 class="w-full bg-white/5 h-10 rounded-lg text-sm px-3 border-2 border-white/10 focus:border-secondary focus:outline-none focus:bg-white/10 transition-all duration-200"
                 placeholder="3001"
               />
@@ -516,7 +563,9 @@
       </div>
 
       {#if !$isUserRemembered}
-        <div class="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+        <div
+          class="flex items-center justify-between mt-4 pt-4 border-t border-white/10"
+        >
           <div class="flex items-center gap-3">
             <Checkbox.Root
               id="remember-me-checkbox"
@@ -557,7 +606,7 @@
       color={isRegisterForm ? "bg-primary" : "bg-secondary"}
       disabled={isButtonDisabled}
     />
-    
+
     {#if $isUserRemembered}
       <button
         type="button"
@@ -578,9 +627,15 @@
         class="text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         {#if isRegisterForm}
-          Already have an account? <span class="text-primary font-semibold underline underline-offset-2 cursor-pointer">Login here</span>
+          Already have an account? <span
+            class="text-primary font-semibold underline underline-offset-2 cursor-pointer"
+            >Login here</span
+          >
         {:else}
-          Don't have an account? <span class="text-secondary font-semibold underline underline-offset-2 cursor-pointer">Register here</span>
+          Don't have an account? <span
+            class="text-secondary font-semibold underline underline-offset-2 cursor-pointer"
+            >Register here</span
+          >
         {/if}
       </button>
     </div>

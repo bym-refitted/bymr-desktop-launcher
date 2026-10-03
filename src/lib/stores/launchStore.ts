@@ -10,7 +10,7 @@ export const launchSwf = async (
   language: string | unknown = "english",
   token?: string,
   host?: string,
-  port?: number
+  port?: number,
 ) => {
   const launchOptions = { buildName, language, token, host, port };
   //localStorage.setItem("lastLaunch", JSON.stringify(launchOptions));
@@ -23,7 +23,7 @@ export const launchSwf = async (
     console.log(err);
     const e = err as { code?: string } | null;
     const error = e?.code || `Error during launch process: ${err || "unknown"}`;
-    
+
     launchError.update(() => ({ code: error, show: true }));
   } finally {
     isLaunching.set(false);

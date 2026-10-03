@@ -3,7 +3,11 @@ import { get } from "svelte/store";
 import { Method } from "$lib/enums/Method";
 import { SessionState } from "$lib/enums/SessionState";
 import { addErrorLog } from "$lib/stores/debugLogStore";
-import { beginSession, endSession, sessionState } from "$lib/stores/sessionStore";
+import {
+  beginSession,
+  endSession,
+  sessionState,
+} from "$lib/stores/sessionStore";
 import { handleErrorMessage } from "$lib/errors/errorMessages";
 import { invokeApiRequest } from "$lib/utils/invokeApiRequest";
 import {
@@ -57,18 +61,30 @@ export const validateSession = async (): Promise<void> => {
   if (hasExpired(token)) return endSession(true);
 
   try {
-    const { data } = await invokeApiRequest<SessionResponse>("/player/account", {}, Method.GET, {
-      timeoutMs: REQUEST_TIMEOUT_MS,
-    });
+    const { data } = await invokeApiRequest<SessionResponse>(
+      "/player/account",
+      {},
+      Method.GET,
+      {
+        timeoutMs: REQUEST_TIMEOUT_MS,
+      },
+    );
 
-    if (data?.username) saveUserToLocalStorage({ ...get(user), userId: data.userId, username: data.username });
+    if (data?.username)
+      saveUserToLocalStorage({
+        ...get(user),
+        userId: data.userId,
+        username: data.username,
+      });
 
     beginSession();
   } catch (error) {
-    addErrorLog(`Could not validate the saved session: ${handleErrorMessage(error)}`);
+    addErrorLog(
+      `Could not validate the saved session: ${handleErrorMessage(error)}`,
+    );
 
     const isUnresolved = get(sessionState) === SessionState.UNKNOWN;
-    
+
     if (isUnresolved) beginSession();
   }
 };
@@ -83,9 +99,13 @@ export const validateSession = async (): Promise<void> => {
  */
 export const signOut = async (): Promise<void> => {
   try {
-    await invokeApiRequest("/player/logout", {}, Method.POST, { timeoutMs: REQUEST_TIMEOUT_MS });
+    await invokeApiRequest("/player/logout", {}, Method.POST, {
+      timeoutMs: REQUEST_TIMEOUT_MS,
+    });
   } catch (error) {
-    addErrorLog(`Could not end the session on the server: ${handleErrorMessage(error)}`);
+    addErrorLog(
+      `Could not end the session on the server: ${handleErrorMessage(error)}`,
+    );
   } finally {
     endSession();
   }

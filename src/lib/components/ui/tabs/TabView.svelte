@@ -1,12 +1,21 @@
 <script lang="ts">
-  import { Play, Ranking, Sword, Shield, UserCircle, UsersThree } from "phosphor-svelte";
+  import {
+    Play,
+    Ranking,
+    Sword,
+    Shield,
+    UserCircle,
+    UsersThree,
+  } from "phosphor-svelte";
   import { Menubar } from "bits-ui";
   import TabItem from "./TabItem.svelte";
   import { user } from "$lib/stores/userStore";
 </script>
 
 <div class="flex flex-1 min-h-0">
-  <Menubar.Root class="flex flex-col h-full shrink-0 py-12 pl-3 pr-16 w-[380px]">
+  <Menubar.Root
+    class="flex flex-col h-full shrink-0 py-12 pl-3 pr-16 w-[380px]"
+  >
     <div class="flex-1">
       <a href="/">
         <h1
@@ -17,11 +26,7 @@
       </a>
       <div class="pt-8">
         <TabItem path="/" Icon={Play} text="BYM Refitted" />
-        <TabItem
-          path="/minigame"
-          Icon={Sword}
-          text="Attack of the Pokies"
-        />
+        <TabItem path="/minigame" Icon={Sword} text="Attack of the Pokies" />
         <TabItem path="/leaderboards" Icon={Ranking} text="Leaderboards" />
         {#if $user.token}
           <TabItem path="/attacklogs" Icon={Shield} text="Attack Logs" />

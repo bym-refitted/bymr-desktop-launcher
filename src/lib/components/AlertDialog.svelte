@@ -18,7 +18,6 @@
 
   export let open = false;
   export let error = "";
-
 </script>
 
 <Dialog bind:open>

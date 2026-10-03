@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { Method } from '$lib/enums/Method';
-  import { user } from '$lib/stores/userStore';
-  import { invokeApiRequest } from '$lib/utils/invokeApiRequest';
-  import { Label, RadioGroup, Tooltip } from 'bits-ui';
-  import { Notepad, ArrowClockwise, ImageBroken } from 'phosphor-svelte';
-  import { fly } from 'svelte/transition';
+  import { Method } from "$lib/enums/Method";
+  import { user } from "$lib/stores/userStore";
+  import { invokeApiRequest } from "$lib/utils/invokeApiRequest";
+  import { Label, RadioGroup, Tooltip } from "bits-ui";
+  import { Notepad, ArrowClockwise, ImageBroken } from "phosphor-svelte";
+  import { fly } from "svelte/transition";
 
-  import AlertDialog from '$lib/components/AlertDialog.svelte';
+  import AlertDialog from "$lib/components/AlertDialog.svelte";
 
   interface AttackLogs {
     attackLogs: AttackLogDetails[];
@@ -28,7 +28,7 @@
   }
 
   let attackLogs: AttackLogDetails[] = [];
-  let filterType = 'both';
+  let filterType = "both";
 
   let imageError = false;
   let viewAttackLogs = false;
@@ -40,20 +40,21 @@
       const { data } = await invokeApiRequest<AttackLogs>(
         `/attacklogs?filter=${filterType}`,
         null,
-        Method.GET
+        Method.GET,
       );
 
       if (data.attackLogs && data.attackLogs.length > 0) {
         attackLogs = data.attackLogs;
       }
     } catch (err) {
-      console.error('Error fetching attack logs:', err);
+      console.error("Error fetching attack logs:", err);
     }
   };
 
   $: if ($user.token && filterType) fetchAttackLogs();
 
-  const isUserAttacker = (log: AttackLogDetails) => $user && log.attacker_userid === $user.userId;
+  const isUserAttacker = (log: AttackLogDetails) =>
+    $user && log.attacker_userid === $user.userId;
 
   const getTimeAgo = (date: Date) => {
     const now = new Date();
@@ -61,7 +62,9 @@
     const diffMs = now.getTime() - attackTime.getTime();
 
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const diffHrs = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const diffHrs = Math.floor(
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+    );
     const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
     if (diffDays >= 2) {
@@ -87,7 +90,9 @@
       class="flex flex-col items-center text-muted-foreground"
       in:fly={{ y: 30, duration: 600, delay: 100 }}
     >
-      <h1 class="text-white font-title leading-snug pt-12 text-5xl lg:text-7xl lg:pt-0">
+      <h1
+        class="text-white font-title leading-snug pt-12 text-5xl lg:text-7xl lg:pt-0"
+      >
         Attack Logs
       </h1>
     </div>
@@ -104,29 +109,41 @@
             bind:value={filterType}
             class="flex flex-col sm:flex-row gap-3 sm:gap-4 text-sm font-medium"
           >
-            <div class="text-foreground group flex select-none items-center transition-all">
+            <div
+              class="text-foreground group flex select-none items-center transition-all"
+            >
               <RadioGroup.Item
                 id="both"
                 value="both"
                 class="size-5 rounded-[4px] border border-gray-600 bg-gray-800 data-[state=checked]:bg-primary data-[state=checked]:border-primary cursor-pointer"
               />
-              <Label.Root for="both" class="pl-3 cursor-pointer">Both</Label.Root>
+              <Label.Root for="both" class="pl-3 cursor-pointer"
+                >Both</Label.Root
+              >
             </div>
-            <div class="text-foreground group flex select-none items-center transition-all">
+            <div
+              class="text-foreground group flex select-none items-center transition-all"
+            >
               <RadioGroup.Item
                 id="myattacks"
                 value="myattacks"
                 class="size-5 rounded-[4px] border border-gray-600 bg-gray-800 data-[state=checked]:bg-primary data-[state=checked]:border-primary cursor-pointer"
               />
-              <Label.Root for="myattacks" class="pl-3 cursor-pointer">My Attacks</Label.Root>
+              <Label.Root for="myattacks" class="pl-3 cursor-pointer"
+                >My Attacks</Label.Root
+              >
             </div>
-            <div class="text-foreground group flex select-none items-center transition-all">
+            <div
+              class="text-foreground group flex select-none items-center transition-all"
+            >
               <RadioGroup.Item
                 id="peopleattackingme"
                 value="peopleattackingme"
                 class="size-5 rounded-[4px] border border-gray-600 bg-gray-800 data-[state=checked]:bg-primary data-[state=checked]:border-primary cursor-pointer"
               />
-              <Label.Root for="peopleattackingme" class="pl-3 cursor-pointer">People Attacking Me</Label.Root>
+              <Label.Root for="peopleattackingme" class="pl-3 cursor-pointer"
+                >People Attacking Me</Label.Root
+              >
             </div>
           </RadioGroup.Root>
 
@@ -137,7 +154,11 @@
                 <div
                   class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/30 transition-all"
                 >
-                  <ArrowClockwise size={20} weight="bold" class="text-primary" />
+                  <ArrowClockwise
+                    size={20}
+                    weight="bold"
+                    class="text-primary"
+                  />
                 </div>
               </Tooltip.Trigger>
               <Tooltip.Content side="top" sideOffset={5}>
@@ -155,23 +176,51 @@
         </div>
 
         <!-- Attack Logs Table -->
-        <div class="h-full mt-6 bg-gray-800 p-5 relative flex flex-col overflow-hidden rounded-lg">
+        <div
+          class="h-full mt-6 bg-gray-800 p-5 relative flex flex-col overflow-hidden rounded-lg"
+        >
           {#if attackLogs.length > 0}
             <div class="overflow-x-auto">
               <table class="w-full text-sm text-left text-gray-300">
                 <thead class="text-xs uppercase bg-gray-700 text-gray-300">
                   <tr>
-                    <th scope="col" class="whitespace-nowrap font-display tracking-widest text-1xl px-6 py-3">Profile</th>
-                    <th scope="col" class="whitespace-nowrap font-display tracking-widest text-1xl px-6 py-3">Battle</th>
-                    <th scope="col" class="whitespace-nowrap font-display tracking-widest text-1xl px-6 py-3">Type</th>
-                    <th scope="col" class="whitespace-nowrap font-display tracking-widest text-1xl px-6 py-3">Location</th>
-                    <th scope="col" class="whitespace-nowrap font-display tracking-widest text-1xl px-6 py-3">Time</th>
-                    <th scope="col" class="whitespace-nowrap font-display tracking-widest text-1xl px-6 py-3">Attack Report</th>
+                    <th
+                      scope="col"
+                      class="whitespace-nowrap font-display tracking-widest text-1xl px-6 py-3"
+                      >Profile</th
+                    >
+                    <th
+                      scope="col"
+                      class="whitespace-nowrap font-display tracking-widest text-1xl px-6 py-3"
+                      >Battle</th
+                    >
+                    <th
+                      scope="col"
+                      class="whitespace-nowrap font-display tracking-widest text-1xl px-6 py-3"
+                      >Type</th
+                    >
+                    <th
+                      scope="col"
+                      class="whitespace-nowrap font-display tracking-widest text-1xl px-6 py-3"
+                      >Location</th
+                    >
+                    <th
+                      scope="col"
+                      class="whitespace-nowrap font-display tracking-widest text-1xl px-6 py-3"
+                      >Time</th
+                    >
+                    <th
+                      scope="col"
+                      class="whitespace-nowrap font-display tracking-widest text-1xl px-6 py-3"
+                      >Attack Report</th
+                    >
                   </tr>
                 </thead>
                 <tbody>
                   {#each attackLogs as log}
-                    <tr class="border-b bg-gray-800 border-gray-700 hover:bg-gray-700">
+                    <tr
+                      class="border-b bg-gray-800 border-gray-700 hover:bg-gray-700"
+                    >
                       <td class="whitespace-nowrap px-6 py-4">
                         <div class="flex justify-center">
                           {#if isUserAttacker(log)}
@@ -183,7 +232,9 @@
                                 on:error={() => (imageError = true)}
                               />
                             {:else}
-                              <div class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
+                              <div
+                                class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center"
+                              >
                                 <ImageBroken size={16} />
                               </div>
                             {/if}
@@ -195,7 +246,9 @@
                               on:error={() => (imageError = true)}
                             />
                           {:else}
-                            <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                            <div
+                              class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center"
+                            >
                               <ImageBroken size={16} />
                             </div>
                           {/if}
@@ -203,17 +256,25 @@
                       </td>
                       <td class="whitespace-nowrap px-6 py-4">
                         {#if isUserAttacker(log)}
-                          You attacked <span class="font-medium text-white">{log.defender_username}</span>
+                          You attacked <span class="font-medium text-white"
+                            >{log.defender_username}</span
+                          >
                         {:else}
-                          <span class="font-medium text-red-400">{log.attacker_username}</span> attacked you
+                          <span class="font-medium text-red-400"
+                            >{log.attacker_username}</span
+                          > attacked you
                         {/if}
                       </td>
                       <td class="whitespace-nowrap px-6 py-4">
                         {log.type}
                       </td>
                       <td class="whitespace-nowrap px-6 py-4">
-                        {#if log.type === 'inferno'}
-                          <div class="flex justify-center items-center h-full w-full">-</div>
+                        {#if log.type === "inferno"}
+                          <div
+                            class="flex justify-center items-center h-full w-full"
+                          >
+                            -
+                          </div>
                         {:else}
                           {log.x} x {log.y}
                         {/if}
@@ -224,7 +285,9 @@
                       <td class="whitespace-nowrap px-6 py-4">
                         <button
                           class="px-3 py-1 text-white rounded text-xs"
-                          on:click={() => { viewAttackLogs = true; }}
+                          on:click={() => {
+                            viewAttackLogs = true;
+                          }}
                         >
                           View Details
                         </button>
@@ -235,8 +298,12 @@
               </table>
             </div>
           {:else}
-            <div class="flex flex-col items-center justify-center py-12 text-center lg:px-20">
-              <p class="font-display text-white text-center text-xl mb-2">No attack logs found</p>
+            <div
+              class="flex flex-col items-center justify-center py-12 text-center lg:px-20"
+            >
+              <p class="font-display text-white text-center text-xl mb-2">
+                No attack logs found
+              </p>
               <p class="text-center text-white/60 max-w-md mx-auto">
                 When you attack or are attacked, the logs will appear here.
               </p>

@@ -33,10 +33,10 @@
     </div>
     <div class="mb-8">
       <p class="text-lg leading-relaxed text-muted-foreground">
-        The official Backyard Monsters Refitted server. A faithful one-to-one preservation of
-        the original Adobe Flash game, including all Map Room versions 1, 2 and 3. All
-        buildings, monsters and gameplay mechanics on this server are from the
-        classic vanilla version of the game.
+        The official Backyard Monsters Refitted server. A faithful one-to-one
+        preservation of the original Adobe Flash game, including all Map Room
+        versions 1, 2 and 3. All buildings, monsters and gameplay mechanics on
+        this server are from the classic vanilla version of the game.
       </p>
     </div>
 
@@ -75,9 +75,12 @@
               Discord Verification
             </h3>
             <p class="text-lg text-muted-foreground leading-relaxed mb-2">
-              Visit our <a href="https://discord.gg/bymrefitted" target="_blank" class="text-secondary hover:underline">Discord server</a> to verify your account and play on the
-              server. This is to help us reduce ban evasion, bot accounts and
-              maintain a healthy community.
+              Visit our <a
+                href="https://discord.gg/bymrefitted"
+                target="_blank"
+                class="text-secondary hover:underline">Discord server</a
+              > to verify your account and play on the server. This is to help us
+              reduce ban evasion, bot accounts and maintain a healthy community.
             </p>
           </div>
         </div>

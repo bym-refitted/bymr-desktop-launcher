@@ -1,0 +1,10 @@
+node_modules
+/build
+/.svelte-kit
+/src-tauri/target
+/src-tauri/gen
+.env
+.env.*
+
+# Lockfiles
+package-lock.json

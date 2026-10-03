@@ -12,7 +12,9 @@ const DAY_HOURS = 24;
 export const timeAgo = (value: string | Date | null): string => {
   if (!value) return "";
 
-  const minutes = Math.floor((Date.now() - new Date(value).getTime()) / MINUTE_MS);
+  const minutes = Math.floor(
+    (Date.now() - new Date(value).getTime()) / MINUTE_MS,
+  );
 
   if (minutes < 1) return "just now";
   if (minutes < HOUR_MINUTES) return `${minutes} min ago`;

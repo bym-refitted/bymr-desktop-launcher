@@ -3,7 +3,7 @@
   import type { Component } from "svelte";
   import type { IconComponentProps } from "phosphor-svelte/lib/shared";
   import { Play } from "phosphor-svelte";
-  
+
   import { page } from "$app/stores";
 
   export let path = "/";

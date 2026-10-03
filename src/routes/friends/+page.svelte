@@ -14,7 +14,11 @@
   } from "phosphor-svelte";
 
   import { Method } from "$lib/enums/Method";
-  import { FriendRelation, FriendshipStatus, FriendsTab } from "$lib/enums/Friends";
+  import {
+    FriendRelation,
+    FriendshipStatus,
+    FriendsTab,
+  } from "$lib/enums/Friends";
   import { user } from "$lib/stores/userStore";
   import { invokeApiRequest } from "$lib/utils/invokeApiRequest";
   import { handleErrorMessage } from "$lib/errors/errorMessages";
@@ -85,7 +89,9 @@
   $: isBusy = (userId: number) => busyIds.includes(userId);
 
   const setBusy = (userId: number, busy: boolean) => {
-    busyIds = busy ? [...busyIds, userId] : busyIds.filter((id) => id !== userId);
+    busyIds = busy
+      ? [...busyIds, userId]
+      : busyIds.filter((id) => id !== userId);
   };
 
   const fail = (error: unknown, context: string) => {
@@ -100,7 +106,11 @@
     }
 
     try {
-      const { data } = await invokeApiRequest<FriendsResponse>("/friends", {}, Method.GET);
+      const { data } = await invokeApiRequest<FriendsResponse>(
+        "/friends",
+        {},
+        Method.GET,
+      );
 
       friends = data.friends ?? [];
       incoming = data.incoming ?? [];
@@ -124,7 +134,11 @@
 
     try {
       const query = encodeURIComponent(term.trim());
-      const { data } = await invokeApiRequest<SearchResponse>(`/friends/search?search=${query}`, {}, Method.GET);
+      const { data } = await invokeApiRequest<SearchResponse>(
+        `/friends/search?search=${query}`,
+        {},
+        Method.GET,
+      );
 
       results = data.players ?? [];
       errorMessage = "";
@@ -146,7 +160,11 @@
    * Re-labels one search result after acting on them, so the button follows the
    * new state without running the search again.
    */
-  const setResultRelation = (userId: number, relation: FriendRelation, requestId: number | null = null) => {
+  const setResultRelation = (
+    userId: number,
+    relation: FriendRelation,
+    requestId: number | null = null,
+  ) => {
     results = results.map((player) => {
       if (player.user_id !== userId) return player;
 
@@ -161,12 +179,15 @@
       const { data } = await invokeApiRequest<{ status: FriendshipStatus }>(
         "/friends/request",
         { userid: player.user_id },
-        Method.POST
+        Method.POST,
       );
 
       const accepted = data.status === FriendshipStatus.ACCEPTED;
 
-      setResultRelation(player.user_id, accepted ? FriendRelation.FRIENDS : FriendRelation.PENDING_OUTGOING);
+      setResultRelation(
+        player.user_id,
+        accepted ? FriendRelation.FRIENDS : FriendRelation.PENDING_OUTGOING,
+      );
       await loadFriends();
     } catch (error) {
       fail(error, `Could not add ${player.username}`);
@@ -175,15 +196,25 @@
     }
   };
 
-  const respond = async (request: RequestEntry | SearchResult, accept: boolean) => {
+  const respond = async (
+    request: RequestEntry | SearchResult,
+    accept: boolean,
+  ) => {
     if (!request.request_id) return;
 
     setBusy(request.user_id, true);
 
     try {
-      await invokeApiRequest("/friends/respond", { request_id: request.request_id, accept }, Method.POST);
+      await invokeApiRequest(
+        "/friends/respond",
+        { request_id: request.request_id, accept },
+        Method.POST,
+      );
 
-      setResultRelation(request.user_id, accept ? FriendRelation.FRIENDS : FriendRelation.NONE);
+      setResultRelation(
+        request.user_id,
+        accept ? FriendRelation.FRIENDS : FriendRelation.NONE,
+      );
       await loadFriends();
     } catch (error) {
       fail(error, `Could not answer ${request.username}`);
@@ -196,7 +227,11 @@
     setBusy(player.user_id, true);
 
     try {
-      await invokeApiRequest("/friends/remove", { userid: player.user_id }, Method.POST);
+      await invokeApiRequest(
+        "/friends/remove",
+        { userid: player.user_id },
+        Method.POST,
+      );
 
       setResultRelation(player.user_id, FriendRelation.NONE);
       await loadFriends();
@@ -215,12 +250,18 @@
     setBusy(friend.user_id, true);
 
     try {
-      await invokeApiRequest("/gifts/send", { userid: friend.user_id }, Method.POST);
+      await invokeApiRequest(
+        "/gifts/send",
+        { userid: friend.user_id },
+        Method.POST,
+      );
 
       const readyAt = Math.floor(Date.now() / 1000) + GIFT_COOLDOWN_SECONDS;
 
       friends = friends.map((entry) =>
-        entry.user_id === friend.user_id ? { ...entry, gift_ready_at: readyAt } : entry
+        entry.user_id === friend.user_id
+          ? { ...entry, gift_ready_at: readyAt }
+          : entry,
       );
     } catch (error) {
       fail(error, `Could not send ${friend.username} a gift`);
@@ -266,21 +307,29 @@
       class="flex flex-col items-center text-muted-foreground"
       in:fly={{ y: 30, duration: 600, delay: 100 }}
     >
-      <h1 class="text-white font-title leading-snug pt-12 text-5xl lg:text-7xl lg:pt-0">Friends</h1>
+      <h1
+        class="text-white font-title leading-snug pt-12 text-5xl lg:text-7xl lg:pt-0"
+      >
+        Friends
+      </h1>
     </div>
 
     <div class="mt-16" in:fly={{ y: 30, duration: 600, delay: 200 }}>
       {#if !$user.token}
         <div class="bg-gray-800 rounded-lg p-12 text-center">
-          <p class="font-display text-white text-xl mb-2">Sign in to see your friends</p>
+          <p class="font-display text-white text-xl mb-2">
+            Sign in to see your friends
+          </p>
           <p class="text-white/60 max-w-md mx-auto">
-            Your friends list follows your account, so you will need to log in first.
+            Your friends list follows your account, so you will need to log in
+            first.
           </p>
         </div>
       {:else}
         <div class="flex flex-row gap-2 text-sm font-display overflow-x-auto">
           <button
-            class="shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 rounded-md transition-colors cursor-pointer {activeTab === FriendsTab.FRIENDS
+            class="shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 rounded-md transition-colors cursor-pointer {activeTab ===
+            FriendsTab.FRIENDS
               ? 'bg-white/10 text-primary'
               : 'text-unselected hover:bg-white/5'}"
             on:click={() => (activeTab = FriendsTab.FRIENDS)}
@@ -288,17 +337,22 @@
             Friends ({friends.length})
           </button>
           <button
-            class="shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 rounded-md transition-colors cursor-pointer {activeTab === FriendsTab.REQUESTS
+            class="shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 rounded-md transition-colors cursor-pointer {activeTab ===
+            FriendsTab.REQUESTS
               ? 'bg-white/10 text-primary'
               : 'text-unselected hover:bg-white/5'}"
             on:click={() => (activeTab = FriendsTab.REQUESTS)}
           >
             Requests{#if requestCount > 0}
-              <span class="ml-2 px-2 py-0.5 rounded-full bg-primary text-black text-xs">{requestCount}</span>
+              <span
+                class="ml-2 px-2 py-0.5 rounded-full bg-primary text-black text-xs"
+                >{requestCount}</span
+              >
             {/if}
           </button>
           <button
-            class="shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 rounded-md transition-colors cursor-pointer {activeTab === FriendsTab.FIND
+            class="shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 rounded-md transition-colors cursor-pointer {activeTab ===
+            FriendsTab.FIND
               ? 'bg-white/10 text-primary'
               : 'text-unselected hover:bg-white/5'}"
             on:click={() => (activeTab = FriendsTab.FIND)}
@@ -359,24 +413,35 @@
                 </PlayerRow>
               {/each}
             {:else}
-              <div class="flex flex-col items-center justify-center px-6 py-12 text-center lg:px-20">
-                <p class="font-display text-white text-xl mb-2">No friends yet</p>
+              <div
+                class="flex flex-col items-center justify-center px-6 py-12 text-center lg:px-20"
+              >
+                <p class="font-display text-white text-xl mb-2">
+                  No friends yet
+                </p>
                 <p class="text-white/60 max-w-md mx-auto">
-                  Head to Find Players to search for someone by name and send them a request.
+                  Head to Find Players to search for someone by name and send
+                  them a request.
                 </p>
               </div>
             {/if}
           {:else if activeTab === FriendsTab.REQUESTS}
             {#if incoming.length === 0 && outgoing.length === 0}
-              <div class="flex flex-col items-center justify-center px-6 py-12 text-center lg:px-20">
-                <p class="font-display text-white text-xl mb-2">Nothing waiting</p>
+              <div
+                class="flex flex-col items-center justify-center px-6 py-12 text-center lg:px-20"
+              >
+                <p class="font-display text-white text-xl mb-2">
+                  Nothing waiting
+                </p>
                 <p class="text-white/60 max-w-md mx-auto">
                   Friend requests you send or receive will show up here.
                 </p>
               </div>
             {:else}
               {#if incoming.length > 0}
-                <p class="px-5 pt-4 pb-2 text-xs uppercase tracking-widest font-display text-white/50">
+                <p
+                  class="px-5 pt-4 pb-2 text-xs uppercase tracking-widest font-display text-white/50"
+                >
                   Waiting on you
                 </p>
                 {#each incoming as request (request.request_id)}
@@ -408,7 +473,9 @@
               {/if}
 
               {#if outgoing.length > 0}
-                <p class="px-5 pt-4 pb-2 text-xs uppercase tracking-widest font-display text-white/50">
+                <p
+                  class="px-5 pt-4 pb-2 text-xs uppercase tracking-widest font-display text-white/50"
+                >
                   Waiting on them
                 </p>
                 {#each outgoing as request (request.request_id)}
@@ -448,7 +515,8 @@
                 />
               </div>
               <p class="mt-2 text-xs text-white/40">
-                Type at least {SEARCH_MIN_LENGTH} characters. Players who have never played are not listed.
+                Type at least {SEARCH_MIN_LENGTH} characters. Players who have never
+                played are not listed.
               </p>
             </div>
 
@@ -463,12 +531,16 @@
                   online={player.online}
                 >
                   {#if player.relation === FriendRelation.FRIENDS}
-                    <span class="flex items-center gap-2 px-3 py-2 text-xs text-primary">
+                    <span
+                      class="flex items-center gap-2 px-3 py-2 text-xs text-primary"
+                    >
                       <UsersThree size={16} weight="bold" />
                       Friends
                     </span>
                   {:else if player.relation === FriendRelation.PENDING_OUTGOING}
-                    <span class="flex items-center gap-2 px-3 py-2 text-xs text-white/50">
+                    <span
+                      class="flex items-center gap-2 px-3 py-2 text-xs text-white/50"
+                    >
                       <Clock size={16} weight="bold" />
                       Requested
                     </span>
@@ -494,15 +566,24 @@
                 </PlayerRow>
               {/each}
             {:else if hasSearched}
-              <div class="flex flex-col items-center justify-center px-6 py-12 text-center lg:px-20">
-                <p class="font-display text-white text-xl mb-2">No players found</p>
+              <div
+                class="flex flex-col items-center justify-center px-6 py-12 text-center lg:px-20"
+              >
+                <p class="font-display text-white text-xl mb-2">
+                  No players found
+                </p>
                 <p class="text-white/60 max-w-md mx-auto">
-                  Nobody matched "{searchTerm}". Check the spelling, or try part of the name.
+                  Nobody matched "{searchTerm}". Check the spelling, or try part
+                  of the name.
                 </p>
               </div>
             {:else}
-              <div class="flex flex-col items-center justify-center px-6 py-12 text-center lg:px-20">
-                <p class="font-display text-white text-xl mb-2">Find your friends</p>
+              <div
+                class="flex flex-col items-center justify-center px-6 py-12 text-center lg:px-20"
+              >
+                <p class="font-display text-white text-xl mb-2">
+                  Find your friends
+                </p>
                 <p class="text-white/60 max-w-md mx-auto">
                   Search for a player by name to send them a friend request.
                 </p>

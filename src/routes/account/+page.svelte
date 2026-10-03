@@ -2,7 +2,12 @@
   import { onMount } from "svelte";
   import { fly } from "svelte/transition";
   import { goto } from "$app/navigation";
-  import { UserCircle, WarningDiamond, SignOut, Sparkle } from "phosphor-svelte";
+  import {
+    UserCircle,
+    WarningDiamond,
+    SignOut,
+    Sparkle,
+  } from "phosphor-svelte";
 
   import { Method } from "$lib/enums/Method";
   import { Status } from "$lib/enums/StatusCodes";
@@ -58,7 +63,12 @@
 
   $: validationError = validateUsername(username);
   $: isUnchanged = !!account && username === account.username;
-  $: canSubmit = !!account && account.canChangeUsername && !validationError && !isUnchanged && !isSubmitting;
+  $: canSubmit =
+    !!account &&
+    account.canChangeUsername &&
+    !validationError &&
+    !isUnchanged &&
+    !isSubmitting;
 
   const fetchAccount = async () => {
     if (!$user.token) {
@@ -67,7 +77,11 @@
     }
 
     try {
-      const { data } = await invokeApiRequest<Account>("/player/account", {}, Method.GET,);
+      const { data } = await invokeApiRequest<Account>(
+        "/player/account",
+        {},
+        Method.GET,
+      );
 
       account = data;
       username = data.username;
@@ -131,7 +145,8 @@
    * below both move the switch programmatically and would otherwise call straight back in.
    */
   const handleToggleShiny = async (locked: boolean) => {
-    if (!account || isSavingShiny || locked === account.settings.shinyLocked) return;
+    if (!account || isSavingShiny || locked === account.settings.shinyLocked)
+      return;
 
     isSavingShiny = true;
     shinyErrorMessage = "";
@@ -155,10 +170,14 @@
   };
 
   const formatNextChange = (nextChangeAt: string) => {
-    const options: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric" };
-    
+    const options: Intl.DateTimeFormatOptions = {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    };
+
     return new Date(nextChangeAt).toLocaleDateString(undefined, options);
-  }
+  };
 
   const handleLogout = async () => {
     await signOut();
@@ -270,14 +289,17 @@
           </div>
 
           <p class="text-muted-foreground mb-6 leading-relaxed">
-            Turning shiny off hides it completely: the game reads 0 shiny, and nothing can
-            be bought, rushed or unlocked with it. You still earn it as normal - mushrooms
-            and quest rewards keep paying out, you just will not see them land. Your
-            balance comes back in full when you turn shiny back on.
+            Turning shiny off hides it completely: the game reads 0 shiny, and
+            nothing can be bought, rushed or unlocked with it. You still earn it
+            as normal - mushrooms and quest rewards keep paying out, you just
+            will not see them land. Your balance comes back in full when you
+            turn shiny back on.
           </p>
 
           <div class="flex items-center justify-between gap-6">
-            <span class="text-sm font-medium text-muted-foreground">Turn shiny off</span>
+            <span class="text-sm font-medium text-muted-foreground"
+              >Turn shiny off</span
+            >
             <Switch
               label="Turn shiny off"
               disabled={isSavingShiny}
@@ -289,16 +311,18 @@
           {#if shinyErrorMessage}
             <p class="text-red-400 text-sm mt-4">{shinyErrorMessage}</p>
           {:else if shinyLocked}
-            <div class="flex items-start gap-3 mt-4 text-sm text-muted-foreground">
+            <div
+              class="flex items-start gap-3 mt-4 text-sm text-muted-foreground"
+            >
               <WarningDiamond
                 size={18}
                 weight="bold"
                 class="text-primary shrink-0 mt-0.5"
               />
               <span>
-                Shiny is off, so nothing can be spent. Anything you earn is still saved for
-                when you turn it back on. If the game is already running, it catches up
-                within about 30 seconds.
+                Shiny is off, so nothing can be spent. Anything you earn is
+                still saved for when you turn it back on. If the game is already
+                running, it catches up within about 30 seconds.
               </span>
             </div>
           {/if}

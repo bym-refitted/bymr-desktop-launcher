@@ -33,7 +33,7 @@ export const validatePassword = (password: string): string => {
 export const validateConfirmPassword = (
   password: string,
   confirmPassword: string,
-  isRegisterForm: boolean
+  isRegisterForm: boolean,
 ): string => {
   if (isRegisterForm && confirmPassword !== password) {
     return "Passwords do not match";

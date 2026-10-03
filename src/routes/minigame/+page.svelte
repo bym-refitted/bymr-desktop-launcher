@@ -8,7 +8,7 @@
 </script>
 
 <div class="grid grid-cols-1 gap-x-8 lg:grid-cols-2 lg:grid-rows-[800px]">
-  <div 
+  <div
     class="grid-item flex flex-col lg:p-16 lg:justify-center"
     in:fly={{ y: 30, duration: 600, delay: 100 }}
   >
@@ -20,15 +20,16 @@
         when the game was under maintenance.
         <br />
         <br />
-        <b class="text-primary">How to Play: </b> Guide the worker to the
-        mushrooms while avoiding Pokies! For every 20 mushrooms you collect, a
-        golden mushroom power-up will appear. Eat it to become invincible and
-        kill Pokies by smashing them with your body for a short amount of time.
-        Can you get the score to 0?
+        <b class="text-primary">How to Play: </b> Guide the worker to the mushrooms
+        while avoiding Pokies! For every 20 mushrooms you collect, a golden mushroom
+        power-up will appear. Eat it to become invincible and kill Pokies by smashing
+        them with your body for a short amount of time. Can you get the score to 0?
       </p>
       <div class="mt-6">
         <PrimaryButton
-          on:click={() => { launchSwf("pokies", "english") }}
+          on:click={() => {
+            launchSwf("pokies", "english");
+          }}
           buttonText="Play Now"
           width="w-40"
           color="bg-secondary"

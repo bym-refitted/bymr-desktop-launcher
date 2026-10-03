@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-  import {FrameCorners, Minus, X as Close} from "phosphor-svelte";
+  import { FrameCorners, Minus, X as Close } from "phosphor-svelte";
 
   const appWindow = getCurrentWebviewWindow();
 
@@ -54,7 +54,7 @@
     class="group inline-flex items-center justify-center w-7 h-7 relative cursor-pointer"
     id="titlebar-close"
   >
-    <div class="absolute inset-0 bg-transparent group-hover:bg-red" ></div>
+    <div class="absolute inset-0 bg-transparent group-hover:bg-red"></div>
     <Close size={15} class="z-10 text-white/50" weight="bold" />
   </div>
 </div>
