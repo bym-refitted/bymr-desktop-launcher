@@ -1,0 +1,11 @@
+[package]
+name = "bymr-input-protocol"
+description = "Names shared by bymr-player.exe and the DLL it loads into the Flash Player"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+windows-sys.workspace = true
