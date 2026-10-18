@@ -24,21 +24,31 @@ jobs:
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
+        with:
+          # flash-input is 32-bit to match the 32-bit standalone Flash Player
+          targets: i686-pc-windows-msvc
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: "./src-tauri -> target"
+          workspaces: |
+            ./src-tauri -> target
+            ./flash-input -> target
 
       - name: Install frontend dependencies
         run: npm ci
+
+      - name: Build Flash input fix
+        working-directory: flash-input
+        run: cargo build --release
 
       - name: Build
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           VITE_BASE_URL: https://server.bymrefitted.com
-        run: npm run tauri build -- --bundles nsis,msi
+        # tauri.flash-input.conf.json bundles bymr-player.exe and bymr_input.dll (Windows only)
+        run: npm run tauri build -- --bundles nsis,msi --config src-tauri/tauri.flash-input.conf.json
 
       - name: Upload NSIS installer
         uses: actions/upload-artifact@v4

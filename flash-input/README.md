@@ -52,6 +52,17 @@ The player is already running by the time the fix is attempted, so the game is n
 
 The only fatal error is Flash Player itself failing to start.
 
+## Shipping with the launcher
+
+The Windows launcher bundles both files and starts Flash Player through `bymr-player.exe` (`src-tauri/src/flash_input.rs`):
+
+- **Build:** the Windows CI workflow builds this folder, then bundles both files into `<install dir>/flash-input/` through `src-tauri/tauri.flash-input.conf.json`.
+- **Launch:** the launcher starts the wrapper without a console window and shows its output in the launcher's Activity Logs.
+- **Fallback:** if the wrapper is missing or fails to start, the launcher starts Flash Player directly.
+- **Opt-in switch:** the launcher only uses the fix when the CDN `versionManifest.json` has `"launcherFlashInputFix": true`; `false`, a missing key or an unreachable manifest launch Flash Player directly, without a launcher release.
+
+Output is written with `report!`/`report_error!`, which never panic. The launcher may close the pipe while the game runs, and a panic would abort the wrapper and close Flash Player through the job object.
+
 ## Requirements
 
 - Windows 10 version 1803 or later, for high-resolution waitable timers. On older versions the game runs without the fix.
