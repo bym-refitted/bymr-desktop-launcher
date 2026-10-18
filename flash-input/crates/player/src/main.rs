@@ -80,9 +80,9 @@ fn main() {
 fn run(player: &OsStr, swf: &OsStr, print_stats: bool) -> Result<u32, String> {
     let player_path = wide(player);
     let mut command = Vec::new();
-    push_quoted(&mut command, player);
+    push_argument(&mut command, player);
     command.push(u16::from(b' '));
-    push_quoted(&mut command, swf);
+    push_argument(&mut command, swf);
     command.push(0);
 
     let startup = STARTUPINFOW {
@@ -313,11 +313,26 @@ fn wait_for_answer(
     }
 }
 
-/// Appends `argument` to a command line, quoted the way Windows splits argv:
-/// backslashes are doubled before a quote and at the end of the argument.
-fn push_quoted(command: &mut Vec<u16>, argument: &OsStr) {
+/// Appends `argument` to a command line, quoting it only when Windows argv splitting needs it,
+/// the same rule `std::process::Command` follows.
+///
+/// The standalone Flash Player cuts a quoted argument to about 256 characters, which truncated
+/// the session token at the end of the game URL. Game URLs contain no spaces, so they are
+/// passed unquoted and arrive whole, exactly as when the launcher started Flash Player itself.
+///
+/// When quoting is needed, backslashes are doubled before a quote and at the end of the argument.
+fn push_argument(command: &mut Vec<u16>, argument: &OsStr) {
     const QUOTE: u16 = b'"' as u16;
     const BACKSLASH: u16 = b'\\' as u16;
+
+    let needs_quotes = argument.is_empty()
+        || argument
+            .encode_wide()
+            .any(|unit| matches!(unit, 0x20 | 0x09 | 0x0A | 0x0B | QUOTE));
+    if !needs_quotes {
+        command.extend(argument.encode_wide());
+        return;
+    }
 
     command.push(QUOTE);
     let mut backslashes = 0;
