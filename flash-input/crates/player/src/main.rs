@@ -38,6 +38,23 @@ use windows_sys::Win32::UI::WindowsAndMessaging::{
 
 const STARTUP_TIMEOUT_MS: u32 = 15_000;
 
+/// `println!` that never panics. The launcher reads this output through a pipe and may close
+/// before we print; a panic here would abort and take Flash Player down with the job object.
+macro_rules! report {
+    ($($arg:tt)*) => {{
+        use std::io::Write;
+        let _ = writeln!(std::io::stdout(), $($arg)*);
+    }};
+}
+
+/// `eprintln!` that never panics, for the same reason as [`report!`].
+macro_rules! report_error {
+    ($($arg:tt)*) => {{
+        use std::io::Write;
+        let _ = writeln!(std::io::stderr(), $($arg)*);
+    }};
+}
+
 fn main() {
     let mut arguments: Vec<_> = env::args_os().skip(1).collect();
     let print_stats = arguments.first().is_some_and(|flag| flag == "--stats");
@@ -45,14 +62,14 @@ fn main() {
         arguments.remove(0);
     }
     let [player, swf] = arguments.as_slice() else {
-        eprintln!("Usage: bymr-player.exe [--stats] <flashplayer.exe> <game.swf>");
+        report_error!("Usage: bymr-player.exe [--stats] <flashplayer.exe> <game.swf>");
         process::exit(2);
     };
 
     match run(player, swf, print_stats) {
         Ok(exit_code) => process::exit(exit_code as i32),
         Err(message) => {
-            eprintln!("Flash Player launch failed: {message}.");
+            report_error!("Flash Player launch failed: {message}.");
             process::exit(1);
         }
     }
@@ -96,16 +113,16 @@ fn run(player: &OsStr, swf: &OsStr, print_stats: bool) -> Result<u32, String> {
     };
 
     let _job = contain_in_job(&process)
-        .inspect_err(|message| eprintln!("Flash Player will outlive this launcher: {message}."))
+        .inspect_err(|message| report_error!("Flash Player will outlive this launcher: {message}."))
         .ok();
 
     // The player is already running, so a failed or slow install costs nothing.
     match install_input_fix(&player_path, &process, child.dwThreadId, print_stats) {
-        Ok(()) => println!(
+        Ok(()) => report!(
             "Flash Player PID {}: input scheduling fix active.",
             child.dwProcessId
         ),
-        Err(message) => eprintln!(
+        Err(message) => report_error!(
             "Flash Player PID {}: running without the input scheduling fix: {message}.",
             child.dwProcessId
         ),
@@ -141,7 +158,7 @@ fn wait_for_exit(process: &OwnedHandle) {
         } != 0
         {
             if stats.wParam != 0 {
-                println!(
+                report!(
                     "Input fix: {} early wake-ups in the last second, player resumed {:.1} ms after deferring on average.",
                     stats.wParam,
                     stats.lParam as f64 / 1000.0

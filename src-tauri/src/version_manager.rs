@@ -20,6 +20,8 @@ pub struct VersionManifest {
     pub current_game_version: String,
     #[serde(rename = "currentAndroidVersion")]
     pub current_android_version: String,
+    #[serde(rename = "launcherFlashInputFix", default)]
+    pub flash_input_fix: bool,
 }
 
 pub async fn get_server_manifest() -> Result<(VersionManifest, bool), networking::FetchError> {

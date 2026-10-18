@@ -1,0 +1,8 @@
+{
+  "bundle": {
+    "resources": {
+      "../flash-input/target/i686-pc-windows-msvc/release/bymr-player.exe": "flash-input/bymr-player.exe",
+      "../flash-input/target/i686-pc-windows-msvc/release/bymr_input.dll": "flash-input/bymr_input.dll"
+    }
+  }
+}
