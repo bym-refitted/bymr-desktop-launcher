@@ -1,17 +1,20 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod flash_input;
 mod networking;
 mod version_manager;
 
+use crate::flash_input::InputFixSetting;
 use crate::version_manager::*;
 use serde::Serialize;
 use std::env;
 use std::process::Command;
-use tauri::{command, AppHandle, Emitter};
+use tauri::{command, AppHandle, Emitter, Manager};
 
 fn main() {
     tauri::Builder::default()
+        .manage(InputFixSetting::default())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
@@ -41,6 +44,7 @@ async fn initialize_app(app: AppHandle) -> Result<(), String> {
                     manifest.current_game_version, if used_https {"s"} else {""}
                 ),
             );
+            app.state::<InputFixSetting>().set(manifest.flash_input_fix);
             used_https
         }
         Err(err) => {
@@ -104,6 +108,18 @@ fn launch_game(
 
     println!("Opening: {:?}, {:?}", flash_runtime_path, swf_url);
 
+    // On Windows, start Flash Player through the input fix when it is bundled and enabled
+    if let Some(wrapper) = flash_input::bundled_wrapper(&app) {
+        match flash_input::launch(&app, &wrapper, &flash_runtime_path, &swf_url) {
+            Ok(()) => return Ok(()),
+            Err(err) => emit_event(
+                &app,
+                "infoLog",
+                format!("Input fix could not start ({err}), launching Flash Player directly."),
+            ),
+        }
+    }
+
     // Open the game in Flash Player
     Command::new(&flash_runtime_path)
         .arg(&swf_url)
@@ -128,8 +144,8 @@ async fn get_current_game_version() -> Result<String, String> {
 }
 
 #[derive(Clone, Serialize)]
-struct EventLog {
-    message: String,
+pub(crate) struct EventLog {
+    pub(crate) message: String,
 }
 
 fn emit_event(app: &AppHandle, event_type: &str, message: String) {
