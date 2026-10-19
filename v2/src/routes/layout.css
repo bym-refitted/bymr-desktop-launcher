@@ -1,0 +1,132 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+@font-face {
+  font-family: "Graveblade";
+  src: url("../lib/assets/fonts/Graveblade-W00-Regular.ttf") format("truetype");
+  font-display: block;
+}
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --background: hsl(212 18% 14%);
+  --foreground: hsl(210 40% 98%);
+  --card: hsl(212 17% 16.5%);
+  --sunken: hsl(212 20% 11%);
+  --accent: hsl(212 18% 18.5%);
+  --muted-foreground: hsl(215 16% 64%);
+  --border: hsl(213 18% 21%);
+  --border-strong: hsl(213 14% 30%);
+  --primary: hsl(174 100% 40%);
+  --primary-foreground: hsl(174 90% 7%);
+  --secondary: hsl(220 100% 64%);
+  --secondary-foreground: #fff;
+  --destructive: hsl(358 75% 59%);
+  --success: hsl(150 70% 48%);
+  --warning: hsl(38 95% 58%);
+  --contour-opacity: 0.08;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --background: hsl(40 14% 95%);
+  --foreground: hsl(212 28% 12%);
+  --card: hsl(40 20% 98.5%);
+  --sunken: hsl(40 20% 98.5%);
+  --accent: hsl(40 10% 92%);
+  --muted-foreground: hsl(212 12% 42%);
+  --border: hsl(212 20% 15% / 0.12);
+  --border-strong: hsl(212 20% 15% / 0.28);
+  --primary: hsl(174 100% 30%);
+  --primary-foreground: #fff;
+  --secondary: hsl(220 85% 50%);
+  --success: hsl(150 65% 36%);
+  --contour-opacity: 0.12;
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Graveblade", ui-sans-serif, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-sunken: var(--sunken);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body {
+    @apply h-full;
+  }
+  body {
+    @apply overflow-hidden bg-background font-sans text-foreground antialiased select-none;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
+  }
+  /* Tailwind 4's preflight no longer gives buttons a pointer cursor. */
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  input,
+  textarea {
+    @apply select-text;
+  }
+}
+
+/* Graveblade headline; wrap the highlighted word in <em>. */
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.02;
+  & em {
+    font-style: normal;
+    color: var(--primary);
+  }
+}
+
+@utility eyebrow {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+@utility num {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+
+@utility contours {
+  pointer-events: none;
+  background: url("../lib/assets/art/contours.png") center / cover;
+  opacity: var(--contour-opacity);
+  mask-image: radial-gradient(
+    ellipse 70% 90% at 30% 40%,
+    #000 15%,
+    transparent 75%
+  );
+  &:where([data-theme="light"] *) {
+    filter: invert(1);
+  }
+}
