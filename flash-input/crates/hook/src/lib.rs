@@ -5,6 +5,11 @@
 //! `bymr-player.exe`, replaces the player's `SetTimer` and `KillTimer` imports,
 //! and delivers that timer's `WM_TIMER` after one millisecond instead.
 //!
+//! It also replaces `PostQuitMessage`. A posted `WM_TIMER` is retrieved before `WM_QUIT`, unlike
+//! the timer's own, and the player's handler for it peeks with `PM_REMOVE`, which takes and
+//! discards `WM_QUIT` whatever the filter. The player then keeps running with no window, so no
+//! early wake may be left in the queue once it asks to quit.
+//!
 //! Requires Windows 10 version 1803 or later for high-resolution waitable timers.
 
 #[cfg(not(all(windows, target_pointer_width = "32")))]
@@ -33,8 +38,9 @@ use windows_sys::Win32::System::Threading::{
     SetWaitableTimer, TIMER_ALL_ACCESS, WaitForSingleObject,
 };
 use windows_sys::Win32::UI::WindowsAndMessaging::{
-    CallNextHookEx, GetClassNameW, HC_ACTION, KillTimer, MSG, PostMessageW, PostThreadMessageW,
-    RegisterWindowMessageW, SetTimer, TIMERPROC, WM_TIMER,
+    CallNextHookEx, GetClassNameW, HC_ACTION, KillTimer, MSG, PM_REMOVE, PeekMessageW, PostMessageW,
+    PostQuitMessage, PostThreadMessageW, RegisterWindowMessageW, SetTimer, TIMERPROC, WM_QUIT,
+    WM_TIMER,
 };
 
 use imports::{find_user32_import, replace_import};
@@ -50,6 +56,15 @@ static WAKE_TIMER: AtomicPtr<c_void> = AtomicPtr::new(null_mut());
 
 /// Window owed an early `WM_TIMER` when the wake timer fires, or null.
 static PENDING_WAKE: AtomicPtr<c_void> = AtomicPtr::new(null_mut());
+
+/// Window the last early wake was scheduled for, or null.
+static WAKE_WINDOW: AtomicPtr<c_void> = AtomicPtr::new(null_mut());
+
+/// Set once the player asks to quit. No early wake is delivered after that.
+static QUITTING: AtomicBool = AtomicBool::new(false);
+
+/// Held while an early wake is posted, so that quitting cannot miss one in flight.
+static POSTING: Mutex<()> = Mutex::new(());
 
 /// Set when the launcher asks for statistics. Nothing is counted otherwise.
 static STATS_ENABLED: AtomicBool = AtomicBool::new(false);
@@ -113,6 +128,8 @@ pub unsafe extern "system" fn BymrInputHook(code: i32, wparam: WPARAM, lparam: L
 unsafe fn install() -> Result<(), WIN32_ERROR> {
     let set_timer_slot = unsafe { find_user32_import(c"SetTimer") }.ok_or(ERROR_NOT_SUPPORTED)?;
     let kill_timer_slot = unsafe { find_user32_import(c"KillTimer") }.ok_or(ERROR_NOT_SUPPORTED)?;
+    let post_quit_slot =
+        unsafe { find_user32_import(c"PostQuitMessage") }.ok_or(ERROR_NOT_SUPPORTED)?;
 
     let timer = unsafe {
         CreateWaitableTimerExW(
@@ -152,7 +169,9 @@ unsafe fn install() -> Result<(), WIN32_ERROR> {
                 .map_or(ERROR_NOT_ENOUGH_MEMORY, |code| code as WIN32_ERROR)
         })?;
 
+    // Replace the quit path first, so the early wakes never run without it.
     unsafe {
+        replace_import(post_quit_slot, post_quit_message as *mut c_void)?;
         replace_import(set_timer_slot, set_timer as *mut c_void)?;
         if let Err(error) = replace_import(kill_timer_slot, kill_timer as *mut c_void) {
             let _ = replace_import(set_timer_slot, SetTimer as *mut c_void);
@@ -173,8 +192,9 @@ fn deliver_wakes() {
     let timer = WAKE_TIMER.load(Ordering::Relaxed);
     while unsafe { WaitForSingleObject(timer, INFINITE) } == WAIT_OBJECT_0 {
         let window = PENDING_WAKE.swap(null_mut(), Ordering::AcqRel);
+        let _posting = POSTING.lock().unwrap_or_else(PoisonError::into_inner);
 
-        if !window.is_null() {
+        if !window.is_null() && !QUITTING.load(Ordering::Acquire) {
             unsafe { PostMessageW(window, WM_TIMER, INPUT_TIMER_ID, 0) };
             if let Some(mut stats) = stats() {
                 stats.wakes += 1;
@@ -262,7 +282,7 @@ unsafe extern "system" fn set_timer(
     delay: u32,
     callback: TIMERPROC,
 ) -> usize {
-    if !is_input_deferral(window, id, delay, callback) {
+    if QUITTING.load(Ordering::Acquire) || !is_input_deferral(window, id, delay, callback) {
         cancel_pending_wake(window, id);
         return unsafe { SetTimer(window, id, delay, callback) };
     }
@@ -278,6 +298,7 @@ unsafe extern "system" fn set_timer(
 
         // SetTimer(0) is clamped to >=10 ms. Give the player a brief input yield
         // using a high-resolution timer, then deliver its existing notification.
+        WAKE_WINDOW.store(window, Ordering::Relaxed);
         PENDING_WAKE.store(window, Ordering::Release);
         let timer = WAKE_TIMER.load(Ordering::Relaxed);
         if unsafe { SetWaitableTimer(timer, &WAKE_DELAY, 0, None, null(), FALSE) } == 0 {
@@ -286,6 +307,34 @@ unsafe extern "system" fn set_timer(
     }
 
     timer_id
+}
+
+/// Stops early wakes and removes any already posted before the player quits, so that
+/// `WM_QUIT` is the next message it retrieves, as without this DLL.
+///
+/// Runs on the player's UI thread, which owns the queue being drained.
+unsafe extern "system" fn post_quit_message(exit_code: i32) {
+    {
+        let _posting = POSTING.lock().unwrap_or_else(PoisonError::into_inner);
+        QUITTING.store(true, Ordering::Release);
+    }
+    if !PENDING_WAKE.swap(null_mut(), Ordering::AcqRel).is_null() {
+        unsafe { CancelWaitableTimer(WAKE_TIMER.load(Ordering::Relaxed)) };
+    }
+
+    let window = WAKE_WINDOW.load(Ordering::Relaxed);
+    let mut message = MSG::default();
+    while !window.is_null()
+        && unsafe { PeekMessageW(&mut message, window, WM_TIMER, WM_TIMER, PM_REMOVE) } != 0
+    {
+        // An earlier quit request is also returned whatever the filter: keep it.
+        if message.message == WM_QUIT {
+            unsafe { PostQuitMessage(message.wParam as i32) };
+            break;
+        }
+    }
+
+    unsafe { PostQuitMessage(exit_code) }
 }
 
 unsafe extern "system" fn kill_timer(window: HWND, id: usize) -> i32 {

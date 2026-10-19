@@ -17,7 +17,7 @@
 </script>
 
 <div
-  class="min-h-screen grid grid-cols-1 [@media(min-width:1500px)]:grid-cols-2 gap-8 px-6 py-8 [@media(min-width:1500px)]:px-12 overflow-x-hidden"
+  class="flex-1 grid grid-cols-1 [@media(min-width:1500px)]:grid-cols-2 gap-8 px-6 py-8 [@media(min-width:1500px)]:px-12 overflow-x-clip"
 >
   <div
     class="flex flex-col justify-start [@media(min-width:1500px)]:pr-8 [@media(min-width:1500px)]:pt-16"
