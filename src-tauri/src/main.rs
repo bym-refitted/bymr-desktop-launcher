@@ -9,6 +9,7 @@ use crate::flash_input::InputFixSetting;
 use crate::version_manager::*;
 use serde::Serialize;
 use std::env;
+use std::path::Path;
 use std::process::Command;
 use tauri::{command, AppHandle, Emitter, Manager};
 
@@ -110,7 +111,16 @@ fn launch_game(
 
     // On Windows, start Flash Player through the input fix when it is bundled and enabled
     if let Some(wrapper) = flash_input::bundled_wrapper(&app) {
-        match flash_input::launch(&app, &wrapper, &flash_runtime_path, &swf_url) {
+        let fallback = {
+            let app = app.clone();
+            let (flash_runtime_path, swf_url) = (flash_runtime_path.clone(), swf_url.clone());
+            move || {
+                if let Err(err) = start_flash_player(&flash_runtime_path, &swf_url) {
+                    emit_event(&app, "errorLog", err);
+                }
+            }
+        };
+        match flash_input::launch(&app, &wrapper, &flash_runtime_path, &swf_url, fallback) {
             Ok(()) => return Ok(()),
             Err(err) => emit_event(
                 &app,
@@ -120,9 +130,13 @@ fn launch_game(
         }
     }
 
-    // Open the game in Flash Player
-    Command::new(&flash_runtime_path)
-        .arg(&swf_url)
+    start_flash_player(&flash_runtime_path, &swf_url)
+}
+
+/// Opens the game in Flash Player directly.
+fn start_flash_player(flash_runtime_path: &Path, swf_url: &str) -> Result<(), String> {
+    Command::new(flash_runtime_path)
+        .arg(swf_url)
         .env_remove("LD_LIBRARY_PATH") // On Linux, clear LD_LIBRARY_PATH so the AppImage's bundled GLib doesn't shadow the system GLib that flashplayer's GTK2 dependency requires
         .spawn()
         .map_err(|err| {
