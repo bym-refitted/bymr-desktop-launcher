@@ -16,7 +16,8 @@ flashplayer.*
 .idea
 .svelte-kit
 .tauri
-vite.config.ts*
+/vite.config.ts*
 
 # AI Configs
 CLAUDE.md
+/docs
