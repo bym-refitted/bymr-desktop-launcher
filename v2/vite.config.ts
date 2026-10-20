@@ -16,5 +16,5 @@ export default defineConfig({
     }),
   ],
   clearScreen: false,
-  server: { port: 5174, strictPort: true },
+  server: { port: 5174, strictPort: true, warmup: { clientFiles: ["./src/routes/**/+page.svelte"] } },
 });
