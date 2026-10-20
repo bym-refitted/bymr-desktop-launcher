@@ -50,6 +50,18 @@ class User {
   }
 
   /**
+   * Updates the username, keeping the copy saved on this device in step if the user is remembered.
+   *
+   * @param {string} username - The new username.
+   */
+  rename(username: string) {
+    const details = { token: this.token, userId: this.userId, username, language: this.language, avatar: this.avatar };
+
+    if (this.remembered) this.save(details);
+    else this.set(details);
+  }
+
+  /**
    * Signs the user out locally and forgets them on this device.
    */
   clear() {

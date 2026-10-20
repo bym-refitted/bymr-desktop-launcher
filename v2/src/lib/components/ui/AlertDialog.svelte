@@ -11,9 +11,18 @@
     art?: string;
     buttonLabel?: string;
     error?: boolean;
+    onconfirm?: () => void;
   }
 
-  let { open = $bindable(false), label, title, description, art, buttonLabel = "Okay", error = false }: Props = $props();
+  let { open = $bindable(false), label, title, description, art, buttonLabel = "Okay", error = false, onconfirm }: Props = $props();
+
+  /**
+   * Closes the dialog and runs the confirmed action.
+   */
+  const confirm = () => {
+    open = false;
+    onconfirm?.();
+  };
 </script>
 
 <AlertDialog.Root bind:open>
@@ -44,11 +53,26 @@
                   <AlertDialog.Description class="mt-1.5 text-muted-foreground">{description}</AlertDialog.Description>
                 </div>
               </div>
-              <AlertDialog.Cancel>
-                {#snippet child({ props })}
-                  <Button {...props} variant={error ? "outline" : "default"} class="justify-self-end">{buttonLabel}</Button>
-                {/snippet}
-              </AlertDialog.Cancel>
+              <div class="flex justify-end gap-2">
+                {#if onconfirm}
+                  <AlertDialog.Cancel>
+                    {#snippet child({ props })}
+                      <Button {...props} variant="outline">Cancel</Button>
+                    {/snippet}
+                  </AlertDialog.Cancel>
+                  <AlertDialog.Action>
+                    {#snippet child({ props })}
+                      <Button {...props} onclick={confirm}>{buttonLabel}</Button>
+                    {/snippet}
+                  </AlertDialog.Action>
+                {:else}
+                  <AlertDialog.Cancel>
+                    {#snippet child({ props })}
+                      <Button {...props} variant={error ? "outline" : "default"}>{buttonLabel}</Button>
+                    {/snippet}
+                  </AlertDialog.Cancel>
+                {/if}
+              </div>
             </div>
           </div>
         {/if}

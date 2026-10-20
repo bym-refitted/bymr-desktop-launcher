@@ -1,13 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Clock from "@lucide/svelte/icons/clock";
-  import { goto } from "$app/navigation";
   import { AttackLogFilter, getAttackLogs } from "#lib/api/attackLogs.js";
   import { toErrorMessage } from "#lib/api/errors.js";
-  import brain from "#lib/assets/art/brain.png";
   import snipertower from "#lib/assets/art/snipertower.png";
   import AttackLogTable from "#lib/components/attack-logs/AttackLogTable.svelte";
-  import Button from "#lib/components/ui/Button.svelte";
+  import SignInPrompt from "#lib/components/ui/SignInPrompt.svelte";
   import TabBar from "#lib/components/ui/TabBar.svelte";
   import type { AttackLog } from "#lib/schemas.js";
   import { logs } from "#lib/state/logs.svelte.js";
@@ -84,11 +82,6 @@
     </div>
     <AttackLogTable {battles} {loading} {error} onretry={loadBattles} />
   {:else}
-    <div class="grid flex-1 place-content-center justify-items-center gap-3 text-center">
-      <img src={brain} alt="" class="w-20" />
-      <p class="font-semibold">Sign in to see your battles</p>
-      <p class="text-muted-foreground">Your raids and defences show up here once you're signed in.</p>
-      <Button class="mt-2" onclick={() => goto("/")}>Go to sign in</Button>
-    </div>
+    <SignInPrompt title="Sign in to see your battles" description="Your raids and defences show up here once you're signed in." />
   {/if}
 </div>

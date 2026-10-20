@@ -55,6 +55,28 @@ export const Account = z.object({
 
 export type Account = z.infer<typeof Account>;
 
+/** The player's account settings, sent and echoed back as a whole */
+export const Settings = z.object({ shinyLocked: z.boolean() });
+
+export type Settings = z.infer<typeof Settings>;
+
+/** The full account shown on the account page, with the username cooldown and settings */
+export const AccountDetails = Account.extend({
+  email: z.string(),
+  discord_verified: z.boolean(),
+  canChangeUsername: z.boolean(),
+  nextChangeAt: z.coerce.date().nullable(),
+  settings: Settings,
+});
+
+export type AccountDetails = z.infer<typeof AccountDetails>;
+
+/** The answer to a username change: the new name and when it can next be changed */
+export const UsernameChange = z.object({ username: z.string(), nextChangeAt: z.coerce.date() });
+
+/** The answer to a settings update */
+export const SettingsUpdate = z.object({ settings: Settings });
+
 /**
  * The player saved in localStorage when "Remember me" is ticked. Fields that are missing or broken fall back
  * to empty, so an older save still loads; only a missing token or user id discards it

@@ -12,7 +12,7 @@
 
   const appWindow = getCurrentWindow();
 
-  const visiblePages = $derived(pages.filter((link) => !link.signedIn || user.token));
+  const visiblePages = $derived(pages.filter((link) => !link.menu && (!link.signedIn || user.token)));
 
   /**
    * Maximises the window, or restores it if it is already maximised.
