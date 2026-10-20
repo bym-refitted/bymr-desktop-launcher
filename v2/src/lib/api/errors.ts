@@ -3,7 +3,7 @@ export const connectErrorMessage = "Could not connect to the server. Please chec
 const unexpectedErrorMessage = "An unexpected error occurred. Please try again later.";
 
 export const ErrorCode = {
-  SESSION_INVALID: "SESSION_INVALID",
+  sessionInvalid: "SESSION_INVALID",
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -36,7 +36,7 @@ export class ApiError extends Error {
  * @returns {boolean} True only when the stored session is what was rejected.
  */
 export const isSessionError = (error: unknown) =>
-  error instanceof ApiError && error.code === ErrorCode.SESSION_INVALID;
+  error instanceof ApiError && error.code === ErrorCode.sessionInvalid;
 
 /**
  * Turns any thrown value into a message fit to show the player.

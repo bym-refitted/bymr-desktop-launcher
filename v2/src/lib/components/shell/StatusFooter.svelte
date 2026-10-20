@@ -1,6 +1,9 @@
 <script lang="ts">
+  import Gem from "@lucide/svelte/icons/gem";
   import { openUrl } from "@tauri-apps/plugin-opener";
   import LogsSheet from "#lib/components/shell/LogsSheet.svelte";
+  import Discord from "#lib/components/ui/icons/Discord.svelte";
+  import GitHub from "#lib/components/ui/icons/GitHub.svelte";
   import { app } from "#lib/state/app.svelte.js";
   import { logs } from "#lib/state/logs.svelte.js";
 
@@ -21,9 +24,9 @@
   });
 
   const links = [
-    { label: "Discord", url: "https://discord.gg/bymrefitted" },
-    { label: "GitHub", url: "https://github.com/orgs/bym-refitted/repositories" },
-    { label: "Donate", url: "https://bymrefitted.com/donations/checkout" },
+    { label: "Discord", url: "https://discord.gg/bymrefitted", icon: Discord },
+    { label: "GitHub", url: "https://github.com/orgs/bym-refitted/repositories", icon: GitHub },
+    { label: "Donate", url: "https://bymrefitted.com/donations/checkout", icon: Gem },
   ];
   
 </script>
@@ -41,9 +44,9 @@
     View logs
   </button>
   <div class="flex gap-5">
-    {#each links as { label, url } (url)}
-      <button class="hover:text-foreground" onclick={() => openUrl(url)}>
-        {label}
+    {#each links as { label, url, icon: Icon } (url)}
+      <button class="flex items-center gap-1.5 hover:text-foreground" onclick={() => openUrl(url)}>
+        <Icon class="size-3.5" />{label}
       </button>
     {/each}
   </div>

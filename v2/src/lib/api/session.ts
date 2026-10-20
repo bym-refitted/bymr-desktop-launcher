@@ -1,5 +1,7 @@
+import { login, loginWithToken } from "#lib/api/auth.js";
 import { toErrorMessage } from "#lib/api/errors.js";
 import { getAccount, logout } from "#lib/api/player.js";
+import type { Credentials, SavedUser } from "#lib/schemas.js";
 import { logs } from "#lib/state/logs.svelte.js";
 import { session } from "#lib/state/session.svelte.js";
 import { user } from "#lib/state/user.svelte.js";
@@ -32,15 +34,54 @@ export const validateSession = async () => {
   if (hasExpired(user.token)) return session.end(true);
 
   try {
-    const { userId, username } = await getAccount();
+    const { userId, username, pic_square } = await getAccount();
 
-    user.save({ token: user.token, language: user.language, userId, username });
+    user.save({ token: user.token, language: user.language, userId, username, avatar: pic_square ?? "" });
 
     session.begin();
   } catch (error) {
     logs.error(`Could not validate the saved session: ${toErrorMessage(error)}`);
     if (session.status === "unknown") session.begin();
   }
+};
+
+/**
+ * Signs in with an email and password and begins the session.
+ *
+ * @param {Credentials} credentials - The player's email and password.
+ * @param {string} language - The language to play in, saved with the user.
+ * @param {boolean} remember - Whether to remember the user on this device.
+ * @returns {Promise<string>} The fresh session token, for launching the game.
+ * @throws {ApiError | Error} When the details are wrong or the request fails.
+ */
+export const signIn = async (credentials: Credentials, language: string, remember: boolean) => {
+  const { token, userId, username, pic_square } = await login(credentials);
+  const details: SavedUser = { token, userId, username, language, avatar: pic_square ?? "" };
+
+  if (remember) user.save(details);
+  else user.set(details);
+
+  session.begin();
+
+  return token;
+};
+
+/**
+ * Renews the signed-in user's token with the server, keeping them remembered if they were.
+ *
+ * @returns {Promise<string>} The fresh session token, for launching the game.
+ * @throws {ApiError | Error} When the token is rejected or the request fails.
+ */
+export const refreshSession = async () => {
+  const { token, userId, username, pic_square } = await loginWithToken(user.token);
+  const details: SavedUser = { token, userId, username, language: user.language, avatar: pic_square ?? "" };
+
+  if (user.remembered) user.save(details);
+  else user.set(details);
+
+  session.begin();
+
+  return token;
 };
 
 /**

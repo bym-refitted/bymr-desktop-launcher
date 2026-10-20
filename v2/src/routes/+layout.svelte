@@ -12,8 +12,7 @@
   import { startLauncher } from "#lib/startup.js";
   import { app } from "#lib/state/app.svelte.js";
   import { Build, build } from "#lib/state/build.svelte.js";
-  import { session } from "#lib/state/session.svelte.js";
-  import type { LayoutProps } from "./$types";
+  import { session } from "#lib/state/session.svelte.js";  import type { LayoutProps } from "./$types";
 
   let { children }: LayoutProps = $props();
 
@@ -46,11 +45,13 @@
           {/if}
         </span>
         <span>
-          {build.selected === Build.LOCAL
+          {build.selected === Build.local
             ? `Local server ${build.host}:${build.port}`
             : "Online server"}
           <span class="mx-1.5 opacity-40">·</span>
-          Game {app.gameVersion}
+          Game v{app.gameVersion}
+          <span class="mx-1.5 opacity-40">·</span>
+          Launcher v{app.launcherVersion}
         </span>
       </div>
 
@@ -71,6 +72,8 @@
 
 <AlertDialog
   bind:open={session.expired}
+  label="Session"
+  buttonLabel="Sign in again"
   title="Session expired"
   description="You were away long enough for your session to wander off. Sign in again to get back to your yard."
   art={brain}

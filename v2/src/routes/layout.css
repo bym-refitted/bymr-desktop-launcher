@@ -26,6 +26,7 @@
   --success: hsl(150 70% 48%);
   --warning: hsl(38 95% 58%);
   --contour-opacity: 0.08;
+  --lava-strength: 1;
 }
 
 [data-theme="light"] {
@@ -43,6 +44,7 @@
   --secondary: hsl(220 85% 50%);
   --success: hsl(150 65% 36%);
   --contour-opacity: 0.12;
+  --lava-strength: 0.6;
 }
 
 @theme inline {
@@ -75,7 +77,7 @@
     @apply h-full;
   }
   body {
-    @apply overflow-hidden bg-background font-sans text-foreground antialiased select-none;
+    @apply overflow-hidden bg-background font-sans text-sm text-foreground antialiased select-none;
     transition:
       background-color 0.2s,
       color 0.2s;
@@ -128,5 +130,44 @@
   );
   &:where([data-theme="light"] *) {
     filter: invert(1);
+  }
+}
+
+/* Korath's glow: a pulse and a hover boost each drive a registered property, so they combine instead of overriding the filter. */
+@property --lava-pulse {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --lava-boost {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@keyframes lava-pulse {
+  50% {
+    --lava-pulse: 1;
+  }
+}
+
+@utility lava-glow {
+  --lava: calc((0.35 + 0.35 * var(--lava-pulse) + 0.5 * var(--lava-boost)) * var(--lava-strength));
+  filter: drop-shadow(0 0 calc(8px + 10px * var(--lava-pulse) + 8px * var(--lava-boost)) hsl(24 100% 52% / var(--lava)));
+  animation: lava-pulse 4.5s ease-in-out infinite;
+  transition:
+    --lava-boost 0.3s ease,
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  &:hover {
+    --lava-boost: 1;
+    transform: translateY(-4px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transition: none;
+    &:hover {
+      transform: none;
+    }
   }
 }

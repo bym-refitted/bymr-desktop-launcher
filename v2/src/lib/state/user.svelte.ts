@@ -7,6 +7,7 @@ class User {
   userId = $state(0);
   username = $state("");
   language = $state("");
+  avatar = $state("");
   remembered = $state(false);
 
   /**
@@ -28,6 +29,15 @@ class User {
   }
 
   /**
+   * Sets the user for this session only, without remembering them on this device.
+   *
+   * @param {SavedUser} details - The user's token, id, username and language.
+   */
+  set(details: SavedUser) {
+    this.#apply(details, false);
+  }
+
+  /**
    * Sets the user and remembers them on this device.
    *
    * @param {SavedUser} details - The user's token, id, username and language.
@@ -43,7 +53,7 @@ class User {
    * Signs the user out locally and forgets them on this device.
    */
   clear() {
-    this.#apply({ token: "", userId: 0, username: "", language: "" }, false);
+    this.#apply({ token: "", userId: 0, username: "", language: "", avatar: "" }, false);
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch {}
@@ -58,6 +68,7 @@ class User {
     this.userId = details.userId;
     this.username = details.username;
     this.language = details.language;
+    this.avatar = details.avatar;
     this.remembered = remembered;
   }
 }
