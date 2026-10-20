@@ -1,0 +1,237 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+@font-face {
+  font-family: "Graveblade";
+  src: url("../lib/assets/fonts/Graveblade-W00-Regular.ttf") format("truetype");
+  font-display: block;
+}
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --background: hsl(212 18% 14%);
+  --foreground: hsl(210 40% 98%);
+  --card: hsl(212 17% 16.5%);
+  --sunken: hsl(212 20% 11%);
+  --accent: hsl(212 18% 18.5%);
+  --muted-foreground: hsl(215 16% 64%);
+  --border: hsl(213 18% 21%);
+  --border-strong: hsl(213 14% 30%);
+  --primary: hsl(174 100% 40%);
+  --primary-foreground: hsl(174 90% 7%);
+  --secondary: hsl(220 100% 64%);
+  --secondary-foreground: #fff;
+  --destructive: hsl(358 75% 59%);
+  --success: hsl(150 70% 48%);
+  --warning: hsl(38 95% 58%);
+  --gold: hsl(45 100% 55%);
+  --silver: hsl(212 16% 78%);
+  --bronze: hsl(26 68% 56%);
+  --contour-opacity: 0.08;
+  --lava-strength: 1;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --background: hsl(40 14% 95%);
+  --foreground: hsl(212 28% 12%);
+  --card: hsl(40 20% 98.5%);
+  --sunken: hsl(40 20% 98.5%);
+  --accent: hsl(40 10% 92%);
+  --muted-foreground: hsl(212 12% 42%);
+  --border: hsl(212 20% 15% / 0.12);
+  --border-strong: hsl(212 20% 15% / 0.28);
+  --primary: hsl(174 100% 30%);
+  --primary-foreground: #fff;
+  --secondary: hsl(220 85% 50%);
+  --success: hsl(150 65% 36%);
+  --gold: hsl(42 95% 44%);
+  --silver: hsl(212 10% 60%);
+  --bronze: hsl(24 62% 44%);
+  --contour-opacity: 0.12;
+  --lava-strength: 0.6;
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Graveblade", ui-sans-serif, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-sunken: var(--sunken);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-gold: var(--gold);
+  --color-silver: var(--silver);
+  --color-bronze: var(--bronze);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body {
+    @apply h-full;
+  }
+  body {
+    @apply overflow-hidden bg-background font-sans text-sm text-foreground antialiased select-none;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
+  }
+  /* Tailwind 4's preflight no longer gives buttons a pointer cursor. */
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  input,
+  textarea {
+    @apply select-text;
+  }
+  /* WebView2 and both WebKit webviews support these; standard scrollbar-* properties would make Chromium ignore them. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background: var(--border-strong) content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--muted-foreground);
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-old(page) {
+  animation: 120ms ease-out both page-out;
+}
+
+::view-transition-new(page) {
+  animation: 200ms cubic-bezier(0.33, 1, 0.68, 1) both page-in;
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-new(page) {
+    animation-name: page-fade-in;
+  }
+}
+
+/* Graveblade headline; wrap the highlighted word in <em>. */
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.02;
+  & em {
+    font-style: normal;
+    color: var(--primary);
+  }
+}
+
+@utility eyebrow {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+@utility num {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+
+@utility contours {
+  pointer-events: none;
+  background: url("../lib/assets/art/contours.png") center / cover;
+  opacity: var(--contour-opacity);
+  mask-image: radial-gradient(
+    ellipse 70% 90% at 30% 40%,
+    #000 15%,
+    transparent 75%
+  );
+  &:where([data-theme="light"] *) {
+    filter: invert(1);
+  }
+}
+
+/* Korath's glow: a pulse and a hover boost each drive a registered property, so they combine instead of overriding the filter. */
+@property --lava-pulse {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --lava-boost {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@keyframes lava-pulse {
+  50% {
+    --lava-pulse: 1;
+  }
+}
+
+@utility lava-glow {
+  --lava: calc((0.35 + 0.35 * var(--lava-pulse) + 0.5 * var(--lava-boost)) * var(--lava-strength));
+  filter: drop-shadow(0 0 calc(8px + 10px * var(--lava-pulse) + 8px * var(--lava-boost)) hsl(24 100% 52% / var(--lava)));
+  animation: lava-pulse 4.5s ease-in-out infinite;
+  transition:
+    --lava-boost 0.3s ease,
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  &:hover {
+    --lava-boost: 1;
+    transform: translateY(-4px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transition: none;
+    &:hover {
+      transform: none;
+    }
+  }
+}
