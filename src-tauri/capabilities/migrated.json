@@ -8,9 +8,6 @@
     "core:window:allow-maximize",
     "core:window:allow-unmaximize",
     "core:window:allow-minimize",
-    "core:window:allow-unminimize",
-    "core:window:allow-show",
-    "core:window:allow-hide",
     "core:window:allow-close",
     "core:window:allow-start-dragging",
     {
@@ -25,8 +22,6 @@
       ]
     },
     "opener:default",
-    "process:allow-exit",
-    "http:default",
     "process:default"
   ]
 }

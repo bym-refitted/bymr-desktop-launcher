@@ -1,98 +1,96 @@
 <script lang="ts">
-  import "../app.css";
-
-  import { getVersion } from "@tauri-apps/api/app";
-  import { check } from "@tauri-apps/plugin-updater";
-  import { relaunch } from "@tauri-apps/plugin-process";
-  import { platform } from "@tauri-apps/plugin-os";
-  import {
-    addErrorLog,
-    addSuccessLog,
-    setupLogListeners,
-  } from "$lib/stores/debugLogStore";
-  import { invoke } from "@tauri-apps/api/core";
+  import "./layout.css";
   import { onMount } from "svelte";
-  import Toast from "$lib/components/Toast.svelte";
-  import {
-    currentGameVersion,
-    hasLoaded,
-    setLoaded,
-  } from "$lib/stores/loadState";
-  import Titlebar from "$lib/components/Titlebar.svelte";
-  import TabView from "$lib/components/ui/tabs/TabView.svelte";
-  import Navbar from "$lib/components/Navbar.svelte";
-  import Loader from "$lib/components/Loader.svelte";
-  import { Platform } from "$lib/enums/Platform";
-  import AlertDialog from "$lib/components/AlertDialog.svelte";
-  import { WarningDiamond } from "phosphor-svelte";
-  import { sessionExpired } from "$lib/stores/sessionStore";
-  import { validateSession } from "$lib/utils/session";
+  import { Tooltip } from "bits-ui";
+  import LoaderCircle from "@lucide/svelte/icons/loader-circle";
+  import { onNavigate } from "$app/navigation";
+  import { page } from "$app/state";
+  import brain from "#lib/assets/art/brain.png";
+  import StatusFooter from "#lib/components/shell/StatusFooter.svelte";
+  import TopBar from "#lib/components/shell/TopBar.svelte";
+  import AlertDialog from "#lib/components/ui/AlertDialog.svelte";
+  import { pages } from "#lib/nav.js";
+  import { startLauncher } from "#lib/startup.js";
+  import { app } from "#lib/state/app.svelte.js";
+  import { Build, build } from "#lib/state/build.svelte.js";
+  import { launch } from "#lib/state/launch.svelte.js";
+  import { session } from "#lib/state/session.svelte.js";
+  import type { LayoutProps } from "./$types";
 
-  let launcherVersion = "0.0.0";
+  let { children }: LayoutProps = $props();
 
-  onMount(async () => {
-    try {
-      if (platform() !== Platform.MACOS) {
-        const update = await check();
-        if (update) {
-          await update.downloadAndInstall();
-          await relaunch();
-        }
-      }
-    } catch (e) {
-      console.error("Updater error:", e);
-    }
-    setupLogListeners();
-    initializeLauncher();
+  const currentIndex = $derived(pages.findIndex((p) => p.href === page.url.pathname));
+
+  onMount(startLauncher);
+
+  onNavigate((navigation) => {
+    if (!document.startViewTransition) return;
+
+    return new Promise((resolve) => {
+      document.startViewTransition(async () => {
+        resolve();
+        await navigation.complete;
+      });
+    });
   });
-
-  const initializeLauncher = async () => {
-    try {
-      const [launcherVersionManifest, currentGameVersionManifest, _] =
-        await Promise.all([
-          getVersion(),
-          invoke<string>("get_current_game_version"),
-          invoke("initialize_app"),
-        ]);
-
-      launcherVersion = launcherVersionManifest;
-      currentGameVersion.set(currentGameVersionManifest);
-
-      await validateSession();
-
-      addSuccessLog(`Launcher initialized! 🚀`);
-    } catch (error) {
-      addErrorLog(`Error during launcher initialization: ${error}`);
-    } finally {
-      setLoaded();
-    }
-  };
 </script>
 
+<svelte:head>
+  <title>Backyard Monsters: Refitted | Launcher</title>
+</svelte:head>
+
+<Tooltip.Provider delayDuration={300}>
+  <div class="flex h-full flex-col">
+    <TopBar />
+
+    <div
+      class="mx-8 flex min-h-0 flex-1 flex-col border-x max-[1100px]:mx-0 max-[1100px]:border-x-0"
+    >
+      <div
+        class="flex h-10 shrink-0 items-center justify-between border-b px-7 text-[12.5px] text-muted-foreground"
+      >
+        <span>
+          {#if currentIndex >= 0}
+            <span class="num">{String(currentIndex + 1).padStart(2, "0")}</span>
+            <span class="mx-2 opacity-40">/</span>
+            <b class="font-semibold text-foreground">
+              {pages[currentIndex].label}
+            </b>
+          {/if}
+        </span>
+        <span>
+          {build.selected === Build.local
+            ? `Custom server ${build.serverHost}`
+            : "Online server"}
+          <span class="mx-1.5 opacity-40">·</span>
+          Game v{app.gameVersion}
+          <span class="mx-1.5 opacity-40">·</span>
+          Launcher v{app.launcherVersion}
+        </span>
+      </div>
+
+      <main class="relative min-h-0 flex-1 [view-transition-name:page]">
+        {#if app.loaded}
+          {@render children()}
+        {:else}
+          <div class="grid h-full place-items-center">
+            <LoaderCircle class="size-8 animate-spin text-primary" />
+          </div>
+        {/if}
+      </main>
+
+      <StatusFooter />
+    </div>
+  </div>
+</Tooltip.Provider>
+
 <AlertDialog
-  bind:open={$sessionExpired}
-  title="Session Expired"
-  error="Your saved session has expired. Please login again to continue."
-  Icon={WarningDiamond}
+  bind:open={session.expired}
+  label="Session"
+  buttonLabel="Sign in again"
+  title="Session expired"
+  description="You were away long enough for your session to wander off. Sign in again to get back to your yard."
+  art={brain}
 />
 
-<!-- Custom Titlebar -->
-<Titlebar />
-<!-- Content -->
-<div class="flex flex-col h-screen">
-  <main
-    class="flex-1 overflow-hidden bg-background text-foreground flex flex-col antialiased select-none font-sans"
-  >
-    {#if !$hasLoaded}
-      <div class="w-full h-full flex justify-center items-center" role="status">
-        <Loader size={3} />
-      </div>
-    {:else}
-      <TabView>
-        <Navbar />
-        <slot />
-      </TabView>
-    {/if}
-  </main>
-  <Toast {launcherVersion} />
-</div>
+<AlertDialog bind:open={launch.failed} label="Launch failed" error title="Couldn't start the game" description={launch.message} />

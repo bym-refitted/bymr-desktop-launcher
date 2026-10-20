@@ -22,7 +22,7 @@ export const SEARCH_MIN_LENGTH = 2;
  * @param {Friend} friend - The friend to check.
  * @returns {boolean} True once their daily cooldown has ended, or if they've never been sent one.
  */
-export const canGift = (friend: Friend) => !friend.gift_ready_at || friend.gift_ready_at * 1000 <= Date.now();
+const canGift = (friend: Friend) => !friend.gift_ready_at || friend.gift_ready_at * 1000 <= Date.now();
 
 class Friends {
   friends = $state<Friend[]>([]);

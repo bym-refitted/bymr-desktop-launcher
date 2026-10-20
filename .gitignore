@@ -1,8 +1,6 @@
 # Build files
 build
-build/bin
 node_modules
-frontend/dist
 
 # macOS system files
 *.DS_Store
@@ -16,7 +14,7 @@ flashplayer.*
 .idea
 .svelte-kit
 .tauri
-/vite.config.ts*
+vite.config.ts.timestamp-*
 
 # AI Configs
 CLAUDE.md

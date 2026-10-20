@@ -10,9 +10,6 @@
   "bundle": {
     "active": true,
     "category": "DeveloperTool",
-    "copyright": "",
-    "targets": "all",
-    "externalBin": [],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -20,27 +17,9 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "windows": {
-      "certificateThumbprint": null,
-      "digestAlgorithm": "sha256",
-      "timestampUrl": ""
-    },
-    "longDescription": "",
-    "macOS": {
-      "entitlements": null,
-      "exceptionDomain": "",
-      "frameworks": [],
-      "providerShortName": null,
-      "signingIdentity": null
-    },
-    "resources": [],
-    "shortDescription": "",
     "linux": {
       "deb": {
         "depends": ["libgtk2.0-0"]
-      },
-      "appimage": {
-        "files": {}
       }
     },
     "createUpdaterArtifacts": true
