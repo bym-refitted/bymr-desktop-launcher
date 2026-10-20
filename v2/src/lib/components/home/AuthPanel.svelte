@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { Select } from "bits-ui";
   import ArrowLeft from "@lucide/svelte/icons/arrow-left";
   import Check from "@lucide/svelte/icons/check";
@@ -39,6 +38,8 @@
     { value: Mode.register, label: "Create account" },
   ];
 
+  const LANGUAGES_DELAY_MS = 400;
+
   const labels = { [Mode.signin]: "Sign in & Play", [Mode.register]: "Create account", [Mode.forgot]: "Send reset link" };
 
   let mode = $state<Mode>(Mode.signin);
@@ -51,6 +52,8 @@
   let error = $state("");
   let registered = $state(false);
   let resetSent = $state(false);
+
+  const languagesServer = $derived(build.serverUrlError ? "" : build.apiBaseUrl);
 
   const result = $derived(schemas[mode].safeParse(form));
 
@@ -114,13 +117,33 @@
     }
   };
 
-  onMount(() => {
-    getLanguages()
-      .then((available) => {
-        languages = available;
-        language = available.includes(user.language) ? user.language : available[0];
-      })
-      .catch((failure) => logs.error(`Could not load the available languages: ${toErrorMessage(failure)}`));
+  /**
+   * Fetches the languages the selected server offers, keeping the current list if it can't be reached.
+   *
+   * @param {() => boolean} isCurrent - Whether the server is still the selected one when the answer arrives.
+   * @returns {Promise<void>} Resolves once the list is updated or the request failed.
+   */
+  const loadLanguages = async (isCurrent: () => boolean) => {
+    try {
+      const available = await getLanguages();
+
+      if (!isCurrent()) return;
+
+      languages = available;
+      language = available.includes(user.language) ? user.language : available[0];
+    } catch {}
+  };
+
+  $effect(() => {
+    if (!languagesServer) return;
+
+    let current = true;
+    const timer = setTimeout(() => loadLanguages(() => current), LANGUAGES_DELAY_MS);
+
+    return () => {
+      current = false;
+      clearTimeout(timer);
+    };
   });
 </script>
 

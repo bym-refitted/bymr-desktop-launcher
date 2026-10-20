@@ -1,11 +1,11 @@
 <script lang="ts">
-  import Globe from "@lucide/svelte/icons/globe";
+  import Cloud from "@lucide/svelte/icons/cloud";
   import Server from "@lucide/svelte/icons/server";
   import Segmented from "#lib/components/ui/Segmented.svelte";
   import { Build, build } from "#lib/state/build.svelte.js";
 
   const options = [
-    { value: Build.stable, label: "Online", icon: Globe },
+    { value: Build.stable, label: "Online", icon: Cloud },
     { value: Build.local, label: "Custom", icon: Server },
   ];
 </script>

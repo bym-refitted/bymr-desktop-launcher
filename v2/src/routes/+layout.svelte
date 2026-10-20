@@ -6,7 +6,6 @@
   import { onNavigate } from "$app/navigation";
   import { page } from "$app/state";
   import brain from "#lib/assets/art/brain.png";
-  import favicon from "#lib/assets/favicon.png";
   import StatusFooter from "#lib/components/shell/StatusFooter.svelte";
   import TopBar from "#lib/components/shell/TopBar.svelte";
   import AlertDialog from "#lib/components/ui/AlertDialog.svelte";
@@ -38,7 +37,6 @@
 
 <svelte:head>
   <title>Backyard Monsters: Refitted | Launcher</title>
-  <link rel="icon" href={favicon} />
 </svelte:head>
 
 <Tooltip.Provider delayDuration={300}>
