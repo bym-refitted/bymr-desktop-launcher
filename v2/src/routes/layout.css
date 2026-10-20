@@ -25,6 +25,9 @@
   --destructive: hsl(358 75% 59%);
   --success: hsl(150 70% 48%);
   --warning: hsl(38 95% 58%);
+  --gold: hsl(45 100% 55%);
+  --silver: hsl(212 16% 78%);
+  --bronze: hsl(26 68% 56%);
   --contour-opacity: 0.08;
   --lava-strength: 1;
 }
@@ -43,6 +46,9 @@
   --primary-foreground: #fff;
   --secondary: hsl(220 85% 50%);
   --success: hsl(150 65% 36%);
+  --gold: hsl(42 95% 44%);
+  --silver: hsl(212 10% 60%);
+  --bronze: hsl(24 62% 44%);
   --contour-opacity: 0.12;
   --lava-strength: 0.6;
 }
@@ -66,6 +72,9 @@
   --color-destructive: var(--destructive);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-gold: var(--gold);
+  --color-silver: var(--silver);
+  --color-bronze: var(--bronze);
 }
 
 @layer base {
@@ -89,6 +98,23 @@
   input,
   textarea {
     @apply select-text;
+  }
+  /* WebView2 and both WebKit webviews support these; standard scrollbar-* properties would make Chromium ignore them. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background: var(--border-strong) content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--muted-foreground);
   }
 }
 

@@ -2,8 +2,8 @@
   import { DropdownMenu } from "bits-ui";
   import ChevronDown from "@lucide/svelte/icons/chevron-down";
   import LogOut from "@lucide/svelte/icons/log-out";
-  import PlayerAvatar from "#lib/components/shell/PlayerAvatar.svelte";
   import { signOut } from "#lib/api/session.js";
+  import Avatar from "#lib/components/ui/Avatar.svelte";
   import { user } from "#lib/state/user.svelte.js";
 </script>
 
@@ -11,7 +11,7 @@
   <DropdownMenu.Trigger
     class="flex items-center gap-2 px-3 text-[13px] font-semibold transition-colors hover:bg-accent data-[state=open]:bg-accent"
   >
-    <PlayerAvatar class="size-7 rounded-md" />
+    <Avatar src={user.avatar} class="size-7 rounded-md" />
     {user.username || "Account"}
     <ChevronDown class="size-3.5 text-muted-foreground" />
   </DropdownMenu.Trigger>

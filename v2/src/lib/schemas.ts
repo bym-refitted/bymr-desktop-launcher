@@ -49,8 +49,29 @@ export const LoginResponse = z.object({
 
 export const Languages = z.array(z.string());
 
+export const World = z.object({
+  uuid: z.string(),
+  name: z.string(),
+  playerCount: z.number(),
+  map_version: z.number(),
+});
+
+export const Worlds = z.object({ worlds: z.array(World) });
+
+export const LeaderboardEntry = z.object({
+  username: z.string(),
+  discord_tag: z.string().nullish(),
+  pic_square: z.string().nullish(),
+  outpost_count: z.coerce.number(),
+  stronghold_count: z.coerce.number().optional(),
+});
+
+export const Leaderboard = z.object({ leaderboard: z.array(LeaderboardEntry) });
+
 export type Account = z.infer<typeof Account>;
 export type SavedUser = z.infer<typeof SavedUser>;
 export type Credentials = z.infer<typeof Credentials>;
 export type Registration = z.infer<typeof Registration>;
 export type LoginResponse = z.infer<typeof LoginResponse>;
+export type World = z.infer<typeof World>;
+export type LeaderboardEntry = z.infer<typeof LeaderboardEntry>;

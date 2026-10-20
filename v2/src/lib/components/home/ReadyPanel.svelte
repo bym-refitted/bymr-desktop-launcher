@@ -2,8 +2,8 @@
   import Play from "@lucide/svelte/icons/play";
   import { toErrorMessage } from "#lib/api/errors.js";
   import { refreshSession, signOut } from "#lib/api/session.js";
-  import PlayerAvatar from "#lib/components/shell/PlayerAvatar.svelte";
   import ServerFields from "#lib/components/home/ServerFields.svelte";
+  import Avatar from "#lib/components/ui/Avatar.svelte";
   import Button from "#lib/components/ui/Button.svelte";
   import { launch } from "#lib/state/launch.svelte.js";
   import { logs } from "#lib/state/logs.svelte.js";
@@ -44,7 +44,7 @@
 
   <div class="grid min-h-0 flex-1 content-start gap-4 overflow-auto px-7 py-5">
     <div class="flex items-center gap-3.5">
-      <PlayerAvatar class="size-14 rounded-xl" />
+      <Avatar src={user.avatar} class="size-14 rounded-xl" />
       <div>
         <p class="eyebrow">Welcome back</p>
         <p class="display text-3xl">{user.username || "Player"}</p>
