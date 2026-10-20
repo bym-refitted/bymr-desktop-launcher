@@ -118,6 +118,44 @@
   }
 }
 
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-old(page) {
+  animation: 120ms ease-out both page-out;
+}
+
+::view-transition-new(page) {
+  animation: 200ms cubic-bezier(0.33, 1, 0.68, 1) both page-in;
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-new(page) {
+    animation-name: page-fade-in;
+  }
+}
+
 /* Graveblade headline; wrap the highlighted word in <em>. */
 @utility display {
   font-family: var(--font-display);

@@ -1,9 +1,11 @@
 <script lang="ts">
+  import { fade } from "svelte/transition";
   import Clock from "@lucide/svelte/icons/clock";
   import Gift from "@lucide/svelte/icons/gift";
   import UserMinus from "@lucide/svelte/icons/user-minus";
   import PlayerRow from "#lib/components/friends/PlayerRow.svelte";
   import Button from "#lib/components/ui/Button.svelte";
+  import { DURATION_MS } from "#lib/motion.js";
   import type { Friend } from "#lib/schemas.js";
   import { friends } from "#lib/state/friends.svelte.js";
 
@@ -46,11 +48,11 @@
   };
 </script>
 
-{#each friends.friends as friend (friend.user_id)}
+{#each friends.friends as friend, index (friend.user_id)}
   {@const cooldown = readyIn(friend.gift_ready_at)}
-  <PlayerRow player={friend} note={noteFor(friend)}>
+  <PlayerRow player={friend} {index} note={noteFor(friend)}>
     {#if cooldown}
-      <span class="flex items-center gap-1.5 px-3 text-[12.5px] text-muted-foreground" title="One mystery sack per friend each day">
+      <span class="flex items-center gap-1.5 px-3 text-[12.5px] text-muted-foreground" title="One mystery sack per friend each day" in:fade={{ duration: DURATION_MS }}>
         <Clock class="size-3.5" />Sack ready in {cooldown}
       </span>
     {:else}

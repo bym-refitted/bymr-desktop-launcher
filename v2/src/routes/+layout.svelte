@@ -3,6 +3,7 @@
   import { onMount } from "svelte";
   import { Tooltip } from "bits-ui";
   import LoaderCircle from "@lucide/svelte/icons/loader-circle";
+  import { onNavigate } from "$app/navigation";
   import { page } from "$app/state";
   import brain from "#lib/assets/art/brain.png";
   import StatusFooter from "#lib/components/shell/StatusFooter.svelte";
@@ -21,6 +22,17 @@
   const currentIndex = $derived(pages.findIndex((p) => p.href === page.url.pathname));
 
   onMount(startLauncher);
+
+  onNavigate((navigation) => {
+    if (!document.startViewTransition) return;
+
+    return new Promise((resolve) => {
+      document.startViewTransition(async () => {
+        resolve();
+        await navigation.complete;
+      });
+    });
+  });
 </script>
 
 <svelte:head>
@@ -57,7 +69,7 @@
         </span>
       </div>
 
-      <main class="relative min-h-0 flex-1">
+      <main class="relative min-h-0 flex-1 [view-transition-name:page]">
         {#if app.loaded}
           {@render children()}
         {:else}

@@ -16,8 +16,8 @@
 
 {#if friends.incoming.length > 0}
   <p class="eyebrow flex h-10 items-center border-b px-7">Waiting on you</p>
-  {#each friends.incoming as request (request.request_id)}
-    <PlayerRow player={request} note="Asked {timeAgo(request.sent_at)}">
+  {#each friends.incoming as request, index (request.request_id)}
+    <PlayerRow player={request} {index} note="Asked {timeAgo(request.sent_at)}">
       <Button size="sm" disabled={friends.isBusy(request.user_id)} onclick={() => friends.respond(request, true)}>
         <Check />Accept
       </Button>
@@ -30,8 +30,8 @@
 
 {#if friends.outgoing.length > 0}
   <p class="eyebrow flex h-10 items-center border-b px-7">Waiting on them</p>
-  {#each friends.outgoing as request (request.request_id)}
-    <PlayerRow player={request} note="Sent {timeAgo(request.sent_at)}">
+  {#each friends.outgoing as request, index (request.request_id)}
+    <PlayerRow player={request} {index} note="Sent {timeAgo(request.sent_at)}">
       <Button variant="ghost" size="sm" disabled={friends.isBusy(request.user_id)} onclick={() => friends.remove(request)}>
         <X />Cancel
       </Button>

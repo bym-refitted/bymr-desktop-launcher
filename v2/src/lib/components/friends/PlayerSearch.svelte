@@ -53,8 +53,8 @@
     </div>
   {/each}
 {:else if friends.results.length > 0}
-  {#each friends.results as player (player.user_id)}
-    <PlayerRow {player} note={player.online ? "Online now" : ""}>
+  {#each friends.results as player, index (player.user_id)}
+    <PlayerRow {player} {index} note={player.online ? "Online now" : ""}>
       {#if player.relation === FriendRelation.friends}
         <span class="flex items-center gap-1.5 px-3 text-[12.5px] font-medium text-primary"><Users class="size-3.5" />Friends</span>
       {:else if player.relation === FriendRelation.pendingOutgoing}

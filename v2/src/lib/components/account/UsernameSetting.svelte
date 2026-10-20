@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { fade } from "svelte/transition";
   import Check from "@lucide/svelte/icons/check";
   import Lock from "@lucide/svelte/icons/lock";
   import UserPen from "@lucide/svelte/icons/user-pen";
@@ -8,6 +9,7 @@
   import AlertDialog from "#lib/components/ui/AlertDialog.svelte";
   import Button from "#lib/components/ui/Button.svelte";
   import TextField from "#lib/components/ui/TextField.svelte";
+  import { DURATION_MS } from "#lib/motion.js";
   import { Username, type AccountDetails } from "#lib/schemas.js";
   import { logs } from "#lib/state/logs.svelte.js";
   import { user } from "#lib/state/user.svelte.js";
@@ -108,7 +110,7 @@
     </TextField>
     <div>
       {#if saved}
-        <p class="flex items-center gap-1.5 text-[12.5px] text-success">
+        <p class="flex items-center gap-1.5 text-[12.5px] text-success" in:fade={{ duration: DURATION_MS }}>
           <Check class="size-3.5 shrink-0" />Saved. Restart the game if it's running.
         </p>
       {:else if locked && details.nextChangeAt}

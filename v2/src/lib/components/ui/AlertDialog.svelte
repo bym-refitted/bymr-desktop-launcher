@@ -2,6 +2,7 @@
   import { AlertDialog } from "bits-ui";
   import { fade, fly } from "svelte/transition";
   import Button from "#lib/components/ui/Button.svelte";
+  import { DURATION_MS, lift } from "#lib/motion.js";
 
   interface Props {
     open?: boolean;
@@ -40,7 +41,7 @@
           <div
             {...props}
             class="fixed top-1/2 left-1/2 z-50 w-[420px] -translate-1/2 overflow-hidden rounded-xl border border-border-strong bg-card shadow-2xl"
-            transition:fly={{ y: 8, duration: 180 }}
+            transition:fly={{ y: lift(8), duration: DURATION_MS }}
           >
             <p class={["eyebrow flex h-10 items-center border-b px-5", error && "text-destructive"]}>{label}</p>
             <div class="grid gap-5 p-5">

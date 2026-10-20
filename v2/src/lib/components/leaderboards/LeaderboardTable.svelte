@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { fly } from "svelte/transition";
   import Crown from "@lucide/svelte/icons/crown";
   import { MapRoom } from "#lib/api/leaderboards.js";
   import outpost from "#lib/assets/art/outpost.png";
@@ -7,6 +8,7 @@
   import Avatar from "#lib/components/ui/Avatar.svelte";
   import Button from "#lib/components/ui/Button.svelte";
   import type { LeaderboardEntry } from "#lib/schemas.js";
+  import { rowIn } from "#lib/motion.js";
   import { user } from "#lib/state/user.svelte.js";
 
   interface Props {
@@ -70,7 +72,7 @@
         {#each entries as entry, index (entry.username)}
           {@const isYou = entry.username === user.username}
           {@const crownColour = crownColours[index]}
-          <tr class={["h-14 border-b transition-colors hover:bg-accent/60", isYou && "bg-primary/5"]}>
+          <tr class={["h-14 border-b transition-colors hover:bg-accent/60", isYou && "bg-primary/5"]} in:fly|global={rowIn(index)}>
             <td class="pl-7">
               <span class="text-[15px] font-semibold tabular-nums {index < 3 ? 'text-primary' : 'text-muted-foreground'}">
                 {index + 1}

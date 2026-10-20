@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { fade } from "svelte/transition";
   import CircleAlert from "@lucide/svelte/icons/circle-alert";
   import Gift from "@lucide/svelte/icons/gift";
   import bandito from "#lib/assets/art/bandito.png";
@@ -9,6 +10,7 @@
   import AlertDialog from "#lib/components/ui/AlertDialog.svelte";
   import SignInPrompt from "#lib/components/ui/SignInPrompt.svelte";
   import TabBar from "#lib/components/ui/TabBar.svelte";
+  import { collapse } from "#lib/motion.js";
   import type { Friend } from "#lib/schemas.js";
   import { friends } from "#lib/state/friends.svelte.js";
   import { user } from "#lib/state/user.svelte.js";
@@ -76,29 +78,33 @@
     </div>
 
     {#if friends.error}
-      <p class="flex shrink-0 items-center gap-2 border-b bg-destructive/10 px-7 py-2.5 text-[13px] text-destructive" role="alert">
+      <p class="flex shrink-0 items-center gap-2 border-b bg-destructive/10 px-7 py-2.5 text-[13px] text-destructive" role="alert" transition:collapse>
         <CircleAlert class="size-4 shrink-0" />{friends.error}
       </p>
     {/if}
 
     <div class="min-h-0 flex-1 overflow-auto">
-      {#if friends.loading}
-        {#each { length: 6 }, index (index)}
-          <div class="flex h-16 items-center gap-4 border-b px-7">
-            <div class="size-10 animate-pulse rounded-lg bg-accent"></div>
-            <div class="grid gap-2">
-              <div class="h-3 w-32 animate-pulse rounded bg-accent"></div>
-              <div class="h-3 w-20 animate-pulse rounded bg-accent"></div>
-            </div>
-          </div>
-        {/each}
-      {:else if tab === FriendsTab.friends}
-        <FriendsList onfind={() => (tab = FriendsTab.find)} onremove={askToRemove} />
-      {:else if tab === FriendsTab.requests}
-        <RequestsList />
-      {:else}
-        <PlayerSearch />
-      {/if}
+      {#key tab}
+        <div in:fade={{ duration: 150 }}>
+          {#if friends.loading}
+            {#each { length: 6 }, index (index)}
+              <div class="flex h-16 items-center gap-4 border-b px-7">
+                <div class="size-10 animate-pulse rounded-lg bg-accent"></div>
+                <div class="grid gap-2">
+                  <div class="h-3 w-32 animate-pulse rounded bg-accent"></div>
+                  <div class="h-3 w-20 animate-pulse rounded bg-accent"></div>
+                </div>
+              </div>
+            {/each}
+          {:else if tab === FriendsTab.friends}
+            <FriendsList onfind={() => (tab = FriendsTab.find)} onremove={askToRemove} />
+          {:else if tab === FriendsTab.requests}
+            <RequestsList />
+          {:else}
+            <PlayerSearch />
+          {/if}
+        </div>
+      {/key}
     </div>
   {/if}
 </div>

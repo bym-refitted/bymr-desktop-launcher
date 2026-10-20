@@ -1,9 +1,11 @@
 <script lang="ts">
+  import { fly } from "svelte/transition";
   import Shield from "@lucide/svelte/icons/shield";
   import Swords from "@lucide/svelte/icons/swords";
   import Avatar from "#lib/components/ui/Avatar.svelte";
   import Button from "#lib/components/ui/Button.svelte";
   import { timeAgo } from "#lib/format.js";
+  import { rowIn } from "#lib/motion.js";
   import type { AttackLog } from "#lib/schemas.js";
   import { user } from "#lib/state/user.svelte.js";
 
@@ -95,11 +97,11 @@
           </tr>
         {/each}
       {:else}
-        {#each rows as { log, count } (log.id)}
+        {#each rows as { log, count }, index (log.id)}
           {@const isAttack = log.attacker_userid === user.userId}
           {@const kind = isAttack ? battleKinds.attack : battleKinds.defence}
           {@const opponentPic = isAttack ? log.defender_pic_square : log.attacker_pic_square}
-          <tr class="h-14 border-b transition-colors hover:bg-accent/60">
+          <tr class="h-14 border-b transition-colors hover:bg-accent/60" in:fly|global={rowIn(index)}>
             <td class="pl-7">
               <div class="flex min-w-0 items-center gap-4">
                 <span class="relative shrink-0">

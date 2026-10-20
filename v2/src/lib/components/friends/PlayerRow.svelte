@@ -1,18 +1,21 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import { fly } from "svelte/transition";
   import Avatar from "#lib/components/ui/Avatar.svelte";
+  import { collapse, rowIn } from "#lib/motion.js";
   import type { FriendPlayer } from "#lib/schemas.js";
 
   interface Props {
     player: FriendPlayer;
+    index: number;
     note?: string;
     children: Snippet;
   }
 
-  let { player, note, children }: Props = $props();
+  let { player, index, note, children }: Props = $props();
 </script>
 
-<div class="flex h-16 items-center gap-4 border-b px-7 transition-colors hover:bg-accent/40">
+<div class="flex h-16 items-center gap-4 border-b px-7 transition-colors hover:bg-accent/40" in:fly|global={rowIn(index)} out:collapse>
   <span class="relative shrink-0">
     <Avatar src={player.pic_square} class="size-10 rounded-lg" />
     {#if player.online}

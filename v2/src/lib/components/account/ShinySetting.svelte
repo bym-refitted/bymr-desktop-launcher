@@ -1,9 +1,11 @@
 <script lang="ts">
+  import { fade } from "svelte/transition";
   import Coins from "@lucide/svelte/icons/coins";
   import { toErrorMessage } from "#lib/api/errors.js";
   import { updateSettings } from "#lib/api/player.js";
   import SettingRow from "#lib/components/account/SettingRow.svelte";
   import Switch from "#lib/components/ui/Switch.svelte";
+  import { DURATION_MS } from "#lib/motion.js";
   import type { AccountDetails } from "#lib/schemas.js";
   import { logs } from "#lib/state/logs.svelte.js";
 
@@ -53,6 +55,6 @@
   {#if error}
     <p class="text-[12.5px] text-destructive">{error}</p>
   {:else if shinyLocked}
-    <p class="text-[12.5px] text-muted-foreground">Shiny is hidden in game. If it's running, it catches up within about 30 seconds.</p>
+    <p class="text-[12.5px] text-muted-foreground" in:fade={{ duration: DURATION_MS }}>Shiny is hidden in game. If it's running, it catches up within about 30 seconds.</p>
   {/if}
 </SettingRow>
