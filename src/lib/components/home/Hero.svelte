@@ -23,7 +23,10 @@
     </p>
 
     <figure class="absolute right-9 bottom-6 w-[150px] max-[1180px]:hidden">
-      <img src={korath} alt="Korath" class="lava-glow" />
+      <span class="lava-glow">
+        <span class="lava-halo"><img src={korath} alt="" /></span>
+        <img src={korath} alt="Korath" class="relative" />
+      </span>
       <figcaption class="mt-2 flex justify-between border-t pt-2 text-[11.5px] text-muted-foreground">
         <span>Fig. 01</span>
         <span><b class="font-semibold text-foreground">Korath</b> · Champion</span>

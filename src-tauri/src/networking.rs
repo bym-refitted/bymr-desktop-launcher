@@ -15,10 +15,13 @@
 //! Note: This module is designed to be used by other parts of the application that require network communication.
 //! It abstracts away some of the complexities of error handling and request making.
 
-use std::{fmt, path::PathBuf};
+use std::{fmt, path::PathBuf, time::Duration};
 use tokio::{fs::File, io::AsyncWriteExt};
 
 use crate::RUNTIMES_URL;
+
+const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
+const READ_TIMEOUT: Duration = Duration::from_secs(30);
 
 #[derive(Debug)]
 pub(crate) enum FetchError {
@@ -64,13 +67,26 @@ impl fmt::Display for FetchError {
     }
 }
 
+/// Builds an HTTP client that gives up on a server that won't connect or stops sending data.
+///
+/// The read timeout applies between chunks rather than to the whole response, so a slow but
+/// working runtime download is never cut off.
+fn http_client() -> Result<reqwest::Client, FetchError> {
+    let client = reqwest::Client::builder()
+        .connect_timeout(CONNECT_TIMEOUT)
+        .read_timeout(READ_TIMEOUT)
+        .build()?;
+
+    Ok(client)
+}
+
 async fn make_request(
     protocol: &str,
     url_base_path: &str,
 ) -> Result<reqwest::Response, FetchError> {
     let url = format!("{}://{}", protocol, url_base_path);
     let result: Result<reqwest::Response, FetchError> =
-        reqwest::get(&url).await.map_err(|e| e.into());
+        http_client()?.get(&url).send().await.map_err(|e| e.into());
 
     match result {
         Ok(response) if response.status().is_success() => Ok(response),
@@ -137,7 +153,7 @@ pub async fn download_file(
     use_https: bool,
 ) -> Result<(), FetchError> {
     let full_url = format!("{}://{}{}", get_protocol(use_https), RUNTIMES_URL, url);
-    let mut response = reqwest::Client::new().get(&full_url).send().await?;
+    let mut response = http_client()?.get(&full_url).send().await?;
     // Exit early on bad code
     if !response.status().is_success() {
         return Err(FetchError::InvalidStatusCode(response.status().as_u16()));
