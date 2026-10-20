@@ -32,11 +32,14 @@
 <script lang="ts">
   import type { HTMLButtonAttributes } from "svelte/elements";
 
-  type Props = Omit<HTMLButtonAttributes, "class"> & {
+  interface Props extends Omit<HTMLButtonAttributes, "class"> {
+    /** Extra classes, merged over the variant's classes. */
     class?: string;
+    /** The visual style; defaults to the teal primary button. */
     variant?: ButtonVariant;
+    /** The height and padding; defaults to 40px tall. */
     size?: ButtonSize;
-  };
+  }
 
   let {
     class: className,

@@ -1,0 +1,71 @@
+<script lang="ts">
+  import { AlertDialog } from "bits-ui";
+  import { fade, fly } from "svelte/transition";
+  import Button from "#lib/components/ui/Button.svelte";
+
+  interface Props {
+    open?: boolean;
+    title: string;
+    description: string;
+    art?: string;
+    buttonLabel?: string;
+  }
+
+  let {
+    open = $bindable(false),
+    title,
+    description,
+    art,
+    buttonLabel = "Okay",
+  }: Props = $props();
+  
+</script>
+
+<AlertDialog.Root bind:open>
+  <AlertDialog.Portal>
+    <AlertDialog.Overlay forceMount>
+      {#snippet child({ props, open })}
+        {#if open}
+          <div
+            {...props}
+            class="fixed inset-0 z-50 bg-black/55"
+            transition:fade={{ duration: 150 }}
+          ></div>
+        {/if}
+      {/snippet}
+    </AlertDialog.Overlay>
+    <AlertDialog.Content forceMount>
+      {#snippet child({ props, open })}
+        {#if open}
+          <div
+            {...props}
+            class="fixed top-1/2 left-1/2 z-50 w-[420px] -translate-1/2 overflow-hidden rounded-xl border border-border-strong bg-card shadow-2xl"
+            transition:fly={{ y: 8, duration: 180 }}
+          >
+            <p class="eyebrow flex h-10 items-center border-b px-5">Notice</p>
+            <div class="flex gap-4 p-5">
+              {#if art}
+                <img src={art} alt="" class="size-16 shrink-0 object-contain" />
+              {/if}
+              <div>
+                <AlertDialog.Title class="display text-[26px]">
+                  {title}
+                </AlertDialog.Title>
+                <AlertDialog.Description class="mt-1.5 text-muted-foreground">
+                  {description}
+                </AlertDialog.Description>
+              </div>
+            </div>
+            <div class="flex justify-end border-t bg-sunken px-5 py-3.5">
+              <AlertDialog.Cancel>
+                {#snippet child({ props })}
+                  <Button {...props}>{buttonLabel}</Button>
+                {/snippet}
+              </AlertDialog.Cancel>
+            </div>
+          </div>
+        {/if}
+      {/snippet}
+    </AlertDialog.Content>
+  </AlertDialog.Portal>
+</AlertDialog.Root>
