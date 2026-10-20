@@ -28,17 +28,19 @@ class BuildSettings {
   selected = $state<Build>(Build.stable);
   serverUrl = $state(loadServerUrl());
 
-  #check = $derived(ServerUrl.safeParse(this.serverUrl.trim()));
+  #address = $derived(this.serverUrl.trim() || DEFAULT_SERVER_URL);
+
+  #check = $derived(ServerUrl.safeParse(this.#address));
 
   serverUrlError = $derived(this.selected !== Build.local || this.#check.success ? "" : this.#check.error.issues[0].message);
 
-  apiBaseUrl = $derived(this.selected === Build.local ? this.serverUrl.trim().replace(/\/+$/, "") : VITE_BASE_URL);
+  apiBaseUrl = $derived(this.selected === Build.local ? this.#address.replace(/\/+$/, "") : VITE_BASE_URL);
 
   serverHost = $derived.by(() => {
     try {
-      return new URL(this.serverUrl.trim()).host;
+      return new URL(this.#address).host;
     } catch {
-      return this.serverUrl;
+      return this.#address;
     }
   });
 

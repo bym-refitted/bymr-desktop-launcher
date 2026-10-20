@@ -6,15 +6,18 @@
   import korath from "#lib/assets/art/korath.png";
   import pokey from "#lib/assets/art/pokey.png";
   import Fact from "#lib/components/ui/Fact.svelte";
+  import { Build, build } from "#lib/state/build.svelte.js";
 
   const DISCORD_URL = "https://discord.gg/bymrefitted";
+
+  const serverLabel = $derived(build.selected === Build.local ? "Custom server" : "Official server");
 </script>
 
 <section class="relative grid min-w-0 grid-rows-[1fr_auto] overflow-hidden border-r">
   <div class="absolute inset-0 contours"></div>
 
   <div class="relative flex flex-col justify-center px-11 max-[1100px]:px-8">
-    <p class="eyebrow text-primary">Official server</p>
+    <p class="eyebrow text-primary">{serverLabel}</p>
     <h1 class="mt-3 mb-4 display text-[clamp(46px,5.2vw,70px)]">Back to the<br /><em>backyard.</em></h1>
     <p class="max-w-[440px] text-[15px] leading-relaxed text-muted-foreground">
       The original Flash base-builder, preserved one-to-one. Every building, monster and Map Room, exactly as it was.
