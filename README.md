@@ -83,7 +83,7 @@ Before getting started, ensure you have the following components installed and p
 | **Rust**           | The Rust programming language          | [Install Rust](https://www.rust-lang.org/tools/install)                              |
 | **Cargo**          | Rust's package manager                 | [Cargo Registry](https://crates.io/)                                                 |
 | **MSVC Toolchain** | Microsoft Visual C++ build tools       | [Download MSVC](https://visualstudio.microsoft.com/vs/features/cplusplus/)           |
-| **Node.js & NPM**  | JavaScript runtime and package manager | [Install Node.js](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) |
+| **Node.js & NPM**  | JavaScript runtime and package manager (Node 22.17 or newer) | [Install Node.js](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) |
 
 <br />
 
@@ -91,13 +91,19 @@ Before getting started, ensure you have the following components installed and p
 
 This project requires compilation with the **MSVC toolchain** rather than the GNU alternative. The MSVC toolchain properly embeds the WebView2 runtime into the binary, while GNU requires distributing an additional `WebView2Loader.dll` file alongside your executable. For more details, see the [tauri-webview2 documentation](https://crates.io/crates/tauri-webview2#runtime).
 
-For comprehensive setup instructions, please refer to the [Tauri Prerequisites Guide](https://v1.tauri.app/v1/guides/getting-started/prerequisites/).
+For comprehensive setup instructions, please refer to the [Tauri Prerequisites Guide](https://v2.tauri.app/start/prerequisites/).
 
 <br />
 
 ## Live Development
 
-Start the development server using either of the following commands:
+Install the frontend dependencies once:
+
+```bash
+npm install
+```
+
+Then start the development server using either of the following commands:
 
 ```bash
 npm run tauri dev

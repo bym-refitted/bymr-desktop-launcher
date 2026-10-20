@@ -1,109 +1,18 @@
 <script lang="ts">
-  import { openUrl } from "@tauri-apps/plugin-opener";
-
-  import { launchError } from "$lib/stores/launchStore";
-  import AlertDialog from "$lib/components/AlertDialog.svelte";
-  import Form from "$lib/components/ui/form/Form.svelte";
-  import SniperTower from "../assets/images/snipertower.png";
-  import {
-    WarningDiamond,
-    ShieldCheck,
-    DiscordLogo,
-    GameController,
-  } from "phosphor-svelte";
-  import { fade, fly } from "svelte/transition";
-
-  const DISCORD_URL = "https://discord.gg/bymrefitted";
+  import AuthPanel from "#lib/components/home/AuthPanel.svelte";
+  import Hero from "#lib/components/home/Hero.svelte";
+  import ReadyPanel from "#lib/components/home/ReadyPanel.svelte";
+  import { user } from "#lib/state/user.svelte.js";
 </script>
 
-<div
-  class="flex-1 grid grid-cols-1 [@media(min-width:1500px)]:grid-cols-2 gap-8 px-6 py-8 [@media(min-width:1500px)]:px-12 overflow-x-clip"
->
-  <div
-    class="flex flex-col justify-start [@media(min-width:1500px)]:pr-8 [@media(min-width:1500px)]:pt-16"
-    in:fly={{ x: -50, duration: 600, delay: 100 }}
-  >
-    <div class="flex flex-col items-start gap-4 mb-8">
-      <img
-        src={SniperTower}
-        alt="sniper tower"
-        class="w-40 object-contain drop-shadow-2xl"
-      />
-      <h1
-        class="font-title text-5xl leading-tight text-foreground whitespace-nowrap"
-      >
-        Backyard Monsters Refitted
-      </h1>
-    </div>
-    <div class="mb-8">
-      <p class="text-lg leading-relaxed text-muted-foreground">
-        The official Backyard Monsters Refitted server. A faithful one-to-one
-        preservation of the original Adobe Flash game, including all Map Room
-        versions 1, 2 and 3. All buildings, monsters and gameplay mechanics on
-        this server are from the classic vanilla version of the game.
-      </p>
-    </div>
+<div class="grid h-full grid-cols-[1fr_400px] max-[1100px]:grid-cols-[1fr_370px]">
+  <Hero />
 
-    <div class="grid gap-4">
-      <div
-        class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-5 hover:bg-white/[0.07] hover:border-primary/30 transition-all duration-300 group shadow-lg"
-      >
-        <div class="flex items-start gap-3">
-          <div
-            class="bg-primary/10 p-2 rounded-lg group-hover:bg-primary/20 transition-colors"
-          >
-            <ShieldCheck size={20} weight="bold" class="text-primary" />
-          </div>
-          <div class="flex-1">
-            <h3 class="text-lg font-bold text-primary mb-2">Fair Play Rules</h3>
-            <p class="text-lg text-muted-foreground leading-relaxed">
-              This server has strict monitoring for cheating to ensure a fair
-              and enjoyable experience for all players. Any form of cheating or
-              exploits will result in a permanent ban.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-5 hover:bg-white/[0.07] hover:border-secondary/30 transition-all duration-300 group shadow-lg"
-      >
-        <div class="flex items-start gap-3">
-          <div
-            class="bg-secondary/10 p-2 rounded-lg group-hover:bg-secondary/20 transition-colors"
-          >
-            <DiscordLogo size={20} weight="bold" class="text-secondary" />
-          </div>
-          <div class="flex-1">
-            <h3 class="text-lg font-bold text-secondary mb-2">
-              Discord Verification
-            </h3>
-            <p class="text-lg text-muted-foreground leading-relaxed mb-2">
-              Visit our <a
-                href={DISCORD_URL}
-                on:click|preventDefault={() => openUrl(DISCORD_URL)}
-                class="text-secondary hover:underline">Discord server</a
-              > to verify your account and play on the server. This is to help us
-              reduce ban evasion, bot accounts and maintain a healthy community.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div
-    class="flex flex-col items-start justify-center [@media(min-width:1500px)]:pl-8"
-    in:fly={{ x: 50, duration: 600, delay: 200 }}
-  >
-    <div class="w-[420px]">
-      <Form />
-    </div>
-  </div>
+  <section class="min-h-0 bg-card">
+    {#if user.signedIn}
+      <ReadyPanel />
+    {:else}
+      <AuthPanel />
+    {/if}
+  </section>
 </div>
-
-<AlertDialog
-  bind:open={$launchError.show}
-  error={$launchError.code}
-  Icon={WarningDiamond}
-/>

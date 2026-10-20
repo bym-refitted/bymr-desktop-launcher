@@ -3,6 +3,7 @@ node_modules
 /.svelte-kit
 /src-tauri/target
 /src-tauri/gen
+/flash-input/target
 .env
 .env.*
 
