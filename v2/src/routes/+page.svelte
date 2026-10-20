@@ -9,7 +9,7 @@
   <Hero />
 
   <section class="min-h-0 bg-card">
-    {#if user.token}
+    {#if user.signedIn}
       <ReadyPanel />
     {:else}
       <AuthPanel />

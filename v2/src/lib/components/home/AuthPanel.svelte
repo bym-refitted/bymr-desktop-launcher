@@ -10,12 +10,14 @@
   import { toErrorMessage } from "#lib/api/errors.js";
   import { signIn } from "#lib/api/session.js";
   import eyera from "#lib/assets/art/eyera.png";
-  import ServerFields from "#lib/components/home/ServerFields.svelte";
+  import ServerAddress from "#lib/components/home/ServerAddress.svelte";
+  import ServerPicker from "#lib/components/home/ServerPicker.svelte";
   import AlertDialog from "#lib/components/ui/AlertDialog.svelte";
   import Button from "#lib/components/ui/Button.svelte";
   import TabBar from "#lib/components/ui/TabBar.svelte";
   import TextField from "#lib/components/ui/TextField.svelte";
   import { Credentials, Registration, ResetRequest } from "#lib/schemas.js";
+  import { build } from "#lib/state/build.svelte.js";
   import { launch } from "#lib/state/launch.svelte.js";
   import { logs } from "#lib/state/logs.svelte.js";
   import { session } from "#lib/state/session.svelte.js";
@@ -196,9 +198,7 @@
 
     {#if mode !== Mode.forgot}
       <div class="grid grid-cols-[1fr_136px] items-start gap-2.5">
-        <div class="grid gap-2.5">
-          <ServerFields />
-        </div>
+        <ServerPicker />
         <div class="grid min-w-0 gap-1.5">
           <span class="text-[12.5px] font-medium text-muted-foreground">Language</span>
           <Select.Root type="single" bind:value={language} items={languages.map((name) => ({ value: name, label: name }))}>
@@ -233,6 +233,7 @@
           </Select.Root>
         </div>
       </div>
+      <ServerAddress />
     {/if}
 
     {#if mode === Mode.signin}
@@ -247,7 +248,7 @@
     {#if error}
       <p class="text-[13px] text-destructive" role="alert">{error}</p>
     {/if}
-    <Button type="submit" size="lg" variant={mode === Mode.register ? "secondary" : "default"} disabled={busy || launch.launching}>
+    <Button type="submit" size="lg" variant={mode === Mode.register ? "secondary" : "default"} disabled={busy || launch.launching || !!build.serverUrlError}>
       {#if mode === Mode.signin}<Play class="fill-current" />{/if}
       {busy ? "Please wait..." : labels[mode]}
     </Button>

@@ -33,7 +33,7 @@
    * @returns {Promise<void>} Resolves once the account is shown or the request failed.
    */
   const loadDetails = async () => {
-    if (!user.token) return;
+    if (!user.signedIn) return;
 
     loading = true;
     error = "";
@@ -71,7 +71,7 @@
     <img src={townhall} alt="" class="h-24 w-auto self-center" />
   </header>
 
-  {#if !user.token}
+  {#if !user.signedIn}
     <SignInPrompt title="Sign in to manage your account" description="Your username, shiny and session settings live here." />
   {:else}
     <div class="grid min-h-0 flex-1 grid-cols-[300px_1fr] max-[1100px]:grid-cols-[260px_1fr]">

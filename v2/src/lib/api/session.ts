@@ -2,6 +2,7 @@ import { login, loginWithToken } from "#lib/api/auth.js";
 import { toErrorMessage } from "#lib/api/errors.js";
 import { getAccount, logout } from "#lib/api/player.js";
 import type { Credentials, SavedUser } from "#lib/schemas.js";
+import { build } from "#lib/state/build.svelte.js";
 import { logs } from "#lib/state/logs.svelte.js";
 import { session } from "#lib/state/session.svelte.js";
 import { user } from "#lib/state/user.svelte.js";
@@ -36,7 +37,7 @@ export const validateSession = async () => {
   try {
     const { userId, username, pic_square } = await getAccount();
 
-    user.save({ token: user.token, language: user.language, userId, username, avatar: pic_square ?? "" });
+    user.save({ token: user.token, language: user.language, userId, username, avatar: pic_square ?? "", server: user.server });
 
     session.begin();
   } catch (error) {
@@ -56,7 +57,7 @@ export const validateSession = async () => {
  */
 export const signIn = async (credentials: Credentials, language: string, remember: boolean) => {
   const { token, userId, username, pic_square } = await login(credentials);
-  const details: SavedUser = { token, userId, username, language, avatar: pic_square ?? "" };
+  const details: SavedUser = { token, userId, username, language, avatar: pic_square ?? "", server: build.apiBaseUrl };
 
   if (remember) user.save(details);
   else user.set(details);
@@ -74,7 +75,7 @@ export const signIn = async (credentials: Credentials, language: string, remembe
  */
 export const refreshSession = async () => {
   const { token, userId, username, pic_square } = await loginWithToken(user.token);
-  const details: SavedUser = { token, userId, username, language: user.language, avatar: pic_square ?? "" };
+  const details: SavedUser = { token, userId, username, language: user.language, avatar: pic_square ?? "", server: user.server };
 
   if (user.remembered) user.save(details);
   else user.set(details);

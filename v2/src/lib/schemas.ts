@@ -18,6 +18,9 @@ export const Password = z
   .min(8, "Password must be at least 8 characters long")
   .regex(/[^a-zA-Z0-9]/, "Password must contain at least one special character");
 
+/** A custom server's address: http or https, with an optional port and path */
+export const ServerUrl = z.url({ protocol: /^https?$/, error: "Enter the full address, like http://203.0.113.5:3001" });
+
 /** The sign-in form */
 export const Credentials = z.object({ email: Email, password: Password });
 
@@ -78,8 +81,9 @@ export const UsernameChange = z.object({ username: z.string(), nextChangeAt: z.c
 export const SettingsUpdate = z.object({ settings: Settings });
 
 /**
- * The player saved in localStorage when "Remember me" is ticked. Fields that are missing or broken fall back
- * to empty, so an older save still loads; only a missing token or user id discards it
+ * The player saved in localStorage when "Remember me" is ticked, with the server their session belongs to.
+ * Fields that are missing or broken fall back to empty, so an older save still loads; only a missing token
+ * or user id discards it
  */
 export const SavedUser = z.object({
   token: z.string().min(1),
@@ -87,6 +91,7 @@ export const SavedUser = z.object({
   username: z.string().catch(""),
   language: z.string().catch(""),
   avatar: z.string().catch(""),
+  server: z.string().catch(""),
 });
 
 export type SavedUser = z.infer<typeof SavedUser>;

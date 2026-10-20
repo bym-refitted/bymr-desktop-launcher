@@ -51,7 +51,7 @@
   };
 
   onMount(() => {
-    if (user.token) friends.load();
+    if (user.signedIn) friends.load();
   });
 </script>
 
@@ -65,7 +65,7 @@
     <img src={bandito} alt="" class="h-24 w-auto self-center" />
   </header>
 
-  {#if !user.token}
+  {#if !user.signedIn}
     <SignInPrompt title="Sign in to see your friends" description="Your friends list follows your account, so you'll need to sign in first." />
   {:else}
     <div class="flex h-[46px] shrink-0 items-stretch justify-between border-b px-7">

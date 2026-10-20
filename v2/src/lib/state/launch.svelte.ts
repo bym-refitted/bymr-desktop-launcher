@@ -9,8 +9,7 @@ type LaunchOptions = {
   buildName: Build | typeof POKIES_BUILD;
   language: string;
   token?: string;
-  host?: string;
-  port?: number;
+  serverUrl?: string;
 };
 
 class Launch {
@@ -19,7 +18,7 @@ class Launch {
   message = $state("");
 
   /**
-   * Starts the game with the selected build. A local build is also told which server to use.
+   * Starts the game with the selected build. A custom server build is also told which server to use.
    *
    * @param {string} token - The fresh session token the game signs in with.
    * @param {string} language - The language to play in, e.g. "English".
@@ -32,8 +31,7 @@ class Launch {
       buildName: build.selected,
       language,
       token,
-      host: isLocal ? build.host : undefined,
-      port: isLocal ? build.port : undefined,
+      serverUrl: isLocal ? build.apiBaseUrl : undefined,
     });
   }
 

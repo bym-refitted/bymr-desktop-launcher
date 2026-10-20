@@ -60,7 +60,7 @@
         </span>
         <span>
           {build.selected === Build.local
-            ? `Local server ${build.host}:${build.port}`
+            ? `Custom server ${build.serverHost}`
             : "Online server"}
           <span class="mx-1.5 opacity-40">·</span>
           Game v{app.gameVersion}

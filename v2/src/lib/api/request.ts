@@ -50,7 +50,7 @@ export const apiRequest = async (method: Method, path: string, { body, timeoutMs
   try {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
 
-    if (user.token) headers.Authorization = `Bearer ${user.token}`;
+    if (user.signedIn) headers.Authorization = `Bearer ${user.token}`;
 
     const response = await fetch(
       `${build.apiBaseUrl}/api/v${app.gameVersion}-beta${path}`,

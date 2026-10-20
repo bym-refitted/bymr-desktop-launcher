@@ -5,6 +5,7 @@ import { relaunch } from "@tauri-apps/plugin-process";
 import { check } from "@tauri-apps/plugin-updater";
 import { validateSession } from "#lib/api/session.js";
 import { app } from "#lib/state/app.svelte.js";
+import { build } from "#lib/state/build.svelte.js";
 import { logs } from "#lib/state/logs.svelte.js";
 import { user } from "#lib/state/user.svelte.js";
 
@@ -49,6 +50,8 @@ export const startLauncher = async () => {
     app.gameVersion = gameVersion;
 
     user.loadSaved();
+    if (user.token) build.select(user.server);
+    
     await validateSession();
     logs.success("Launcher initialized! 🚀");
   } catch (error) {

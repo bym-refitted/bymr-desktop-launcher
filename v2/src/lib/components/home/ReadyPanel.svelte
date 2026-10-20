@@ -2,9 +2,11 @@
   import Play from "@lucide/svelte/icons/play";
   import { toErrorMessage } from "#lib/api/errors.js";
   import { refreshSession, signOut } from "#lib/api/session.js";
-  import ServerFields from "#lib/components/home/ServerFields.svelte";
+  import ServerAddress from "#lib/components/home/ServerAddress.svelte";
+  import ServerPicker from "#lib/components/home/ServerPicker.svelte";
   import Avatar from "#lib/components/ui/Avatar.svelte";
   import Button from "#lib/components/ui/Button.svelte";
+  import { build } from "#lib/state/build.svelte.js";
   import { launch } from "#lib/state/launch.svelte.js";
   import { logs } from "#lib/state/logs.svelte.js";
   import { session } from "#lib/state/session.svelte.js";
@@ -62,14 +64,15 @@
       </div>
     </dl>
 
-    <ServerFields />
+    <ServerPicker />
+    <ServerAddress />
   </div>
 
   <div class="grid gap-2 px-7 pb-5">
     {#if error}
       <p class="text-[13px] text-destructive" role="alert">{error}</p>
     {/if}
-    <Button size="lg" onclick={play} disabled={loading || launch.launching}>
+    <Button size="lg" onclick={play} disabled={loading || launch.launching || !!build.serverUrlError}>
       <Play class="fill-current" />
       {loading || launch.launching ? "Launching..." : "Play"}
     </Button>

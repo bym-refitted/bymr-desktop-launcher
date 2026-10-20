@@ -12,7 +12,7 @@
 
   const appWindow = getCurrentWindow();
 
-  const visiblePages = $derived(pages.filter((link) => !link.menu && (!link.signedIn || user.token)));
+  const visiblePages = $derived(pages.filter((link) => !link.menu && (!link.signedIn || user.signedIn)));
 
   /**
    * Maximises the window, or restores it if it is already maximised.
@@ -62,7 +62,7 @@
 
   <div class="flex divide-x border-l">
     <ThemeToggle />
-    {#if user.token}
+    {#if user.signedIn}
       <AccountMenu />
     {/if}
     <div class="flex">

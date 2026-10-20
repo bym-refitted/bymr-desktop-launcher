@@ -33,7 +33,7 @@
     battles = [];
     error = "";
 
-    if (!user.token) return;
+    if (!user.signedIn) return;
 
     loading = true;
 
@@ -73,7 +73,7 @@
     <img src={snipertower} alt="" class="-mb-5 h-[104px] w-auto self-end" />
   </header>
 
-  {#if user.token}
+  {#if user.signedIn}
     <div class="flex h-[46px] shrink-0 items-stretch justify-between border-b px-7">
       <TabBar options={filters} bind:value={() => filter, selectFilter} class="h-full" />
       <span class="flex items-center gap-1.5 text-[12.5px] text-muted-foreground">
