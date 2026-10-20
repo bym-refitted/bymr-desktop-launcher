@@ -11,6 +11,7 @@
           "bg-secondary text-secondary-foreground font-semibold shadow-[0_6px_18px_-8px_var(--secondary)] hover:brightness-110",
         outline:
           "border-border-strong text-muted-foreground hover:bg-accent hover:text-foreground border",
+        soft: "bg-primary/15 text-primary font-semibold hover:bg-primary/25",
         ghost: "text-muted-foreground hover:bg-accent hover:text-foreground",
         destructive:
           "bg-destructive/15 text-destructive hover:bg-destructive/25",
@@ -18,6 +19,7 @@
       },
       size: {
         default: "h-10 px-4",
+        sm: "h-8 px-3 text-[13px]",
         lg: "h-12 px-5 text-[15px]",
         icon: "size-9",
       },

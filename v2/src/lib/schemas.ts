@@ -143,3 +143,51 @@ export type AttackLog = z.infer<typeof AttackLog>;
 
 /** The player's 50 most recent battles, newest first */
 export const AttackLogs = z.object({ attackLogs: z.array(AttackLog) });
+
+/** A player as the friends page shows them: who they are, their base level and whether they're online */
+export const FriendPlayer = z.object({
+  user_id: z.number(),
+  username: z.string(),
+  pic_square: z.string().nullish(),
+  level: z.number(),
+  online: z.boolean(),
+});
+
+export type FriendPlayer = z.infer<typeof FriendPlayer>;
+
+/** An accepted friend, with when a mystery sack can next be sent to them, in epoch seconds */
+export const Friend = FriendPlayer.extend({
+  since: z.coerce.date().nullable(),
+  gift_ready_at: z.number().nullable(),
+});
+
+export type Friend = z.infer<typeof Friend>;
+
+/** A friend request waiting on one side or the other */
+export const FriendRequest = FriendPlayer.extend({
+  request_id: z.number(),
+  sent_at: z.coerce.date(),
+});
+
+export type FriendRequest = z.infer<typeof FriendRequest>;
+
+/** A player found by name, with how they relate to the searcher */
+export const PlayerResult = FriendPlayer.extend({
+  relation: z.string(),
+  request_id: z.number().nullable(),
+});
+
+export type PlayerResult = z.infer<typeof PlayerResult>;
+
+/** The player's friends, the requests waiting on them and the requests they've sent */
+export const FriendList = z.object({
+  friends: z.array(Friend),
+  incoming: z.array(FriendRequest),
+  outgoing: z.array(FriendRequest),
+});
+
+/** Players matching a name search */
+export const PlayerSearch = z.object({ players: z.array(PlayerResult) });
+
+/** The answer to a friend request: pending, or accepted if they had already asked */
+export const FriendRequestResult = z.object({ status: z.string() });
