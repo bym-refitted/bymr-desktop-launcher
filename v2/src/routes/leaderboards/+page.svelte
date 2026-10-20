@@ -125,7 +125,7 @@
   <section class="flex min-h-0 min-w-0 flex-col">
     <header class="flex h-[72px] shrink-0 items-center justify-between gap-4 border-b px-7">
       <div class="min-w-0">
-        <p class="eyebrow">Map Room {mapRoom}</p>
+        <p class="mb-1 eyebrow">Map Room {mapRoom}</p>
         <h2 class="truncate display text-[26px]">{world?.name || "No world selected"}</h2>
       </div>
       <div class="flex shrink-0 items-center gap-5 text-[12.5px] text-muted-foreground">

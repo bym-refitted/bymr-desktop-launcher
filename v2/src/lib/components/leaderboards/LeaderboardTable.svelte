@@ -44,8 +44,8 @@
         <th class="eyebrow">Player</th>
         {#each columns as column (column.label)}
           <th class="w-48 pr-7 text-right whitespace-nowrap">
-            <span class="eyebrow inline-flex items-center gap-2">
-              <img src={column.icon} alt="" class="h-7 w-auto" />{column.label}
+            <span class="eyebrow flex items-center justify-end gap-2">
+              <img src={column.icon} alt="" class="h-7 w-auto translate-y-[3px]" />{column.label}
             </span>
           </th>
         {/each}
