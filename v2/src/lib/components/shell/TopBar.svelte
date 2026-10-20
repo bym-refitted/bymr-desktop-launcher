@@ -12,6 +12,8 @@
 
   const appWindow = getCurrentWindow();
 
+  const visiblePages = $derived(pages.filter((link) => !link.signedIn || user.token));
+
   /**
    * Maximises the window, or restores it if it is already maximised.
    *
@@ -29,7 +31,7 @@
   </a>
 
   <nav class="flex">
-    {#each pages as { href, label, icon: Icon } (href)}
+    {#each visiblePages as { href, label, icon: Icon } (href)}
       <Tooltip.Root>
         <Tooltip.Trigger>
           {#snippet child({ props })}

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Select, Tabs } from "bits-ui";
+  import { Select } from "bits-ui";
   import ArrowLeft from "@lucide/svelte/icons/arrow-left";
   import Check from "@lucide/svelte/icons/check";
   import ChevronDown from "@lucide/svelte/icons/chevron-down";
@@ -13,6 +13,7 @@
   import ServerFields from "#lib/components/home/ServerFields.svelte";
   import AlertDialog from "#lib/components/ui/AlertDialog.svelte";
   import Button from "#lib/components/ui/Button.svelte";
+  import TabBar from "#lib/components/ui/TabBar.svelte";
   import TextField from "#lib/components/ui/TextField.svelte";
   import { Credentials, Registration, ResetRequest } from "#lib/schemas.js";
   import { launch } from "#lib/state/launch.svelte.js";
@@ -30,6 +31,11 @@
   type Field = "username" | "email" | "password" | "confirmPassword";
 
   const schemas = { [Mode.signin]: Credentials, [Mode.register]: Registration, [Mode.forgot]: ResetRequest };
+
+  const tabs = [
+    { value: Mode.signin, label: "Sign in" },
+    { value: Mode.register, label: "Create account" },
+  ];
 
   const labels = { [Mode.signin]: "Sign in & Play", [Mode.register]: "Create account", [Mode.forgot]: "Send reset link" };
 
@@ -117,22 +123,7 @@
 </script>
 
 <form class="flex h-full flex-col" onsubmit={submit} novalidate>
-  <Tabs.Root value={mode === Mode.forgot ? Mode.signin : mode} onValueChange={(next) => switchMode(next as Mode)}>
-    <Tabs.List class="flex h-[46px] gap-6 border-b px-7">
-      <Tabs.Trigger
-        value={Mode.signin}
-        class="-mb-px border-b-2 border-transparent text-[13.5px] font-semibold text-muted-foreground transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground"
-      >
-        Sign in
-      </Tabs.Trigger>
-      <Tabs.Trigger
-        value={Mode.register}
-        class="-mb-px border-b-2 border-transparent text-[13.5px] font-semibold text-muted-foreground transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground"
-      >
-        Create account
-      </Tabs.Trigger>
-    </Tabs.List>
-  </Tabs.Root>
+  <TabBar options={tabs} bind:value={() => (mode === Mode.forgot ? Mode.signin : mode), switchMode} class="h-[46px] border-b px-7" />
 
   <div class="grid min-h-0 flex-1 content-start gap-3 overflow-auto px-7 py-5">
     {#if mode === Mode.forgot}

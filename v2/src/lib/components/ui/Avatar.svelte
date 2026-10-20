@@ -1,5 +1,5 @@
 <script lang="ts">
-  import eyera from "#lib/assets/art/eyera.png";
+  import placeholder from "#lib/assets/art/placeholder.jpg";
 
   interface Props {
     src?: string | null;
@@ -10,7 +10,7 @@
 
   let failedUrl = $state("");
 
-  const shown = $derived(src && src !== failedUrl ? src : eyera);
+  const shown = $derived(src && src !== failedUrl ? src : placeholder);
 </script>
 
 <img src={shown} alt="" class="border bg-accent object-contain {className}" onerror={() => (failedUrl = src ?? "")} />

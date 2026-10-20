@@ -68,6 +68,22 @@ export const LeaderboardEntry = z.object({
 
 export const Leaderboard = z.object({ leaderboard: z.array(LeaderboardEntry) });
 
+export const AttackLog = z.object({
+  id: z.number(),
+  attacker_userid: z.number(),
+  attacker_username: z.string(),
+  attacker_pic_square: z.string().nullish(),
+  defender_userid: z.number(),
+  defender_username: z.string(),
+  defender_pic_square: z.string().nullish(),
+  type: z.string(),
+  x: z.number().nullish(),
+  y: z.number().nullish(),
+  attacktime: z.coerce.date(),
+});
+
+export const AttackLogs = z.object({ attackLogs: z.array(AttackLog) });
+
 export type Account = z.infer<typeof Account>;
 export type SavedUser = z.infer<typeof SavedUser>;
 export type Credentials = z.infer<typeof Credentials>;
@@ -75,3 +91,4 @@ export type Registration = z.infer<typeof Registration>;
 export type LoginResponse = z.infer<typeof LoginResponse>;
 export type World = z.infer<typeof World>;
 export type LeaderboardEntry = z.infer<typeof LeaderboardEntry>;
+export type AttackLog = z.infer<typeof AttackLog>;
