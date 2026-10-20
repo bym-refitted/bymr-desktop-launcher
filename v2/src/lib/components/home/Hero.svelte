@@ -4,7 +4,6 @@
   import TicketCheck from "@lucide/svelte/icons/ticket-check";
   import { openUrl } from "@tauri-apps/plugin-opener";
   import korath from "#lib/assets/art/korath.png";
-  import pokey from "#lib/assets/art/pokey.png";
   import Fact from "#lib/components/ui/Fact.svelte";
   import { Build, build } from "#lib/state/build.svelte.js";
 
@@ -30,8 +29,6 @@
         <span><b class="font-semibold text-foreground">Korath</b> · Champion</span>
       </figcaption>
     </figure>
-
-    <img src={pokey} alt="" class="absolute -bottom-1.5 left-10 z-10 w-[52px] -rotate-6 max-[1100px]:hidden" />
   </div>
 
   <div class="relative grid grid-cols-3 divide-x border-t">
