@@ -24,7 +24,7 @@
   onMount(startLauncher);
 
   onNavigate((navigation) => {
-    if (!document.startViewTransition) return;
+    if (!document.startViewTransition || navigation.from?.url.pathname === navigation.to?.url.pathname) return;
 
     return new Promise((resolve) => {
       document.startViewTransition(async () => {
