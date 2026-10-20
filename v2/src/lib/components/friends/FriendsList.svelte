@@ -1,73 +1,61 @@
 <script lang="ts">
-  import { fade } from "svelte/transition";
-  import Clock from "@lucide/svelte/icons/clock";
-  import Gift from "@lucide/svelte/icons/gift";
-  import UserMinus from "@lucide/svelte/icons/user-minus";
-  import PlayerRow from "#lib/components/friends/PlayerRow.svelte";
+  import { flip } from "svelte/animate";
+  import { fade, fly } from "svelte/transition";
+  import FriendCard from "#lib/components/friends/FriendCard.svelte";
+  import Avatar from "#lib/components/ui/Avatar.svelte";
   import Button from "#lib/components/ui/Button.svelte";
-  import { DURATION_MS } from "#lib/motion.js";
+  import { countOf } from "#lib/format.js";
+  import { collapse, DURATION_MS, reflow, rowIn } from "#lib/motion.js";
   import type { Friend } from "#lib/schemas.js";
   import { friends } from "#lib/state/friends.svelte.js";
 
   interface Props {
     onfind: () => void;
+    onreview: () => void;
     onremove: (friend: Friend) => void;
   }
 
-  let { onfind, onremove }: Props = $props();
+  let { onfind, onreview, onremove }: Props = $props();
 
-  const monthYear = new Intl.DateTimeFormat(undefined, { month: "short", year: "numeric" });
+  const ASKERS_SHOWN = 3;
 
-  /**
-   * How long until another sack can be sent, for the cooldown label.
-   *
-   * @param {number | null} readyAt - When the cooldown ends, in epoch seconds.
-   * @returns {string} e.g. "45m" or "5h", or an empty string once a sack can be sent.
-   */
-  const readyIn = (readyAt: number | null) => {
-    if (!readyAt) return "";
+  const askers = $derived(friends.incoming.slice(0, ASKERS_SHOWN));
 
-    const minutes = Math.ceil((readyAt * 1000 - Date.now()) / 60_000);
-
-    if (minutes <= 0) return "";
-
-    return minutes < 60 ? `${minutes}m` : `${Math.ceil(minutes / 60)}h`;
-  };
-
-  /**
-   * The context line under a friend's name.
-   *
-   * @param {Friend} friend - The friend to describe.
-   * @returns {string} "Online now", how long they've been friends, or nothing.
-   */
-  const noteFor = (friend: Friend) => {
-    if (friend.online) return "Online now";
-    if (friend.since) return `Friends since ${monthYear.format(friend.since)}`;
-
-    return "";
-  };
+  const askLabel = $derived.by(() => {
+    if (friends.incoming.length === 1) {
+      return `${friends.incoming[0].username} wants to be friends`;
+    } else {
+      return `${countOf(friends.incoming.length, "player")} want to be friends`;
+    }
+  });
 </script>
 
-{#each friends.friends as friend, index (friend.user_id)}
-  {@const cooldown = readyIn(friend.gift_ready_at)}
-  <PlayerRow player={friend} {index} note={noteFor(friend)}>
-    {#if cooldown}
-      <span class="flex items-center gap-1.5 px-3 text-[12.5px] text-muted-foreground" title="One mystery sack per friend each day" in:fade={{ duration: DURATION_MS }}>
-        <Clock class="size-3.5" />Sack ready in {cooldown}
+{#if friends.incoming.length > 0}
+  <div transition:collapse>
+    <div class="mx-7 mt-6 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+      <span class="flex">
+        {#each askers as asker (asker.request_id)}
+          <Avatar src={asker.pic_square} class="size-8 rounded-lg ring-2 ring-background not-first:-ml-2" />
+        {/each}
       </span>
-    {:else}
-      <Button variant="soft" size="sm" disabled={friends.isBusy(friend.user_id)} onclick={() => friends.gift(friend)}>
-        <Gift />Send sack
-      </Button>
-    {/if}
-    <Button variant="ghost" size="sm" disabled={friends.isBusy(friend.user_id)} onclick={() => onremove(friend)}>
-      <UserMinus />Remove
-    </Button>
-  </PlayerRow>
+      <p class="flex-1 truncate text-[13px] font-semibold">{askLabel}</p>
+      <Button variant="soft" size="sm" onclick={onreview}>Review</Button>
+    </div>
+  </div>
+{/if}
+
+{#if friends.friends.length > 0}
+  <div class="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-4 p-7">
+    {#each friends.onlineFirst as friend, index (friend.user_id)}
+      <div animate:flip={reflow()} in:fly|global={rowIn(index)} out:fade={{ duration: DURATION_MS }}>
+        <FriendCard {friend} {onremove} />
+      </div>
+    {/each}
+  </div>
 {:else}
   <div class="grid justify-items-center gap-1 px-7 py-12 text-center">
     <p class="font-semibold">No friends yet</p>
     <p class="text-muted-foreground">Find players by name and send them a request.</p>
     <Button class="mt-3" onclick={onfind}>Find players</Button>
   </div>
-{/each}
+{/if}

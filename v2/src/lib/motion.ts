@@ -37,3 +37,10 @@ export const rowIn = (index: number) => ({
  */
 export const collapse = (node: Element) =>
   prefersReducedMotion.current ? fade(node, { duration: DURATION_MS }) : slide(node, { duration: DURATION_MS });
+
+/**
+ * Settings for items sliding to their new place when a list reorders, or jumping straight there with reduced motion asked for.
+ *
+ * @returns {import("svelte/animate").FlipParams} The settings for `animate:flip`.
+ */
+export const reflow = () => ({ duration: prefersReducedMotion.current ? 0 : DURATION_MS, easing: cubicOut });

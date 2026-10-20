@@ -22,3 +22,12 @@ export const timeAgo = (date: Date) => {
 
   return relativeTime.format(Math.round(elapsed / size), unit);
 };
+
+/**
+ * Writes a count with its noun, adding an "s" for anything but one, e.g. "1 friend" or "3 friends".
+ *
+ * @param {number} count - How many there are.
+ * @param {string} noun - The singular noun, e.g. "friend".
+ * @returns {string} The count and noun together.
+ */
+export const countOf = (count: number, noun: string) => `${count} ${noun}${count === 1 ? "" : "s"}`;

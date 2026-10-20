@@ -16,6 +16,14 @@ const GIFT_COOLDOWN_SECONDS = 24 * 60 * 60;
 
 export const SEARCH_MIN_LENGTH = 2;
 
+/**
+ * Whether a friend can be sent a mystery sack right now.
+ *
+ * @param {Friend} friend - The friend to check.
+ * @returns {boolean} True once their daily cooldown has ended, or if they've never been sent one.
+ */
+export const canGift = (friend: Friend) => !friend.gift_ready_at || friend.gift_ready_at * 1000 <= Date.now();
+
 class Friends {
   friends = $state<Friend[]>([]);
   incoming = $state<FriendRequest[]>([]);
@@ -27,6 +35,10 @@ class Friends {
   searched = $state(false);
   busy = $state<number[]>([]);
   error = $state("");
+
+  onlineFirst = $derived(this.friends.toSorted((a, b) => Number(b.online) - Number(a.online)));
+  onlineCount = $derived(this.friends.filter((friend) => friend.online).length);
+  sacksReady = $derived(this.friends.filter(canGift).length);
 
   /**
    * Whether an action on a player is still waiting on the server.
