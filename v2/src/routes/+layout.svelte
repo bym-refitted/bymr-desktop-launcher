@@ -12,7 +12,9 @@
   import { startLauncher } from "#lib/startup.js";
   import { app } from "#lib/state/app.svelte.js";
   import { Build, build } from "#lib/state/build.svelte.js";
-  import { session } from "#lib/state/session.svelte.js";  import type { LayoutProps } from "./$types";
+  import { launch } from "#lib/state/launch.svelte.js";
+  import { session } from "#lib/state/session.svelte.js";
+  import type { LayoutProps } from "./$types";
 
   let { children }: LayoutProps = $props();
 
@@ -78,3 +80,5 @@
   description="You were away long enough for your session to wander off. Sign in again to get back to your yard."
   art={brain}
 />
+
+<AlertDialog bind:open={launch.failed} label="Launch failed" error title="Couldn't start the game" description={launch.message} />

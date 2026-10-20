@@ -3,10 +3,12 @@ import { toErrorMessage } from "#lib/api/errors.js";
 import { Build, build } from "#lib/state/build.svelte.js";
 import { logs } from "#lib/state/logs.svelte.js";
 
+const POKIES_BUILD = "pokies";
+
 type LaunchOptions = {
-  buildName: Build;
+  buildName: Build | typeof POKIES_BUILD;
   language: string;
-  token: string;
+  token?: string;
   host?: string;
   port?: number;
 };
@@ -17,7 +19,7 @@ class Launch {
   message = $state("");
 
   /**
-   * Starts Flash Player with the selected build. A local build is also told which server to use.
+   * Starts the game with the selected build. A local build is also told which server to use.
    *
    * @param {string} token - The fresh session token the game signs in with.
    * @param {string} language - The language to play in, e.g. "English".
@@ -26,14 +28,31 @@ class Launch {
   async start(token: string, language: string) {
     const isLocal = build.selected === Build.local;
 
-    const options: LaunchOptions = {
+    await this.#run({
       buildName: build.selected,
       language,
       token,
       host: isLocal ? build.host : undefined,
       port: isLocal ? build.port : undefined,
-    };
+    });
+  }
 
+  /**
+   * Starts the Attack of the Pokies minigame, which needs no account or server.
+   *
+   * @returns {Promise<void>} Resolves once the minigame has started or the launch failed.
+   */
+  async startPokies() {
+    await this.#run({ buildName: POKIES_BUILD, language: "English" });
+  }
+
+  /**
+   * Opens Flash Player through the launcher's Rust side, showing the launch error dialog if it fails.
+   *
+   * @param {LaunchOptions} options - The build and FlashVars to start Flash Player with.
+   * @returns {Promise<void>} Resolves once Flash Player has started or the launch failed.
+   */
+  async #run(options: LaunchOptions) {
     this.launching = true;
 
     try {

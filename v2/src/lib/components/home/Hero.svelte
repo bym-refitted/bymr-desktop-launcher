@@ -5,6 +5,7 @@
   import { openUrl } from "@tauri-apps/plugin-opener";
   import korath from "#lib/assets/art/korath.png";
   import pokey from "#lib/assets/art/pokey.png";
+  import Fact from "#lib/components/ui/Fact.svelte";
 
   const DISCORD_URL = "https://discord.gg/bymrefitted";
 </script>
@@ -26,28 +27,16 @@
         <span><b class="font-semibold text-foreground">Korath</b> · Champion</span>
       </figcaption>
     </figure>
+
+    <img src={pokey} alt="" class="absolute -bottom-1.5 left-10 z-10 w-[52px] -rotate-6 max-[1100px]:hidden" />
   </div>
 
-  <div class="relative grid grid-cols-3 border-t">
-    <img src={pokey} alt="" class="absolute bottom-full left-10 -mb-1.5 w-[52px] -rotate-6 max-[1100px]:hidden" />
-
-    <div class="relative px-5 pt-4 pb-[18px]">
-      <span class="absolute top-[15px] right-[18px] num">01</span>
-      <h3 class="flex items-center gap-2 pr-6 text-sm font-semibold"><Map class="size-4 text-primary" />Map Rooms 1–3</h3>
-      <p class="mt-1 text-[13px] text-muted-foreground">All three Map Room versions, playable just as they shipped.</p>
-    </div>
-    <div class="relative border-l px-5 pt-4 pb-[18px]">
-      <span class="absolute top-[15px] right-[18px] num">02</span>
-      <h3 class="flex items-center gap-2 pr-6 text-sm font-semibold"><ShieldCheck class="size-4 text-primary" />Fair play</h3>
-      <p class="mt-1 text-[13px] text-muted-foreground">Cheating is monitored. Cheats and exploits mean a permanent ban.</p>
-    </div>
-    <div class="relative border-l px-5 pt-4 pb-[18px]">
-      <span class="absolute top-[15px] right-[18px] num">03</span>
-      <h3 class="flex items-center gap-2 pr-6 text-sm font-semibold"><TicketCheck class="size-4 text-primary" />Verify first</h3>
-      <p class="mt-1 text-[13px] text-muted-foreground">
-        Link your account on <button class="text-secondary hover:underline" onclick={() => openUrl(DISCORD_URL)}>Discord</button>
-        before you jump in.
-      </p>
-    </div>
+  <div class="relative grid grid-cols-3 divide-x border-t">
+    <Fact number="01" icon={Map} title="Map Rooms 1–3">All three Map Room versions, playable just as they shipped.</Fact>
+    <Fact number="02" icon={ShieldCheck} title="Fair play">Cheating is monitored. Cheats and exploits mean a permanent ban.</Fact>
+    <Fact number="03" icon={TicketCheck} title="Verify first">
+      Link your account on <button class="text-secondary hover:underline" onclick={() => openUrl(DISCORD_URL)}>Discord</button>
+      before you jump in.
+    </Fact>
   </div>
 </section>

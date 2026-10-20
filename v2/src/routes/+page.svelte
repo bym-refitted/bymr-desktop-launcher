@@ -2,8 +2,6 @@
   import AuthPanel from "#lib/components/home/AuthPanel.svelte";
   import Hero from "#lib/components/home/Hero.svelte";
   import ReadyPanel from "#lib/components/home/ReadyPanel.svelte";
-  import AlertDialog from "#lib/components/ui/AlertDialog.svelte";
-  import { launch } from "#lib/state/launch.svelte.js";
   import { user } from "#lib/state/user.svelte.js";
 </script>
 
@@ -18,5 +16,3 @@
     {/if}
   </section>
 </div>
-
-<AlertDialog bind:open={launch.failed} label="Launch failed" error title="Couldn't start the game" description={launch.message} />
