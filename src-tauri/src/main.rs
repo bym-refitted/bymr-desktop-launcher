@@ -5,6 +5,9 @@ mod flash_input;
 mod networking;
 mod version_manager;
 
+#[cfg(target_os = "linux")]
+mod linux;
+
 use crate::flash_input::InputFixSetting;
 use crate::version_manager::*;
 use serde::Serialize;
@@ -13,6 +16,9 @@ use std::process::Command;
 use tauri::{command, AppHandle, Emitter, Manager};
 
 fn main() {
+    #[cfg(target_os = "linux")]
+    linux::prepare_environment();
+
     tauri::Builder::default()
         .manage(InputFixSetting::default())
         .plugin(tauri_plugin_os::init())

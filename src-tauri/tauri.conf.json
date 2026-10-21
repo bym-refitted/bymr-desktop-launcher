@@ -48,7 +48,7 @@
         "center": true,
         "minWidth": 1000,
         "minHeight": 600,
-        "transparent": true,
+        "backgroundColor": "#1d232a",
         "decorations": false
       }
     ],
