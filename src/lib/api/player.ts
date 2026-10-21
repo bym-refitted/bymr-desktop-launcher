@@ -9,7 +9,7 @@ const TIMEOUT_MS = 5000;
  * @returns {Promise<Account>} The player's id and username.
  * @throws {ApiError | Error} When the request fails or the response isn't an account.
  */
-export const getAccount = async () => Account.parse(await apiRequest("GET", "/player/account", { timeoutMs: TIMEOUT_MS }));
+export const getAccount = async () => Account.parse(await apiRequest("GET", "/player/account"));
 
 /**
  * Fetches the signed-in player's full account, for the account page.

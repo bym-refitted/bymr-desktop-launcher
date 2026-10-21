@@ -2,6 +2,8 @@ import { Build, build } from "#lib/state/build.svelte.js";
 
 export const connectErrorMessage = "Could not connect to the server. Please check the server status on our Discord. There may be an ongoing maintenance break or outage.";
 
+export const timeoutErrorMessage = "The server took too long to respond. Check your connection and try again.";
+
 const unexpectedErrorMessage = "An unexpected error occurred. Please try again later.";
 
 export const ErrorCode = {

@@ -3,6 +3,7 @@ import {
   ApiError,
   connectErrorMessage,
   isSessionError,
+  timeoutErrorMessage,
   toErrorMessage,
 } from "#lib/api/errors.js";
 import { app } from "#lib/state/app.svelte.js";
@@ -47,6 +48,8 @@ const toApiError = async (response: Response) => {
  * @throws {Error} When the server can't be reached or doesn't answer in time.
  */
 export const apiRequest = async (method: Method, path: string, { body, timeoutMs = DEFAULT_TIMEOUT_MS }: RequestOptions = {}) => {
+  const signal = AbortSignal.timeout(timeoutMs);
+
   try {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
 
@@ -58,7 +61,7 @@ export const apiRequest = async (method: Method, path: string, { body, timeoutMs
         method,
         headers,
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(timeoutMs),
+        signal,
       },
     );
 
@@ -68,6 +71,7 @@ export const apiRequest = async (method: Method, path: string, { body, timeoutMs
   } catch (error) {
     if (isSessionError(error)) session.end(true);
     if (error instanceof ApiError) throw error;
+    if (signal.aborted) throw new Error(timeoutErrorMessage);
 
     throw new Error(toErrorMessage(error));
   }
