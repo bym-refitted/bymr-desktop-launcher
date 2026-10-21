@@ -68,8 +68,8 @@ jobs:
           path: src-tauri/target/release/bundle/rpm/*.rpm
 
   # AppImage: built on Arch Linux — Ubuntu is missing gbm drivers needed for EGL on Nvidia/Wayland.
-  # Uses tauri-cli from feat/truly-portable-appimage (targets 2.10.2, not yet in stable release).
-  # Track https://github.com/tauri-apps/tauri/pull/12491 — once merged, revert to npm run tauri build.
+  # Uses tauri-cli from feat/truly-portable-appimage, pinned to a commit so a push to the PR can't change a release.
+  # Track https://github.com/tauri-apps/tauri/pull/12491 (milestone 2.13) — once released, revert to npm run tauri build.
   build-appimage:
     runs-on: ubuntu-latest
     container: ghcr.io/pkgforge-dev/archlinux:latest
@@ -98,7 +98,7 @@ jobs:
           rustup default stable
 
       - name: Install tauri-cli from portable AppImage branch
-        run: cargo install tauri-cli --git https://github.com/tauri-apps/tauri --branch feat/truly-portable-appimage --locked
+        run: cargo install tauri-cli --git https://github.com/tauri-apps/tauri --rev 3b69f584e3a32a8607e0c2aa6543a88511085bfb --locked
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
